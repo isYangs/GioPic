@@ -1,0 +1,286 @@
+<script setup lang="ts">
+import { NButton, NCheckbox } from 'naive-ui';
+import pLimit from 'p-limit';
+import requestData from '~/api';
+import { useAppStore, useUploadRecordStore, UploadData } from '~/store';
+import { convertFileSize } from '~/utils/convert';
+
+const appStore = useAppStore();
+const uploadRecordStore = useUploadRecordStore();
+const { imgLinkFormatTabs, apiUrl, token, strategiesVal, isImgListDelDialog } = storeToRefs(appStore);
+const { data } = storeToRefs(uploadRecordStore);
+const message = useMessage();
+const dialog = useDialog();
+const imgLinkTabsKey = ref(0);
+const isAllPublic = ref(1);
+const isUpload = ref(false);
+
+const isPublicOptions = [
+    { label: '全部公开', value: 1 },
+    { label: '全部私有', value: 0 },
+]
+
+// 上传方法
+const handleUpload = async (index: number, file: File, isGetRecord: Boolean = true) => {
+    if (strategiesVal.value === null) {
+        message.error('请先选择存储策略');
+        return;
+    }
+
+    uploadRecordStore.setData({ isLoading: true }, index);
+
+    try {
+        const { data, status } = await requestData.uploadImage(apiUrl.value, token.value, {
+            file,
+            permission: isAllPublic.value,
+            strategy_id: strategiesVal.value,
+        });
+
+        if (status !== 200) {
+            message.error('上传失败');
+            uploadRecordStore.setData({ uploadFailed: true }, index);
+            return;
+        }
+
+        if (!data.status) {
+            message.error(data.message);
+            uploadRecordStore.setData({ uploadFailed: true }, index);
+            return;
+        }
+
+        uploadRecordStore.setData({ ...data.data, uploadFailed: false, time: new Date().toISOString(), isPublic: isAllPublic, strategies: strategiesVal }, index);
+        imgLinkTabsKey.value++;
+        message.success('上传成功');
+    } catch (error) {
+        message.error('上传失败');
+        uploadRecordStore.setData({ uploadFailed: true }, index);
+    } finally {
+        uploadRecordStore.setData({ isLoading: false }, index);
+        if (isGetRecord) {
+            uploadRecordStore.getRecord();
+        }
+    }
+}
+
+// 当接收到上传记录文件状态时，进行处理
+window.ipcRenderer.on('create-ur-file-status', (_e, status) => {
+    if (!status) {
+        message.error('创建记录文件失败');
+    }
+});
+
+// 全部上传方法
+const handleAllUpload = async () => {
+    if (strategiesVal.value === null) {
+        message.error('请先选择存储策略');
+        return;
+    }
+
+    const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed);
+
+    if (!uploadList.length) {
+        message.info('没有需要上传的图片');
+        return;
+    }
+
+    const limit = pLimit(3); // 最多同时进行 3 个上传任务
+
+    // 创建一个数组来跟踪正在进行的上传任务
+    const uploadingTasks = new Set();
+
+    const tasks = uploadList.map((item: any, index: number) => {
+        if (item.links || item.uploadFailed) {
+            message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`);
+            return;
+        }
+
+        const originalIndex = data.value.indexOf(item);
+
+        // 创建一个新的上传任务
+        const task = limit(() => handleUpload(originalIndex, item.fileInfo.file, false)
+            .then(() => {
+                // 从正在进行的上传任务中移除这个任务
+                uploadingTasks.delete(task);
+                // 检查是否所有的上传任务都已完成
+                if (uploadingTasks.size === 0) {
+                    isUpload.value = false;
+                    uploadRecordStore.getRecord();
+                }
+            })
+            .catch((error) => {
+                // 处理上传失败
+                message.error(`图片 ${originalIndex + 1} 上传失败：${error.message}`);
+            }));
+
+        // 将这个任务添加到正在进行的上传任务中
+        uploadingTasks.add(task);
+
+        return task;
+    });
+
+    isUpload.value = true;
+
+    // 等待所有上传任务完成
+    await Promise.all(tasks);
+}
+
+// 删除图片方法
+const handleClose = (index: number) => {
+    if (isImgListDelDialog.value) {
+        uploadRecordStore.delData(index);
+        return;
+    }
+
+    const n = dialog.warning({
+        title: '提示',
+        content: '确定删除该图片吗？不会删除上传日志和图床中的图片。',
+        autoFocus: false,
+        action: () => {
+            return h('div', { class: 'wh-full flex-center justify-between' }, [
+                h(NCheckbox, {
+                    class: 'text-3',
+                    checked: isImgListDelDialog.value,
+                    'onUpdate:checked': (newValue: boolean) => {
+                        appStore.setState({ isImgListDelDialog: newValue });
+                    }
+                }, () => '不再显示此对话框'),
+                h('div', {}, [
+                    h(NButton, {
+                        size: 'small',
+                        class: 'mr4',
+                        onClick: () => {
+                            n.destroy();
+                        },
+                    }, {
+                        default: () => '取消',
+                    }),
+                    h(NButton, {
+                        type: 'warning',
+                        size: 'small',
+                        onClick: () => {
+                            uploadRecordStore.delData(index);
+                            n.destroy();
+                        },
+                    }, {
+                        default: () => '确定',
+                    }),
+                ])
+            ]);
+        }
+    });
+}
+
+// 清空列表方法
+const handleAllClear = () => {
+    uploadRecordStore.delData();
+}
+
+// 复制全部URL方法
+const handleCopyAllUrl = () => {
+    const urlList = data.value.map((item: UploadData) => item.links?.url).filter((item: string | undefined) => item);
+
+    if (!urlList.length) {
+        message.info('没有可以复制的图片链接');
+        return;
+    }
+
+    const url = urlList.join('\n');
+
+    navigator.clipboard.writeText(url).then(() => {
+        message.success('复制成功');
+    }).catch(() => {
+        message.error('复制失败');
+    });
+}
+
+// 监听图片链接格式选项卡变化，防止渲染出现问题
+watch(imgLinkFormatTabs, () => {
+    imgLinkTabsKey.value++;
+});
+
+</script>
+
+<template>
+    <template v-if="data.length">
+        <n-flex class="wfull my2">
+            <n-button type="primary" :disabled="data.length <= 1 || isUpload" @click="handleAllUpload">
+                全部上传
+            </n-button>
+            <n-button type="error" @click="handleAllClear">
+                清空列表
+            </n-button>
+            <n-button type="info" :disabled="false" @click="handleCopyAllUrl">
+                复制全部URL
+            </n-button>
+            <n-select class="w30" v-model:value="isAllPublic" :options="isPublicOptions" />
+        </n-flex>
+        <n-flex class="wfull" justify="space-between">
+            <n-image-group>
+                <n-card v-for="(file, index) in data" :key="index" content-style="padding: 10px;" class="relative">
+                    <n-spin :show="file.isLoading">
+                        <n-flex justify="space-between">
+                            <n-flex justify="center">
+                                <n-image width="100" :src="file.fileUrl" />
+                            </n-flex>
+                            <template v-if="file.links">
+                                <n-tabs :key="imgLinkTabsKey" class="flex-1 flex-nowrap overflow-auto" type="line">
+                                    <n-tab-pane v-for="tab in imgLinkFormatTabs" class="wfull" :name="tab.value"
+                                        :tab="tab.label" :key="tab.value">
+                                        <CodeBlock :type="tab.lang" :code="file.links ? file.links[tab.value] : '无'" />
+                                    </n-tab-pane>
+                                </n-tabs>
+                            </template>
+                            <template v-else>
+                                <n-tabs class="flex-1 flex-nowrap overflow-auto" type="line">
+                                    <n-tab-pane class="wfull flex-1" name="file_info" tab="详情">
+                                        <div class="wh-full flex-center justify-between flex-row flex-wrap">
+                                            <n-tag :bordered="false" type="info">
+                                                <span class="block text-overflow max-w-100">文件名：
+                                                    {{ file.fileInfo ? file.fileInfo.name : '无' }}</span>
+                                            </n-tag>
+                                            <n-tag :bordered="false" type="info">
+                                                文件大小：{{ file.fileInfo ? convertFileSize(Number(file.fileInfo.file?.size)) : '无' }}
+                                            </n-tag>
+                                            <n-tag :bordered="false" type="info">
+                                                文件类型：{{ file.fileInfo ? file.fileInfo.type : '无' }}
+                                            </n-tag>
+                                            <n-button size="small" secondary strong
+                                                @click="file.fileInfo && file.fileInfo.file && handleUpload(index, file.fileInfo.file)">
+                                                上传
+                                            </n-button>
+                                        </div>
+                                    </n-tab-pane>
+                                </n-tabs>
+                            </template>
+                        </n-flex>
+                        <template #description>
+                            正在上传，请耐心等待...
+                        </template>
+                    </n-spin>
+                    <n-button v-if="!file.isLoading" quaternary class="w5 h5 absolute top-.5 right-1"
+                        @click="handleClose(index)">
+                        <template #icon>
+                            <div class="i-ic-sharp-close text-dark-50 w5 h5"></div>
+                        </template>
+                    </n-button>
+                    <!-- 防止代码块渲染白屏问题 -->
+                    <CodeBlock type="text" code="####" class="hidden" />
+                </n-card>
+            </n-image-group>
+        </n-flex>
+    </template>
+</template>
+
+<style scoped>
+:deep(.n-card) {
+    --n-padding-top: 5px !important;
+    --n-padding-bottom: 5px !important;
+    --n-padding-left: 10px !important;
+    --n-padding-right: 10px !important;
+    @apply rounded-2;
+}
+
+:deep(.n-image)>img {
+    @apply wfull h30;
+}
+</style>
