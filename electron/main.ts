@@ -58,7 +58,7 @@ function createWindow() {
         height: 800,
         minWidth: 1050,
         minHeight: 680,
-        icon: path.join(process.env.VITE_PUBLIC, 'electron-icon.png'),
+        icon: path.join(process.env.VITE_PUBLIC, 'giopic-icon.png'),
         webPreferences: {
             nodeIntegration: true,
             preload: path.join(__dirname, 'preload.js'),
