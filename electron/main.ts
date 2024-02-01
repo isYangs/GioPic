@@ -1,6 +1,6 @@
 import path from 'node:path'
-import type { MenuItemConstructorOptions} from 'electron';
-import { BrowserWindow, Menu, app, ipcMain } from 'electron'
+import type { MenuItemConstructorOptions } from 'electron'
+import { BrowserWindow, Menu, app, ipcMain, shell } from 'electron'
 import { fixElectronCors } from './cors'
 import { setupIpcHandlers } from './ipcHandlers'
 
@@ -19,7 +19,7 @@ process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
 let win: BrowserWindow | null
-const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 const NODE_ENV = process.env.NODE_ENV
 
 // 创建菜单
@@ -53,7 +53,8 @@ function createMenu() {
     ]
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
-  } else {
+  }
+  else {
     // windows 和 linux 的设置
     Menu.setApplicationMenu(null)
   }
@@ -80,23 +81,21 @@ function createWindow() {
   })
 
   win.webContents.setWindowOpenHandler(({ url }) => {
-    require('electron').shell.openExternal(url)
+    shell.openExternal(url)
     return { action: 'deny' }
   })
 
   fixElectronCors(win)
 
   // 加载构建文件或开发服务器的 URL
-  if (VITE_DEV_SERVER_URL) {
+  if (VITE_DEV_SERVER_URL)
     win.loadURL(VITE_DEV_SERVER_URL)
-  } else {
+  else
     win.loadFile(path.join(process.env.DIST, 'index.html'))
-  }
 
   // 在开发模式下打开开发者工具
-  if (NODE_ENV === 'development') {
+  if (NODE_ENV === 'development')
     win.webContents.openDevTools({ mode: 'detach' })
-  }
 }
 
 // 当所有窗口都关闭时退出，但在 macOS 上除外。在 macOS 上，应用程序及其菜单栏保持活动状态，直到用户使用 Cmd + Q 显式退出。
@@ -110,9 +109,8 @@ app.on('window-all-closed', () => {
 // 当应用程序被激活时
 app.on('activate', () => {
   // 在 OS X 上，当dock图标被点击且没有其他窗口打开时，重新创建窗口是一种常见的做法。
-  if (BrowserWindow.getAllWindows().length === 0) {
+  if (BrowserWindow.getAllWindows().length === 0)
     createWindow()
-  }
 })
 
 // 当接收到 quit-app 信号时
