@@ -1,6 +1,6 @@
-import { ipcMain, dialog } from 'electron'
-import path from 'path'
-import fs from 'fs'
+import path from 'node:path'
+import fs from 'node:fs'
+import { dialog, ipcMain } from 'electron'
 import DataBase from './db'
 
 export function setupIpcHandlers() {
@@ -41,9 +41,8 @@ export function setupIpcHandlers() {
     const filePath = path.join(dirPath, 'GioPic-UR.json')
 
     // 检查目录是否存在，如果不存在则创建它
-    if (!fs.existsSync(dirPath)) {
+    if (!fs.existsSync(dirPath))
       fs.mkdirSync(dirPath, { recursive: true })
-    }
 
     const db = new DataBase(filePath)
 
@@ -53,12 +52,14 @@ export function setupIpcHandlers() {
       const data = db.read()
       if (!data) {
         db.write([uploadRecordObject])
-      } else {
+      }
+      else {
         db.update((data) => {
           // 检查新的记录项是否已经存在，如果存在就不添加
-          if (data.some((item: Object) => JSON.stringify(item) === uploadRecord)) {
+          if (data.some((item: object) => JSON.stringify(item) === uploadRecord)) {
             return data
-          } else {
+          }
+          else {
             const newData = [...data, uploadRecordObject]
             return newData
           }
@@ -66,7 +67,8 @@ export function setupIpcHandlers() {
       }
 
       event.reply('create-ur-file-status', true)
-    } catch (error) {
+    }
+    catch (error) {
       event.reply('create-ur-file-status', false)
     }
   })

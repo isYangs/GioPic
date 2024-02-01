@@ -1,4 +1,5 @@
 import { useAppStore } from '~/stores'
+
 // import { SelectGroupOption, SelectOption } from 'naive-ui';
 
 /**
@@ -11,7 +12,7 @@ import { useAppStore } from '~/stores'
  * 如果用户点击'前往配置'，那么会打开配置抽屉（通过设置 appStore 的 isSettingsDrawer 为 true）。
  * 如果用户点击'取消'，或者关闭对话框，那么程序会退出（通过发送 'quit-app' 事件给 ipcRenderer）。
  */
-export const checkConfiguration = () => {
+export function checkConfiguration() {
   const appStore = useAppStore()
   const dialog = useDialog()
   const { apiUrl, token } = appStore
@@ -34,7 +35,8 @@ export const checkConfiguration = () => {
         window.ipcRenderer.send('quit-app')
       },
     })
-  } else {
+  }
+  else {
     appStore.getUserProfile()
   }
 }
@@ -59,7 +61,7 @@ export interface ImgLinkFormatTabsOption {
  */
 const imgLinkFormats = ['URL', 'HTML', 'BBCode', 'Markdown', 'Markdown With Link', 'Thumbnail URL']
 
-export const getImgLinkFormat: ImgLinkFormatTabsOption[] = imgLinkFormats.map((format) => ({
+export const getImgLinkFormat: ImgLinkFormatTabsOption[] = imgLinkFormats.map(format => ({
   label: format,
   value: format.toLowerCase().replace(/\s+/g, '_'),
 }))
@@ -71,23 +73,22 @@ export const getImgLinkFormat: ImgLinkFormatTabsOption[] = imgLinkFormats.map((f
  * 每个选项卡的语言（lang）会根据其值（value）来确定。如果值包含 'html'，则语言为 'html'；
  * 如果值包含 'markdown'，则语言为 'markdown'；否则，语言为 'text'。
  */
-export const getImgLinkFormatTabs = (): ImgLinkFormatTabsOption[] => {
+export function getImgLinkFormatTabs(): ImgLinkFormatTabsOption[] {
   const appStore = useAppStore()
   const { imgLinkFormatVal } = appStore
 
-  const formatMap = new Map(getImgLinkFormat.map((format) => [format.value, format]))
+  const formatMap = new Map(getImgLinkFormat.map(format => [format.value, format]))
 
   const imgLinkFormatTabs = imgLinkFormatVal
     .map((item) => {
       const format = formatMap.get(item)
       if (format) {
-        if (item.includes('html')) {
+        if (item.includes('html'))
           format.lang = 'html'
-        } else if (item.includes('markdown')) {
+        else if (item.includes('markdown'))
           format.lang = 'markdown'
-        } else {
+        else
           format.lang = 'text'
-        }
       }
       return format
     })

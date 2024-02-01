@@ -15,7 +15,7 @@ const collapsed = ref(false)
         @collapse="collapsed = true"
         @expand="collapsed = false"
       >
-        <Menu :collapsed="collapsed"></Menu>
+        <Menu :collapsed="collapsed" />
       </n-layout-sider>
       <n-layout>
         <n-layout-header>颐和园路</n-layout-header>

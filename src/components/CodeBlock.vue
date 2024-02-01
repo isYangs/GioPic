@@ -16,7 +16,7 @@ const props = defineProps({
 const message = useMessage()
 
 // 复制代码到剪切板
-const copyCode = () => {
+function copyCode() {
   const codeToCopy = unescapeHtml(props.code)
   navigator.clipboard
     .writeText(codeToCopy)
@@ -32,9 +32,9 @@ const copyCode = () => {
 <template>
   <div v-highlight class="relative">
     <pre><code class="cursor-text select-text" :class="`language-${type}`">{{ unescapeHtml(code) }}</code></pre>
-    <n-button quaternary class="w5 h5 absolute top-1 right-0" @click="copyCode">
+    <n-button quaternary class="absolute right-0 top-1 h5 w5" @click="copyCode">
       <template #icon>
-        <div class="i-gg-copy text-light-50 w4 h4"></div>
+        <div class="i-gg-copy h4 w4 text-light-50" />
       </template>
     </n-button>
   </div>

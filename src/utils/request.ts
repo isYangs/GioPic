@@ -4,10 +4,10 @@ import type { MessageType } from 'naive-ui'
 
 const { message } = createDiscreteApi(['message'])
 
-const tip = (msg: string, type: MessageType = 'error') => {
+function tip(msg: string, type: MessageType = 'error') {
   message.create(msg, {
     duration: 5 * 1000,
-    type: type,
+    type,
   })
 }
 
@@ -17,7 +17,7 @@ const tip = (msg: string, type: MessageType = 'error') => {
  * @param {DataView} other 其他信息
  */
 
-const errorHandler = (status: number, other: DataView) => {
+function errorHandler(status: number, other: DataView) {
   switch (status) {
     case 401:
       tip('未填写token或token无效')
@@ -59,16 +59,17 @@ service.interceptors.request.use(
 // Response interceptors
 service.interceptors.response.use(
   (response) => {
-    if (response.status === 200) {
+    if (response.status === 200)
       return Promise.resolve(response)
-    }
+
     return Promise.reject(response)
   },
   (error) => {
     if (error.response) {
       errorHandler(error.response.status, error.response.data)
       return Promise.reject(error.response)
-    } else {
+    }
+    else {
       tip('请求超时，请检查网络连接')
     }
   },

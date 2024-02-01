@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import type { BrowserWindow } from 'electron'
 
 export function fixElectronCors(win: BrowserWindow) {
   win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -12,9 +12,9 @@ export function fixElectronCors(win: BrowserWindow) {
 
       for (const [key, value] of Object.entries(details.responseHeaders)) {
         if (key.toLowerCase() === 'access-control-allow-origin') {
-          if (value[0] === '*') {
+          if (value[0] === '*')
             headerAlreadySet = true
-          }
+
           break
         }
       }

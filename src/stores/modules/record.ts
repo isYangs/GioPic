@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { FileInfo } from 'naive-ui/es/upload/src/interface'
+import type { FileInfo } from 'naive-ui/es/upload/src/interface'
 import { useAppStore } from '~/stores'
 
 interface State {
@@ -53,15 +53,13 @@ export const useUploadRecordStore = defineStore('recordStore', () => {
    * @param index - 要更新的项的索引。如果没有提供，那么会在数组的末尾添加新的项。
    */
   function setData(data: UploadData, index?: number) {
-    if (!data || Object.keys(data).length === 0) {
+    if (!data || Object.keys(data).length === 0)
       return
-    }
 
-    if (index !== undefined) {
+    if (index !== undefined)
       state.data[index] = { ...state.data[index], ...data }
-    } else {
+    else
       state.data.push(data)
-    }
   }
 
   /**
@@ -70,11 +68,10 @@ export const useUploadRecordStore = defineStore('recordStore', () => {
    * @param index - 要删除的数据的索引。如果未提供，将清空所有数据。
    */
   function delData(index?: number) {
-    if (index !== undefined) {
+    if (index !== undefined)
       state.data.splice(index, 1)
-    } else {
+    else
       state.data = []
-    }
   }
 
   /**
@@ -84,28 +81,13 @@ export const useUploadRecordStore = defineStore('recordStore', () => {
     const appStore = useAppStore()
     const { recordSavePath } = storeToRefs(appStore)
     state.data
-      .filter((item) => item.links && item.key !== undefined)
-      .map(
-        ({
-          time = '',
-          key = '',
-          isPublic,
-          strategies = 0,
-          fileUrl,
-          fileInfo,
-          pathname,
-          extension,
-          isLoading,
-          uploadFailed,
-          md5,
-          sha1,
-          ...itemWithoutFileInfo
-        }) => {
-          const obj: RecordData = { id: key, time, isPublic: !!isPublic, strategies, ...itemWithoutFileInfo }
-          const newLog = JSON.stringify(obj)
-          window.ipcRenderer.send('create-ur-file', newLog, recordSavePath.value)
-        },
-      )
+      .filter(item => item.links && item.key)
+      .forEach((item: UploadData) => {
+        const { key = '', time = '', isPublic = false, strategies = 0, ...rest } = item
+        const obj: RecordData = { id: key, time, isPublic: Boolean(isPublic), strategies, ...rest }
+        const newLog = JSON.stringify(obj)
+        window.ipcRenderer.send('create-ur-file', newLog, recordSavePath.value)
+      })
   }
   return {
     ...toRefs(state),

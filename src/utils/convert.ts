@@ -8,7 +8,7 @@
  * convertFileSize(1024); // '1.00 KB'
  * convertFileSize(1024, true); // '1.00 MB'
  */
-export const convertFileSize = (size: number, isKb: boolean = false) => {
+export function convertFileSize(size: number, isKb: boolean = false) {
   const units = isKb ? ['KB', 'MB', 'GB'] : ['Bytes', 'KB', 'MB', 'GB']
   let unitIndex = 0
 

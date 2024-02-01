@@ -1,5 +1,6 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions, ipcMain } from 'electron'
 import path from 'node:path'
+import type { MenuItemConstructorOptions} from 'electron';
+import { BrowserWindow, Menu, app, ipcMain } from 'electron'
 import { fixElectronCors } from './cors'
 import { setupIpcHandlers } from './ipcHandlers'
 

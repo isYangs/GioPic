@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5'
-import { UploadCustomRequestOptions } from 'naive-ui'
+import type { UploadCustomRequestOptions } from 'naive-ui'
 import { useUploadRecordStore } from '~/stores'
 
 const uploadRecordStore = useUploadRecordStore()
 const message = useMessage()
 
 // 上传文件，将文件信息存储到store中
-const handleUpload = async ({ file, onFinish }: UploadCustomRequestOptions) => {
+async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
   if (!file.file) {
     message.error('文件不存在')
     return
@@ -27,8 +27,8 @@ const handleUpload = async ({ file, onFinish }: UploadCustomRequestOptions) => {
 
 <template>
   <n-upload
-    multiple
-    directory-dnd
+
+    directory-dnd multiple
     auto-upload="false"
     :custom-request="handleUpload"
     accept="image/*"
@@ -41,7 +41,9 @@ const handleUpload = async ({ file, onFinish }: UploadCustomRequestOptions) => {
           <ArchiveIcon />
         </n-icon>
       </div>
-      <n-text style="font-size: 16px"> 点击或者拖动文件到这里，支持上传多文件 </n-text>
+      <n-text style="font-size: 16px">
+        点击或者拖动文件到这里，支持上传多文件
+      </n-text>
       <n-p depth="3" style="margin: 8px 0 0 0">
         禁止上传任何包含(色情，暴力，宣扬恐怖主义)及违反中华人民共和国法律的图片
       </n-p>

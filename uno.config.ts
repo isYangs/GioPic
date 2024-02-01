@@ -1,4 +1,4 @@
-import { defineConfig, presetUno, presetAttributify, presetIcons, transformerDirectives } from 'unocss'
+import { defineConfig, presetAttributify, presetIcons, presetUno, transformerDirectives } from 'unocss'
 import presetRemToPx from '@unocss/preset-rem-to-px'
 
 export default defineConfig({
@@ -7,9 +7,9 @@ export default defineConfig({
     presetAttributify(),
     presetIcons({
       extraProperties: {
-        display: 'inline-block',
-        height: '20px',
-        width: '20px',
+        'display': 'inline-block',
+        'height': '20px',
+        'width': '20px',
         'vertical-align': 'text-bottom',
       },
     }),

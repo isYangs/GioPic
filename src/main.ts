@@ -1,12 +1,12 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router/auto'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-dark.min.css'
 import App from './App.vue'
 import store from './stores'
 import './style/main.css'
 import 'virtual:uno.css'
 import '@unocss/reset/tailwind-compat.css'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/atom-one-dark.min.css'
 
 const app = createApp(App)
 
@@ -39,6 +39,7 @@ app
 
     // Use contextBridge
     window.ipcRenderer.on('main-process-message', (_event, message) => {
+      // eslint-disable-next-line no-console
       console.log(message)
     })
   })

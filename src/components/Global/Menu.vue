@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MenuOption } from 'naive-ui'
+import type { MenuOption } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
 
 defineProps<{
@@ -22,11 +22,11 @@ const menuOptions = computed((): MenuOption[] => [
         { default: () => '首页' },
       ),
     key: '/',
+    // icon: 'home',
   },
 ])
 
-const handleUpdateValue = (value: string) => {
-  console.log(value)
+function handleUpdateValue(value: string) {
   router.push(value)
 }
 </script>
@@ -34,10 +34,10 @@ const handleUpdateValue = (value: string) => {
 <template>
   <n-menu
     :options="menuOptions"
-    @update:value="handleUpdateValue"
     :collapsed="collapsed"
     :collapsed-width="64"
     :collapsed-icon-size="22"
+    @update:value="handleUpdateValue"
   />
 </template>
 

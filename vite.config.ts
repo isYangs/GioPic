@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
 import path from 'node:path'
+import { defineConfig } from 'vite'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
 import VueRouter from 'unplugin-vue-router/vite'

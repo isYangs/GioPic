@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 import request from '~/utils/request'
 
 interface UploadData {
@@ -9,13 +9,13 @@ interface UploadData {
   expired_at?: string
 }
 
-const createRequest = (url: string, token?: string, customHeaders?: Record<string, string>) => {
+function createRequest(url: string, token?: string, customHeaders?: Record<string, string>) {
   return (path: string, method: 'get' | 'post' = 'get', data?: any) => {
     const config: AxiosRequestConfig = {
       url: url + path,
       method,
       headers: {
-        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...customHeaders,
       },
       data,

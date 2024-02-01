@@ -5,15 +5,14 @@ import bgImg from '~/assets/background.jpg'
 const appStore = useAppStore()
 const { bgImgUrl, recordSavePath } = storeToRefs(appStore)
 
-if (recordSavePath.value) {
+if (recordSavePath.value)
   window.ipcRenderer.send('get-ur-file', recordSavePath.value)
-}
 
-const handleSettingsDrawer = () => {
+function handleSettingsDrawer() {
   appStore.setState({ isSettingsDrawer: true })
 }
 
-const handleUploadRecord = () => {
+function handleUploadRecord() {
   appStore.setState({ isUploadRecord: true })
 }
 
@@ -23,20 +22,20 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <div class="wfull hscreen absolute top-0 left-0 overflow-hidden select-none -z-10">
-    <img class="wh-full object-cover object-center" :src="bgImgUrl || bgImg" />
+  <div class="absolute left-0 top-0 hscreen wfull select-none overflow-hidden -z-10">
+    <img class="wh-full object-cover object-center" :src="bgImgUrl || bgImg">
   </div>
-  <div class="wfull max-h-screen overflow-x-hidden overflow-y-auto">
+  <div class="max-h-screen wfull overflow-x-hidden overflow-y-auto">
     <div class="wh-full select-none">
       <div class="wh-full">
         <Header />
-        <main class="wh-full py5 flex-center flex-col px20">
+        <main class="wh-full flex-center flex-col px20 py5">
           <Upload />
           <ImageList />
         </main>
         <Footer />
       </div>
-      <div class="flex-col fixed bottom-20% right-20px cursor-pointer">
+      <div class="fixed bottom-20% right-20px flex-col cursor-pointer">
         <WidgetsButton ic="i-mi-settings" @click="handleSettingsDrawer" />
         <WidgetsButton ic="i-material-symbols-event-note-outline" @click="handleUploadRecord" />
       </div>

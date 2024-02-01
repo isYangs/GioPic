@@ -1,5 +1,6 @@
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
+
 export * from './modules/app'
 export * from './modules/user'
 export * from './modules/record'

@@ -6,12 +6,12 @@ const tokenPattern = /^\d+\|[A-Za-z0-9]{40}$/
  * @param url - 待验证的URL
  * @returns 如果URL合法，返回true；否则返回错误信息
  */
-export const validateUrl = (url: string) => {
-  if (!url) {
+export function validateUrl(url: string) {
+  if (!url)
     return new Error('API地址不能为空')
-  } else if (!urlPattern.test(url)) {
+  else if (!urlPattern.test(url))
     return new Error('请输入正确的API地址，必须包含http://或https://')
-  }
+
   return true
 }
 
@@ -21,12 +21,12 @@ export const validateUrl = (url: string) => {
  * @param token - 要验证的Token
  * @returns 如果Token有效，返回true；否则返回错误信息
  */
-export const validateToken = (token: string) => {
-  if (!token) {
+export function validateToken(token: string) {
+  if (!token)
     return new Error('Token不能为空')
-  } else if (!tokenPattern.test(token)) {
+  else if (!tokenPattern.test(token))
     return new Error('Token格式不正确，请参考示例格式填写！')
-  }
+
   return true
 }
 
@@ -36,12 +36,12 @@ export const validateToken = (token: string) => {
  * @param bgImgUrl - 需要验证的背景图 URL。
  * @returns 如果URL合法，返回true；否则返回错误信息
  */
-export const validateBgImgUrl = (bgImgUrl: string) => {
-  if (!bgImgUrl) {
+export function validateBgImgUrl(bgImgUrl: string) {
+  if (!bgImgUrl)
     return new Error('背景图地址不能为空')
-  } else if (!urlPattern.test(bgImgUrl)) {
+  else if (!urlPattern.test(bgImgUrl))
     return new Error('请输入正确的URL地址，并且保证图片可以正常访问')
-  }
+
   return true
 }
 
@@ -51,10 +51,10 @@ export const validateBgImgUrl = (bgImgUrl: string) => {
  * @param strategiesVal - 需要验证的存储策略的值
  * @returns 如果存储策略的值合法，返回true；否则返回错误信息
  */
-export const validateStrategiesVal = (strategiesVal: number | null) => {
-  if (!strategiesVal && strategiesVal !== 0) {
+export function validateStrategiesVal(strategiesVal: number | null) {
+  if (!strategiesVal && strategiesVal !== 0)
     return new Error('存储策略不能为空')
-  }
+
   return true
 }
 
@@ -64,10 +64,10 @@ export const validateStrategiesVal = (strategiesVal: number | null) => {
  * @param imgLinkFormatVal - 需要验证的图片链接格式的值
  * @returns 如果图片链接格式的值合法，返回true；否则返回错误信息
  */
-export const validateImgLinkFormatVal = (imgLinkFormatVal: string[]) => {
-  if (!imgLinkFormatVal || imgLinkFormatVal.length === 0) {
+export function validateImgLinkFormatVal(imgLinkFormatVal: string[]) {
+  if (!imgLinkFormatVal || imgLinkFormatVal.length === 0)
     return new Error('图片链接格式不能为空')
-  }
+
   return true
 }
 
@@ -76,15 +76,13 @@ export const validateImgLinkFormatVal = (imgLinkFormatVal: string[]) => {
  * @param recordSavePath 上传记录文件存储路径
  * @returns 如果存储路径合法，返回true；否则返回错误信息
  */
-export const validateLogPath = (recordSavePath: string) => {
-  if (!recordSavePath) {
+export function validateLogPath(recordSavePath: string) {
+  if (!recordSavePath)
     return new Error('上传记录文件存储路径不能为空')
-  }
 
   const pathRegex = /^(.+)\/([^\/]+)$/
-  if (!pathRegex.test(recordSavePath)) {
+  if (!pathRegex.test(recordSavePath))
     return new Error('上传记录文件存储路径格式不正确')
-  }
 
   return true
 }

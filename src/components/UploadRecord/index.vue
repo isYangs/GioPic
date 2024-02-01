@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { format } from 'date-fns'
-import { RecordData, useAppStore } from '~/stores'
-import { ImgLinkFormatTabsOption, getImgLinkFormat } from '../SettingsPanel/utils'
+import { NButton, NCheckbox } from 'naive-ui'
+import type { ImgLinkFormatTabsOption } from '../SettingsPanel/utils'
+import { getImgLinkFormat } from '../SettingsPanel/utils'
+import type { RecordData } from '~/stores'
+import { useAppStore } from '~/stores'
 import { unescapeHtml } from '~/utils/escape'
 import { convertFileSize } from '~/utils/convert'
-import { NButton, NCheckbox } from 'naive-ui'
 
 const appStore = useAppStore()
 const { isUploadRecord, strategies, recordSavePath, isUploadRecordDelDialog } = storeToRefs(appStore)
@@ -24,13 +26,12 @@ const imgLinkFormat = computed(() => {
 
 // 监听主进程发送的获取上传记录的消息
 window.ipcRenderer.on('get-ur-file-status', (_e, status, data) => {
-  if (status) {
+  if (status)
     recordData.value = data
-  }
 })
 
 // 复制链接到剪切板
-const copyLinkToClipboard = (link: string) => {
+function copyLinkToClipboard(link: string) {
   navigator.clipboard
     .writeText(unescapeHtml(link))
     .then(() => {
@@ -42,7 +43,7 @@ const copyLinkToClipboard = (link: string) => {
 }
 
 // 获取链接
-const getLink = (id: string, key: string = 'url') => {
+function getLink(id: string, key: string = 'url') {
   const item = recordData.value.find((item: RecordData) => item.id === id)
   if (!item || !item.links) {
     message.error('没有找到对应的链接')
@@ -59,40 +60,37 @@ const getLink = (id: string, key: string = 'url') => {
 }
 
 // 根据策略id查找策略名称
-const findStrategiesNameById = (id: number) => {
-  const strategy = strategies.value.find((item) => item.value === id)
+function findStrategiesNameById(id: number) {
+  const strategy = strategies.value.find(item => item.value === id)
 
-  if (!strategy) {
+  if (!strategy)
     return '未知'
-  }
 
   return strategy.label
 }
 
 // 复制默认链接
-const handleDefaultImgLinkFormat = (id: string) => {
+function handleDefaultImgLinkFormat(id: string) {
   const link = getLink(id)
-  if (link) {
+  if (link)
     copyLinkToClipboard(link)
-  }
 }
 
 // 复制指定格式的链接
-const handleImgLinkFormatSelect = (key: string, id: string) => {
+function handleImgLinkFormatSelect(key: string, id: string) {
   const link = getLink(id, key)
-  if (link) {
+  if (link)
     copyLinkToClipboard(link)
-  }
 }
 
 // 查看详情
-const handleViewDetails = (file: RecordData) => {
+function handleViewDetails(file: RecordData) {
   selectedFile.value = file
   isImageInfo.value = true
 }
 
 // 删除上传记录
-const handleDelRecord = (id: string) => {
+function handleDelRecord(id: string) {
   const n = dialog.warning({
     title: '提示',
     content: '确定删除该记录吗？同时会删除图床中对应的图片。',
@@ -102,8 +100,8 @@ const handleDelRecord = (id: string) => {
         h(
           NCheckbox,
           {
-            class: 'text-3',
-            checked: isUploadRecordDelDialog.value,
+            'class': 'text-3',
+            'checked': isUploadRecordDelDialog.value,
             'onUpdate:checked': (newValue: boolean) => {
               appStore.setState({ isUploadRecordDelDialog: newValue })
             },
@@ -154,13 +152,15 @@ const handleDelRecord = (id: string) => {
             v-for="file in recordData"
             :key="file.id"
             hoverable
-            class="w60 relative"
+            class="relative w60"
             content-style="padding: 25px 20px 20px 20px;"
           >
-            <n-flex v-if="file.links" class="wh-full" id="image-scroll-container" vertical>
+            <n-flex v-if="file.links" id="image-scroll-container" class="wh-full" vertical>
               <n-image class="h50" :src="file.links.url" lazy>
                 <template #placeholder>
-                  <div class="wh-full flex-center bg-[#0001]">正在加载中，稍等片刻...</div>
+                  <div class="wh-full flex-center bg-[#0001]">
+                    正在加载中，稍等片刻...
+                  </div>
                 </template>
               </n-image>
               <n-flex justify="center">
@@ -170,16 +170,20 @@ const handleDelRecord = (id: string) => {
                   :options="imgLinkFormat"
                   @select="(key: string) => handleImgLinkFormatSelect(key, file.id)"
                 >
-                  <n-button tertiary @click="handleDefaultImgLinkFormat(file.id)">复制链接</n-button>
+                  <NButton tertiary @click="handleDefaultImgLinkFormat(file.id)">
+                    复制链接
+                  </NButton>
                 </n-dropdown>
-                <n-button tertiary @click="handleViewDetails(file)">查看详情</n-button>
+                <NButton tertiary @click="handleViewDetails(file)">
+                  查看详情
+                </NButton>
               </n-flex>
             </n-flex>
-            <n-button quaternary class="w5 h5 absolute top-1 right-1" @click="handleDelRecord(file.id)">
+            <NButton quaternary class="absolute right-1 top-1 h5 w5" @click="handleDelRecord(file.id)">
               <template #icon>
-                <div class="i-ic-sharp-close text-dark-50 w5 h5"></div>
+                <div class="i-ic-sharp-close h5 w5 text-dark-50" />
               </template>
-            </n-button>
+            </NButton>
           </n-card>
         </n-flex>
       </n-image-group>
@@ -188,7 +192,9 @@ const handleDelRecord = (id: string) => {
           <div class="i-material-symbols-speaker-notes-off-outline" />
         </template>
         <template #extra>
-          <n-button size="small"> 看看别的 </n-button>
+          <NButton size="small">
+            看看别的
+          </NButton>
         </template>
       </n-empty>
     </n-drawer-content>
@@ -202,7 +208,7 @@ const handleDelRecord = (id: string) => {
     :auto-focus="false"
   >
     <n-flex v-if="selectedFile" justify="space-between" :wrap="false">
-      <div class="w70 image-info">
+      <div class="image-info w70">
         <p>文件名：{{ selectedFile.name }}</p>
         <n-divider />
         <p>文件原始名：{{ selectedFile.origin_name }}</p>
@@ -211,7 +217,7 @@ const handleDelRecord = (id: string) => {
         <n-divider />
         <p>文件指纹：{{ selectedFile.id }}</p>
       </div>
-      <div class="w70 image-info">
+      <div class="image-info w70">
         <p>上传时间：{{ format(new Date(selectedFile.time), 'yyyy年MM月dd日 HH:mm:ss') }}</p>
         <n-divider />
         <p>文件类型：{{ selectedFile.mimetype }}</p>

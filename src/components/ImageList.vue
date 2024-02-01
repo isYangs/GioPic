@@ -2,7 +2,8 @@
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestData from '~/api'
-import { useAppStore, useUploadRecordStore, UploadData } from '~/stores'
+import type { UploadData } from '~/stores'
+import { useAppStore, useUploadRecordStore } from '~/stores'
 import { convertFileSize } from '~/utils/convert'
 
 const appStore = useAppStore()
@@ -21,7 +22,7 @@ const isPublicOptions = [
 ]
 
 // 上传方法
-const handleUpload = async (index: number, file: File, isGetRecord: Boolean = true) => {
+async function handleUpload(index: number, file: File, isGetRecord: boolean = true) {
   if (strategiesVal.value === null) {
     message.error('请先选择存储策略')
     return
@@ -60,26 +61,26 @@ const handleUpload = async (index: number, file: File, isGetRecord: Boolean = tr
     )
     imgLinkTabsKey.value++
     message.success('上传成功')
-  } catch (error) {
+  }
+  catch (error) {
     message.error('上传失败')
     uploadRecordStore.setData({ uploadFailed: true }, index)
-  } finally {
+  }
+  finally {
     uploadRecordStore.setData({ isLoading: false }, index)
-    if (isGetRecord) {
+    if (isGetRecord)
       uploadRecordStore.getRecord()
-    }
   }
 }
 
 // 当接收到上传记录文件状态时，进行处理
 window.ipcRenderer.on('create-ur-file-status', (_e, status) => {
-  if (!status) {
+  if (!status)
     message.error('创建记录文件失败')
-  }
 })
 
 // 全部上传方法
-const handleAllUpload = async () => {
+async function handleAllUpload() {
   if (strategiesVal.value === null) {
     message.error('请先选择存储策略')
     return
@@ -100,7 +101,7 @@ const handleAllUpload = async () => {
   const tasks = uploadList.map((item: any, index: number) => {
     if (item.links || item.uploadFailed) {
       message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
-      return
+      return null
     }
 
     const originalIndex = data.value.indexOf(item)
@@ -127,7 +128,7 @@ const handleAllUpload = async () => {
     uploadingTasks.add(task)
 
     return task
-  })
+  }).filter(task => task !== null)
 
   isUpload.value = true
 
@@ -136,7 +137,7 @@ const handleAllUpload = async () => {
 }
 
 // 删除图片方法
-const handleClose = (index: number) => {
+function handleClose(index: number) {
   if (isImgListDelDialog.value) {
     uploadRecordStore.delData(index)
     return
@@ -151,8 +152,8 @@ const handleClose = (index: number) => {
         h(
           NCheckbox,
           {
-            class: 'text-3',
-            checked: isImgListDelDialog.value,
+            'class': 'text-3',
+            'checked': isImgListDelDialog.value,
             'onUpdate:checked': (newValue: boolean) => {
               appStore.setState({ isImgListDelDialog: newValue })
             },
@@ -194,12 +195,12 @@ const handleClose = (index: number) => {
 }
 
 // 清空列表方法
-const handleAllClear = () => {
+function handleAllClear() {
   uploadRecordStore.delData()
 }
 
 // 复制全部URL方法
-const handleCopyAllUrl = () => {
+function handleCopyAllUrl() {
   const urlList = data.value.map((item: UploadData) => item.links?.url).filter((item: string | undefined) => item)
 
   if (!urlList.length) {
@@ -227,11 +228,17 @@ watch(imgLinkFormatTabs, () => {
 
 <template>
   <template v-if="data.length">
-    <n-flex class="wfull my2">
-      <n-button type="primary" :disabled="data.length <= 1 || isUpload" @click="handleAllUpload"> 全部上传 </n-button>
-      <n-button type="error" @click="handleAllClear"> 清空列表 </n-button>
-      <n-button type="info" :disabled="false" @click="handleCopyAllUrl"> 复制全部URL </n-button>
-      <n-select class="w30" v-model:value="isAllPublic" :options="isPublicOptions" />
+    <n-flex class="my2 wfull">
+      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="handleAllUpload">
+        全部上传
+      </NButton>
+      <NButton type="error" @click="handleAllClear">
+        清空列表
+      </NButton>
+      <NButton type="info" :disabled="false" @click="handleCopyAllUrl">
+        复制全部URL
+      </NButton>
+      <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
     </n-flex>
     <n-flex class="wfull" justify="space-between">
       <n-image-group>
@@ -245,10 +252,10 @@ watch(imgLinkFormatTabs, () => {
                 <n-tabs :key="imgLinkTabsKey" class="flex-1 flex-nowrap overflow-auto" type="line">
                   <n-tab-pane
                     v-for="tab in imgLinkFormatTabs"
+                    :key="tab.value"
                     class="wfull"
                     :name="tab.value"
                     :tab="tab.label"
-                    :key="tab.value"
                   >
                     <CodeBlock :type="tab.lang" :code="file.links ? file.links[tab.value] : '无'" />
                   </n-tab-pane>
@@ -257,11 +264,9 @@ watch(imgLinkFormatTabs, () => {
               <template v-else>
                 <n-tabs class="flex-1 flex-nowrap overflow-auto" type="line">
                   <n-tab-pane class="wfull flex-1" name="file_info" tab="详情">
-                    <div class="wh-full flex-center justify-between flex-row flex-wrap">
+                    <div class="wh-full flex-center flex-row flex-wrap justify-between">
                       <n-tag :bordered="false" type="info">
-                        <span class="block text-overflow max-w-100"
-                          >文件名： {{ file.fileInfo ? file.fileInfo.name : '无' }}</span
-                        >
+                        <span class="block max-w-100 text-overflow">文件名： {{ file.fileInfo ? file.fileInfo.name : '无' }}</span>
                       </n-tag>
                       <n-tag :bordered="false" type="info">
                         文件大小：{{ file.fileInfo ? convertFileSize(Number(file.fileInfo.file?.size)) : '无' }}
@@ -269,26 +274,28 @@ watch(imgLinkFormatTabs, () => {
                       <n-tag :bordered="false" type="info">
                         文件类型：{{ file.fileInfo ? file.fileInfo.type : '无' }}
                       </n-tag>
-                      <n-button
+                      <NButton
                         size="small"
                         secondary
                         strong
                         @click="file.fileInfo && file.fileInfo.file && handleUpload(index, file.fileInfo.file)"
                       >
                         上传
-                      </n-button>
+                      </NButton>
                     </div>
                   </n-tab-pane>
                 </n-tabs>
               </template>
             </n-flex>
-            <template #description> 正在上传，请耐心等待... </template>
-          </n-spin>
-          <n-button v-if="!file.isLoading" quaternary class="w5 h5 absolute top-.5 right-1" @click="handleClose(index)">
-            <template #icon>
-              <div class="i-ic-sharp-close text-dark-50 w5 h5"></div>
+            <template #description>
+              正在上传，请耐心等待...
             </template>
-          </n-button>
+          </n-spin>
+          <NButton v-if="!file.isLoading" quaternary class="absolute right-1 top-.5 h5 w5" @click="handleClose(index)">
+            <template #icon>
+              <div class="i-ic-sharp-close h5 w5 text-dark-50" />
+            </template>
+          </NButton>
           <!-- 防止代码块渲染白屏问题 -->
           <CodeBlock type="text" code="####" class="hidden" />
         </n-card>

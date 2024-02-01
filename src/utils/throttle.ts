@@ -14,7 +14,7 @@ interface Limit {
  * @example
  * const throttledGetApiUrlTitle = limitFunctionCallFrequency(getApiUrlTitle, { value: 1, unit: '秒' });
  */
-export const limitFunctionCallFrequency = <T extends (...args: any[]) => any>(func: T, limit: Limit): T => {
+export function limitFunctionCallFrequency<T extends (...args: any[]) => any>(func: T, limit: Limit): T {
   const message = useMessage()
   const limitInMilliseconds = convertToMilliseconds(limit)
 
@@ -25,7 +25,8 @@ export const limitFunctionCallFrequency = <T extends (...args: any[]) => any>(fu
     if (currentTime - lastCallTime >= limitInMilliseconds) {
       func(...args)
       useAppStore().setState({ lastCallTime: currentTime })
-    } else {
+    }
+    else {
       const remainingTimeInMilliseconds = limitInMilliseconds - (currentTime - lastCallTime)
       const { value: remainingTime, unit } = convertFromMilliseconds(remainingTimeInMilliseconds)
       message.error(`操作过于频繁，请在${remainingTime}${unit}后再试`)
@@ -38,7 +39,7 @@ export const limitFunctionCallFrequency = <T extends (...args: any[]) => any>(fu
  * @param {Limit} limit - 时间间隔。
  * @returns {number} - 返回时间间隔的毫秒表示。
  */
-const convertToMilliseconds = (limit: Limit): number => {
+function convertToMilliseconds(limit: Limit): number {
   return limit.value * getMultiplier(limit.unit)
 }
 
@@ -47,14 +48,13 @@ const convertToMilliseconds = (limit: Limit): number => {
  * @param {number} milliseconds - 毫秒数。
  * @returns {{ value: number; unit: TimeUnit }} - 返回一个对象，包含转换后的时间值和单位。
  */
-const convertFromMilliseconds = (milliseconds: number): { value: number; unit: TimeUnit } => {
+function convertFromMilliseconds(milliseconds: number): { value: number, unit: TimeUnit } {
   const units: TimeUnit[] = ['小时', '分钟', '秒']
   for (let i = 0; i < units.length; i++) {
     const unit = units[i]
     const value = milliseconds / getMultiplier(unit)
-    if (value >= 1 || i === units.length - 1) {
+    if (value >= 1 || i === units.length - 1)
       return { value: Math.ceil(value), unit }
-    }
   }
   return { value: 0, unit: '秒' }
 }
@@ -64,7 +64,7 @@ const convertFromMilliseconds = (milliseconds: number): { value: number; unit: T
  * @param {TimeUnit} unit - 时间单位。
  * @returns {number} - 返回相应的乘数。
  */
-const getMultiplier = (unit: TimeUnit): number => {
+function getMultiplier(unit: TimeUnit): number {
   switch (unit) {
     case '秒':
       return 1000
