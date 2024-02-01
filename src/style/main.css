@@ -1,56 +1,56 @@
 :root {
-    --scrollbar-width: 6px;
-    --scrollbar-radius: 4px;
-    --scrollbar-background: rgba(255, 255, 255, .1);
-    --scrollbar-thumb-background: rgba(0, 0, 0, .5);
-    --link-text-color: #fb923c;
-    --link-text-color-hover: #38bdf8;
+  --scrollbar-width: 6px;
+  --scrollbar-radius: 4px;
+  --scrollbar-background: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-background: rgba(0, 0, 0, 0.5);
+  --link-text-color: #fb923c;
+  --link-text-color-hover: #38bdf8;
 }
 
 ::-webkit-scrollbar {
-    width: var(--scrollbar-width);
-    border-radius: var(--scrollbar-radius);
-    background: var(--scrollbar-background);
+  width: var(--scrollbar-width);
+  border-radius: var(--scrollbar-radius);
+  background: var(--scrollbar-background);
 }
 
 ::-webkit-scrollbar:horizontal {
-    height: var(--scrollbar-width);
+  height: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-thumb {
-    border-radius: var(--scrollbar-radius);
-    background: var(--scrollbar-thumb-background);
+  border-radius: var(--scrollbar-radius);
+  background: var(--scrollbar-thumb-background);
 }
 
 body,
 #app {
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 #app a {
-    text-decoration: none;
-    color: var(--link-text-color);
-    border-bottom: 1px solid var(--link-text-color);
-    transition: all 0.3s ease-in-out;
+  text-decoration: none;
+  color: var(--link-text-color);
+  border-bottom: 1px solid var(--link-text-color);
+  transition: all 0.3s ease-in-out;
 }
 
 #app a:hover {
-    color: var(--link-text-color-hover);
-    border-bottom: 1px solid var(--link-text-color-hover);
+  color: var(--link-text-color-hover);
+  border-bottom: 1px solid var(--link-text-color-hover);
 }
 
 .n-image-preview-toolbar {
-    border-radius: 6px;
-    background: rgba(0, 0, 0, .75);
-    bottom: 50px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  bottom: 50px;
 }
 
-.n-image-preview-toolbar>.n-base-icon {
-    width: 1.5em;
+.n-image-preview-toolbar > .n-base-icon {
+  width: 1.5em;
 }
 
-.n-image-preview-toolbar>.n-base-icon:nth-last-child(2) {
-    display: none;
+.n-image-preview-toolbar > .n-base-icon:nth-last-child(2) {
+  display: none;
 }

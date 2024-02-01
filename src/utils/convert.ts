@@ -9,13 +9,13 @@
  * convertFileSize(1024, true); // '1.00 MB'
  */
 export const convertFileSize = (size: number, isKb: boolean = false) => {
-    const units = isKb ? ['KB', 'MB', 'GB'] : ['Bytes', 'KB', 'MB', 'GB'];
-    let unitIndex = 0;
+  const units = isKb ? ['KB', 'MB', 'GB'] : ['Bytes', 'KB', 'MB', 'GB']
+  let unitIndex = 0
 
-    while (size >= 1024 && unitIndex < units.length - 1) {
-        size /= 1024;
-        unitIndex++;
-    }
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex++
+  }
 
-    return `${size.toFixed(2)} ${units[unitIndex]}`;
-};
+  return `${size.toFixed(2)} ${units[unitIndex]}`
+}

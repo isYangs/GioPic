@@ -1,4 +1,4 @@
-import { useAppStore } from '~/store';
+import { useAppStore } from '~/stores'
 // import { SelectGroupOption, SelectOption } from 'naive-ui';
 
 /**
@@ -12,37 +12,37 @@ import { useAppStore } from '~/store';
  * 如果用户点击'取消'，或者关闭对话框，那么程序会退出（通过发送 'quit-app' 事件给 ipcRenderer）。
  */
 export const checkConfiguration = () => {
-    const appStore = useAppStore();
-    const dialog = useDialog();
-    const { apiUrl, token } = appStore;
-    if (apiUrl === '' && token === '') {
-        dialog.warning({
-            title: '提示',
-            content: '检测到程序还没有配置，是否前往配置？',
-            positiveText: '前往配置',
-            negativeText: '取消',
-            closeOnEsc: false,
-            maskClosable: false,
-            autoFocus: false,
-            onPositiveClick: () => {
-                appStore.setState({ isSettingsDrawer: true });
-            },
-            onClose: () => {
-                window.ipcRenderer.send('quit-app');
-            },
-            onNegativeClick: () => {
-                window.ipcRenderer.send('quit-app');
-            },
-        });
-    } else {
-        appStore.getUserProfile();
-    }
-};
+  const appStore = useAppStore()
+  const dialog = useDialog()
+  const { apiUrl, token } = appStore
+  if (apiUrl === '' && token === '') {
+    dialog.warning({
+      title: '提示',
+      content: '检测到程序还没有配置，是否前往配置？',
+      positiveText: '前往配置',
+      negativeText: '取消',
+      closeOnEsc: false,
+      maskClosable: false,
+      autoFocus: false,
+      onPositiveClick: () => {
+        appStore.setState({ isSettingsDrawer: true })
+      },
+      onClose: () => {
+        window.ipcRenderer.send('quit-app')
+      },
+      onNegativeClick: () => {
+        window.ipcRenderer.send('quit-app')
+      },
+    })
+  } else {
+    appStore.getUserProfile()
+  }
+}
 
 export interface ImgLinkFormatTabsOption {
-    label: string;
-    value: string;
-    lang?: string;
+  label: string
+  value: string
+  lang?: string
 }
 
 /**
@@ -57,12 +57,12 @@ export interface ImgLinkFormatTabsOption {
  *   // ...
  * ]
  */
-const imgLinkFormats = ['URL', 'HTML', 'BBCode', 'Markdown', 'Markdown With Link', 'Thumbnail URL'];
+const imgLinkFormats = ['URL', 'HTML', 'BBCode', 'Markdown', 'Markdown With Link', 'Thumbnail URL']
 
 export const getImgLinkFormat: ImgLinkFormatTabsOption[] = imgLinkFormats.map((format) => ({
-    label: format,
-    value: format.toLowerCase().replace(/\s+/g, '_'),
-}));
+  label: format,
+  value: format.toLowerCase().replace(/\s+/g, '_'),
+}))
 
 /**
  * 获取图片链接格式选项卡。
@@ -72,26 +72,26 @@ export const getImgLinkFormat: ImgLinkFormatTabsOption[] = imgLinkFormats.map((f
  * 如果值包含 'markdown'，则语言为 'markdown'；否则，语言为 'text'。
  */
 export const getImgLinkFormatTabs = (): ImgLinkFormatTabsOption[] => {
-    const appStore = useAppStore();
-    const { imgLinkFormatVal } = appStore;
+  const appStore = useAppStore()
+  const { imgLinkFormatVal } = appStore
 
-    const formatMap = new Map(getImgLinkFormat.map((format) => [format.value, format]));
+  const formatMap = new Map(getImgLinkFormat.map((format) => [format.value, format]))
 
-    const imgLinkFormatTabs = imgLinkFormatVal
-        .map((item) => {
-            const format = formatMap.get(item);
-            if (format) {
-                if (item.includes('html')) {
-                    format.lang = 'html';
-                } else if (item.includes('markdown')) {
-                    format.lang = 'markdown';
-                } else {
-                    format.lang = 'text';
-                }
-            }
-            return format;
-        })
-        .filter(Boolean) as ImgLinkFormatTabsOption[];
+  const imgLinkFormatTabs = imgLinkFormatVal
+    .map((item) => {
+      const format = formatMap.get(item)
+      if (format) {
+        if (item.includes('html')) {
+          format.lang = 'html'
+        } else if (item.includes('markdown')) {
+          format.lang = 'markdown'
+        } else {
+          format.lang = 'text'
+        }
+      }
+      return format
+    })
+    .filter(Boolean) as ImgLinkFormatTabsOption[]
 
-    return imgLinkFormatTabs;
-};
+  return imgLinkFormatTabs
+}
