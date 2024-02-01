@@ -10,6 +10,6 @@ defineProps<{ ic: string }>()
 
 <style scoped>
 :deep(.n-button__content) {
-  @apply flex-center flex-wrap min-w-none;
+  --uno: flex-center flex-wrap min-w-none;
 }
 </style>

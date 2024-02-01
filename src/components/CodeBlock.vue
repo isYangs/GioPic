@@ -42,10 +42,10 @@ function copyCode() {
 
 <style scoped>
 :deep(code.hljs) {
-  @apply rounded-2;
+  --uno: rounded-2;
 }
 
 :deep(code.hljs)::-webkit-scrollbar-thumb {
-  @apply bg-white op-50;
+  --uno: bg-white op-50;
 }
 </style>

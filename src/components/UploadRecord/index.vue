@@ -232,14 +232,14 @@ function handleDelRecord(id: string) {
 
 <style scoped>
 :deep(.n-image) > img {
-  @apply !object-cover;
+  --uno: !object-cover;
 }
 
 .image-info > p {
-  @apply text-sm text-[#666] text-overflow;
+  --uno: text-sm text-[#666] text-overflow;
 }
 
 .image-info > :deep(.n-divider):not(.n-divider--vertical) {
-  @apply !my;
+  --uno: !my;
 }
 </style>

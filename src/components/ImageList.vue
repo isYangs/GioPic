@@ -310,10 +310,10 @@ watch(imgLinkFormatTabs, () => {
   --n-padding-bottom: 5px !important;
   --n-padding-left: 10px !important;
   --n-padding-right: 10px !important;
-  @apply rounded-2;
+  --uno: rounded-2;
 }
 
 :deep(.n-image) > img {
-  @apply wfull h30;
+  --uno: wfull h30;
 }
 </style>

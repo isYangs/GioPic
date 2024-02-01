@@ -9,6 +9,10 @@ defineProps<{
 const router = useRouter()
 console.log(router.options.routes)
 
+function renderIcon(icon: string) {
+  return () => h('div', { class: icon })
+}
+
 const menuOptions = computed((): MenuOption[] => [
   {
     label: () =>
@@ -22,7 +26,7 @@ const menuOptions = computed((): MenuOption[] => [
         { default: () => '首页' },
       ),
     key: '/',
-    // icon: 'home',
+    icon: renderIcon('i-ic-sharp-home'),
   },
 ])
 

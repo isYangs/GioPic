@@ -4,4 +4,8 @@
   <h1>首页</h1>
 </template>
 
-<style scoped></style>
+<style scoped>
+h1 {
+  --uno: text-2xl;
+}
+</style>
