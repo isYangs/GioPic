@@ -8,7 +8,7 @@ import { convertFileSize } from '~/utils/convert'
 
 const appStore = useAppStore()
 const uploadRecordStore = useUploadRecordStore()
-const { imgLinkFormatTabs, apiUrl, token, strategiesVal, isImgListDelDialog } = storeToRefs(appStore)
+const { imgLinkFormatVal, apiUrl, token, strategiesVal, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadRecordStore)
 const message = useMessage()
 const dialog = useDialog()
@@ -221,7 +221,7 @@ function handleCopyAllUrl() {
 }
 
 // 监听图片链接格式选项卡变化，防止渲染出现问题
-watch(imgLinkFormatTabs, () => {
+watch(imgLinkFormatVal, () => {
   imgLinkTabsKey.value++
 })
 </script>
@@ -251,13 +251,13 @@ watch(imgLinkFormatTabs, () => {
               <template v-if="file.links">
                 <n-tabs :key="imgLinkTabsKey" class="flex-1 flex-nowrap overflow-auto" type="line">
                   <n-tab-pane
-                    v-for="tab in imgLinkFormatTabs"
-                    :key="tab.value"
+                    v-for="linkType in imgLinkFormatVal"
+                    :key="linkType"
                     class="wfull"
-                    :name="tab.value"
-                    :tab="tab.label"
+                    :name="linkType"
+                    :tab="linkType"
                   >
-                    <CodeBlock :type="tab.lang" :code="file.links ? file.links[tab.value] : '无'" />
+                    <div>{{ linkType }}</div>
                   </n-tab-pane>
                 </n-tabs>
               </template>
@@ -296,8 +296,6 @@ watch(imgLinkFormatTabs, () => {
               <div class="i-ic-sharp-close h5 w5 text-dark-50" />
             </template>
           </NButton>
-          <!-- 防止代码块渲染白屏问题 -->
-          <CodeBlock type="text" code="####" class="hidden" />
         </n-card>
       </n-image-group>
     </n-flex>

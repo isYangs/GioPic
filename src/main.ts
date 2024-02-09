@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.min.css'
+import 'animate.css'
 import App from './App.vue'
 import store from './stores'
 import './style/main.css'
@@ -38,8 +39,7 @@ app
     postMessage({ payload: 'removeLoading' }, '*')
 
     // Use contextBridge
-    window.ipcRenderer.on('main-process-message', (_event, message) => {
-      // eslint-disable-next-line no-console
+    window.ipcRenderer.on('main-process-message', (_e, message) => {
       console.log(message)
     })
   })

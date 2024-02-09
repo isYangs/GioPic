@@ -1,25 +1,6 @@
 :root {
-  --scrollbar-width: 6px;
-  --scrollbar-radius: 4px;
-  --scrollbar-background: rgba(255, 255, 255, 0.1);
-  --scrollbar-thumb-background: rgba(0, 0, 0, 0.5);
   --link-text-color: #fb923c;
   --link-text-color-hover: #38bdf8;
-}
-
-::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-  border-radius: var(--scrollbar-radius);
-  background: var(--scrollbar-background);
-}
-
-::-webkit-scrollbar:horizontal {
-  height: var(--scrollbar-width);
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: var(--scrollbar-radius);
-  background: var(--scrollbar-thumb-background);
 }
 
 body,
@@ -29,16 +10,34 @@ body,
   overflow: hidden;
 }
 
-#app a {
-  text-decoration: none;
-  color: var(--link-text-color);
-  border-bottom: 1px solid var(--link-text-color);
-  transition: all 0.3s ease-in-out;
+/*
+-------------------------
+    NaiveUI 组件样式处理 
+-------------------------
+*/
+.n-layout-toggle-bar {
+  height: 44px !important;
+  top: calc(40% - 22px) !important;
 }
 
-#app a:hover {
-  color: var(--link-text-color-hover);
-  border-bottom: 1px solid var(--link-text-color-hover);
+.n-layout-toggle-bar__top,
+.n-layout-toggle-bar__bottom {
+  height: 24px !important;
+}
+
+.n-layout-toggle-bar__bottom {
+  top: 20px !important;
+}
+
+.n-modal {
+  width: 60vw;
+  max-width: 700px;
+  min-width: min(24rem, 100vw);
+  border-radius: 8px;
+}
+
+.n-modal-mask {
+  backdrop-filter: blur(16px);
 }
 
 .n-image-preview-toolbar {
@@ -47,10 +46,22 @@ body,
   bottom: 50px;
 }
 
-.n-image-preview-toolbar > .n-base-icon {
+.n-image-preview-toolbar>.n-base-icon {
   width: 1.5em;
 }
 
-.n-image-preview-toolbar > .n-base-icon:nth-last-child(2) {
+.n-image-preview-toolbar>.n-base-icon:nth-last-child(2) {
   display: none;
+}
+
+/*
+-------------------------
+    过渡动画样式处理
+-------------------------
+*/
+.run-enter-active {
+  animation: lightSpeedInRight .4s linear 0s;
+}
+.run-leave-active {
+  animation: lightSpeedOutRight .2s linear 0s;
 }

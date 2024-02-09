@@ -1,9 +1,31 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { dialog, ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
+import { app, dialog, ipcMain } from 'electron'
 import DataBase from './db'
 
-export function setupIpcHandlers() {
+export function setupIpcMain(win: BrowserWindow) {
+  ipcMain.on('window-min', () => {
+    win.minimize()
+  })
+
+  ipcMain.on('window-maxOrRestore', (event) => {
+    if (win.isMaximized())
+      win.unmaximize()
+    else
+      win.maximize()
+
+    event.reply('window-maxOrRestore-reply', win?.isMaximized())
+  })
+
+  ipcMain.on('window-hide', () => {
+    win.hide()
+  })
+
+  ipcMain.on('window-close', () => {
+    app.quit()
+    win.close()
+  })
   /**
    * Electron 主进程中的事件处理函数，用于处理 'open-directory-dialog' 事件。
    *

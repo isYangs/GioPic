@@ -29,6 +29,7 @@ export default defineConfig({
     VueRouter({
       routesFolder: 'src/pages',
       exclude: ['**/components/*.vue'],
+      dts: 'src/typings/typed-router.d.ts',
       extensions: ['.vue'],
     }),
     vue(),
@@ -37,16 +38,12 @@ export default defineConfig({
     Components({
       dirs: ['src/components'],
       extensions: ['vue'],
-      dts: true,
+      dts: 'src/typings/components.d.ts',
       resolvers: [NaiveUiResolver()],
     }),
     AutoImport({
-      include: [
-        /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
-        /\.vue$/,
-        /\.vue\?vue/,
-        /\.md$/,
-      ],
+      dts: 'src/typings/auto-imports.d.ts',
+      include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
       imports: [
         'vue',
         '@vueuse/core',

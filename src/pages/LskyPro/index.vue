@@ -1,48 +1,56 @@
 <script setup lang="ts">
-import { useAppStore } from '~/stores'
-import bgImg from '~/assets/background.jpg'
+import { NInput, NSelect } from 'naive-ui'
 
-const appStore = useAppStore()
-const { bgImgUrl, recordSavePath } = storeToRefs(appStore)
+// import { useAppStore, useUserStore } from '~/stores'
 
-if (recordSavePath.value)
-  window.ipcRenderer.send('get-ur-file', recordSavePath.value)
+// const appStore = useAppStore()
+// const userStore = useUserStore()
+// const { apiUrl, apiUrlTitle, bgImgUrl, recordSavePath } = storeToRefs(appStore)
+// const { name, getCacpacity, getSize, imageNum } = storeToRefs(userStore)
 
-function handleSettingsDrawer() {
-  appStore.setState({ isSettingsDrawer: true })
-}
+// if (recordSavePath.value)
+// window.ipcRenderer.send('get-ur-file', recordSavePath.value)
 
-function handleUploadRecord() {
-  appStore.setState({ isUploadRecord: true })
-}
+// onBeforeMount(() => {
+//   appStore.setState({ isSettingsDrawer: false }) // 防止保存时出现错误，在挂载时重置设置面板的显示状态
+// })
 
-onBeforeMount(() => {
-  appStore.setState({ isSettingsDrawer: false }) // 防止保存时出现错误，在挂载时重置设置面板的显示状态
-})
+const api = ref('')
+
+const lskySettingOptions = [
+  {
+    name: 'API 地址',
+    tip: 'https://example.com (必须包含http://或https://)',
+    component: () => {
+      return h(NInput, {
+        'value': api.value,
+        'onUpdate:value': (val: string) => {
+          console.log(val)
+        },
+        'options': [
+          { label: '浅色模式', value: 'light' },
+          { label: '深色模式', value: 'dark' },
+        ],
+      })
+    },
+  },
+]
 </script>
 
 <template>
-  <div class="absolute left-0 top-0 hscreen wfull select-none overflow-hidden -z-10">
-    <img class="wh-full object-cover object-center" :src="bgImgUrl || bgImg">
+  <div>
+    <n-tabs type="segment" animated>
+      <n-tab-pane name="upload" tab="上传图片">
+        <Upload />
+      </n-tab-pane>
+      <n-tab-pane name="record" tab="上传记录">
+        上传记录
+      </n-tab-pane>
+      <n-tab-pane name="set" tab="设置">
+        <SetItem title="兰空图床设置" :items="lskySettingOptions" />
+      </n-tab-pane>
+    </n-tabs>
   </div>
-  <div class="max-h-screen wfull overflow-x-hidden overflow-y-auto">
-    <div class="wh-full select-none">
-      <div class="wh-full">
-        <Header />
-        <main class="wh-full flex-center flex-col px20 py5">
-          <Upload />
-          <ImageList />
-        </main>
-        <Footer />
-      </div>
-      <div class="fixed bottom-20% right-20px flex-col cursor-pointer">
-        <WidgetsButton ic="i-mi-settings" @click="handleSettingsDrawer" />
-        <WidgetsButton ic="i-material-symbols-event-note-outline" @click="handleUploadRecord" />
-      </div>
-    </div>
-  </div>
-  <SettingsPanel />
-  <UploadRecord />
 </template>
 
 <style scoped></style>

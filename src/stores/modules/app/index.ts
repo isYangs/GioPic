@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia'
 import type { SelectGroupOption, SelectOption } from 'naive-ui'
-import { useUserStore } from './user'
+import { useUserStore } from '../user'
 import requestData from '~/api'
-import type { ImgLinkFormatTabsOption } from '~/components/SettingsPanel/utils'
 
 interface State {
+  appCloseType: 'close' | 'hide'
+  isMenuCollapsed: boolean
+  appCloseTip: boolean
+  themeType: 'light' | 'dark' | null
+  themeAuto: boolean
   bgImgUrl: string
   isSettingsDrawer: boolean
   isUploadRecord: boolean
@@ -14,7 +18,6 @@ interface State {
   strategies: (SelectOption | SelectGroupOption)[]
   strategiesVal: number | null
   imgLinkFormatVal: string[]
-  imgLinkFormatTabs: ImgLinkFormatTabsOption[]
   isImgListDelDialog: boolean
   isUploadRecordDelDialog: boolean
   recordSavePath: string
@@ -30,6 +33,19 @@ export const useAppStore = defineStore(
   'appStore',
   () => {
     const state: State = reactive({
+      // 基础
+      appCloseType: 'hide', // 关闭类型 'close' | 'hide'
+      appCloseTip: false, // 是否显示关闭应用对话框
+      isMenuCollapsed: false, // 是否折叠菜单
+      imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
+
+      // 系统
+      recordSavePath: '', // 记录文件存储的路径
+
+      // 主题
+      themeType: 'light', // 主题类型 'light' | 'dark'
+      themeAuto: false, // 是否自动切换主题
+
       bgImgUrl: '', // 背景图片地址
       isSettingsDrawer: false, // 是否显示设置面板
       isUploadRecord: false, // 是否显示上传记录面板
@@ -38,11 +54,8 @@ export const useAppStore = defineStore(
       apiUrlTitle: '未知图床', // API地址网站标题
       strategies: [], // 存储策略
       strategiesVal: null, // 存储策略
-      imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
-      imgLinkFormatTabs: [], // 显示的图片链接格式标签
       isImgListDelDialog: false, // 是否显示图片列表删除对话框
       isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框
-      recordSavePath: '', // 日志文件存储的路径
       lastCallTime: 0, // 上次调用时间，用于限制函数调用频率
     })
 
@@ -55,6 +68,7 @@ export const useAppStore = defineStore(
      * appStore.setState({ bgImgUrl: 'https://xxx.com/xxx.jpg' });
      */
     async function setState<T extends State>(newState: Partial<T>) {
+      console.log(newState)
       if (newState.apiUrl && newState.apiUrl.endsWith('/'))
         newState.apiUrl = newState.apiUrl.split('/').slice(0, -1).join('/')
 
@@ -134,21 +148,14 @@ export const useAppStore = defineStore(
   },
   {
     persist: {
-      key: 'APP_SETTING',
+      key: '__giopic_app_store__',
       paths: [
-        'bgImgUrl',
-        'isSettingsDrawer',
-        'apiUrl',
-        'token',
-        'apiUrlTitle',
-        'strategies',
-        'strategiesVal',
-        'imgLinkFormatVal',
-        'imgLinkFormatTabs',
+        'appCloseType',
+        'appCloseTip',
         'recordSavePath',
-        'lastCallTime',
-        'isImgListDelDialog',
-        'isUploadRecordDelDialog',
+        'themeType',
+        'themeAuto',
+        'imgLinkFormatVal',
       ],
     },
   },

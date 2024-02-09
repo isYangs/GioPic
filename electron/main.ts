@@ -1,8 +1,8 @@
 import path from 'node:path'
 import type { MenuItemConstructorOptions } from 'electron'
-import { BrowserWindow, Menu, app, ipcMain, shell } from 'electron'
+import { BrowserWindow, Menu, Tray, app, nativeImage, shell } from 'electron'
 import { fixElectronCors } from './cors'
-import { setupIpcHandlers } from './ipcHandlers'
+import { setupIpcMain } from './ipcMain'
 
 // The built directory structure
 //
@@ -19,6 +19,7 @@ process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
 let win: BrowserWindow | null
+let tray: Tray | null
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 const NODE_ENV = process.env.NODE_ENV
 
@@ -65,10 +66,11 @@ createMenu()
 function createWindow() {
   win = new BrowserWindow({
     width: 1080,
-    height: 800,
+    height: 680,
     minWidth: 1050,
     minHeight: 680,
-    icon: path.join(process.env.VITE_PUBLIC, 'giopic-icon.png'),
+    frame: false,
+    icon: nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'favicon.png')),
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js'),
@@ -95,8 +97,32 @@ function createWindow() {
 
   // 在开发模式下打开开发者工具
   if (NODE_ENV === 'development')
-    win.webContents.openDevTools({ mode: 'detach' })
+    win.webContents.openDevTools()
+
+  setupIpcMain(win)
 }
+
+app.on('ready', () => {
+  tray = new Tray(nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'favicon.png')).resize({ width: 16, height: 16 }))
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '设置',
+      click: () => {
+        win?.show()
+      },
+    },
+    { label: 'Item2', type: 'radio' },
+    { type: 'separator' },
+  ])
+
+  tray.setToolTip('GioPic')
+  tray.setContextMenu(contextMenu)
+
+  tray.on('click', () => {
+    win?.show()
+  })
+})
 
 // 当所有窗口都关闭时退出，但在 macOS 上除外。在 macOS 上，应用程序及其菜单栏保持活动状态，直到用户使用 Cmd + Q 显式退出。
 app.on('window-all-closed', () => {
@@ -112,14 +138,6 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0)
     createWindow()
 })
-
-// 当接收到 quit-app 信号时
-ipcMain.on('quit-app', () => {
-  app.quit()
-  win = null
-})
-
-setupIpcHandlers()
 
 // 等待应用程序准备就绪后创建窗口
 app.whenReady().then(createWindow)

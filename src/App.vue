@@ -1,31 +1,41 @@
 <script setup lang="ts">
-const collapsed = ref(false)
+import { useAppStore } from './stores'
+
+const appStroe = useAppStore()
+const { isMenuCollapsed } = storeToRefs(appStroe)
 </script>
 
 <template>
-  <Provider wh-full>
-    <n-layout has-sider wh-full>
-      <n-layout-sider
-        bordered
-        collapse-mode="width"
-        :collapsed-width="64"
-        :width="240"
-        :collapsed="collapsed"
-        show-trigger
-        @collapse="collapsed = true"
-        @expand="collapsed = false"
+  <Provider>
+    <n-layout hfull>
+      <n-layout-header bordered>
+        <MainNav />
+      </n-layout-header>
+      <n-layout
+        has-sider wh-full position="absolute"
+        style="top:61px;"
       >
-        <Menu :collapsed="collapsed" />
-      </n-layout-sider>
-      <n-layout>
-        <n-layout-header>颐和园路</n-layout-header>
-        <n-layout-content content-style="padding: 24px;">
-          <RouterView />
-        </n-layout-content>
-        <n-layout-footer>成府路</n-layout-footer>
+        <n-layout-sider
+          bordered
+          collapse-mode="width"
+          show-trigger="bar"
+          :native-scrollbar="false"
+          :collapsed-width="64"
+          :width="240"
+          :collapsed="isMenuCollapsed"
+          @collapse="isMenuCollapsed = true"
+          @expand="isMenuCollapsed = false"
+        >
+          <Menu />
+        </n-layout-sider>
+        <n-layout :native-scrollbar="false" embedded p6>
+          <RouterView v-slot="{ Component }">
+            <Transition name="run" mode="out-in">
+              <component :is="Component" />
+            </Transition>
+          </RouterView>
+        </n-layout>
       </n-layout>
     </n-layout>
   </Provider>
 </template>
-
-<style scoped></style>
