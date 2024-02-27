@@ -39,7 +39,7 @@
     "prettier": "^3.2.4",
     "terser": "^5.27.0",
     "typescript": "^5.2.2",
-    "unocss": "^0.58.4",
+    "unocss": "^0.58.5",
     "unplugin-auto-import": "^0.17.3",
     "unplugin-vue-components": "^0.26.0",
     "unplugin-vue-router": "^0.7.0",
