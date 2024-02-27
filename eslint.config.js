@@ -9,6 +9,7 @@ module.exports = antfu(
     rules: {
       'node/prefer-global/process': 'off',
       'no-console': 'off',
+      'vue/no-unused-refs': 'off',
     },
   },
 )
