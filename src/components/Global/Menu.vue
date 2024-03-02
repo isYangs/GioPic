@@ -7,7 +7,6 @@ const appStroe = useAppStore()
 const { isMenuCollapsed } = storeToRefs(appStroe)
 const router = useRouter()
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
-console.log(router.options.routes)
 
 watch(
   () => router.currentRoute.value.path,
