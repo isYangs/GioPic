@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NButton, NInput, NInputGroup, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import { getLinkTypeOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 
 const appStore = useAppStore()
@@ -22,12 +23,12 @@ const tabsOptions = [
         name: '深浅模式',
         component: () => {
           return h(NSelect, {
-            'value': themeType.value,
-            'onUpdate:value': (val: 'dark' | 'light') => {
+            value: themeType.value,
+            onUpdateValue: (val: 'dark' | 'light') => {
               themeAuto.value = false
               themeType.value = val
             },
-            'options': [
+            options: [
               { label: '浅色模式', value: 'light' },
               { label: '深色模式', value: 'dark' },
             ],
@@ -38,9 +39,9 @@ const tabsOptions = [
         name: '深浅模式是否跟随系统',
         component: () => {
           return h(NSwitch, {
-            'value': themeAuto.value,
-            'round': false,
-            'onUpdate:value': (val: boolean) => {
+            value: themeAuto.value,
+            round: false,
+            onUpdateValue: (val: boolean) => {
               themeAuto.value = val
               if (val)
                 themeType.value = osThemeRef.value
@@ -51,23 +52,16 @@ const tabsOptions = [
       {
         name: '链接展示格式',
         tip: '图片上传后要展示的链接格式',
-        width: 'w100',
+        width: 400,
         component: () => {
           return h(NSelect, {
-            'value': imgLinkFormatVal.value,
-            'placeholder': '请选择要展示什么格式的链接',
-            'multiple': true,
-            'onUpdate:value': (val) => {
+            value: imgLinkFormatVal.value,
+            placeholder: '请选择要展示什么格式的链接',
+            multiple: true,
+            onUpdateValue: (val) => {
               imgLinkFormatVal.value = val
             },
-            'options': [
-              { label: 'URL', value: 'url' },
-              { label: 'HTML', value: 'html' },
-              { label: 'BBCode', value: 'bbcode' },
-              { label: 'Markdown', value: 'markdown' },
-              { label: 'Markdown With Link', value: 'markdown_with_link' },
-              { label: 'Thumbnail URL', value: 'thumbnail_url' },
-            ],
+            options: getLinkTypeOptions(),
           })
         },
       },
@@ -80,12 +74,12 @@ const tabsOptions = [
         name: '关闭程序时',
         component: () => {
           return h(NSelect, {
-            'value': appCloseType.value,
-            'disabled': appCloseTip.value,
-            'onUpdate:value': (val: 'hide' | 'close') => {
+            value: appCloseType.value,
+            disabled: appCloseTip.value,
+            onUpdateValue: (val: 'hide' | 'close') => {
               appCloseType.value = val
             },
-            'options': [
+            options: [
               { label: '最小化到任务栏', value: 'hide' },
               { label: '直接退出', value: 'close' },
             ],
@@ -96,9 +90,9 @@ const tabsOptions = [
         name: '每次关闭程序时都询问',
         component: () => {
           return h(NSwitch, {
-            'value': appCloseTip.value,
-            'round': false,
-            'onUpdate:value': (val: boolean) => {
+            value: appCloseTip.value,
+            round: false,
+            onUpdateValue: (val: boolean) => {
               appCloseTip.value = val
             },
           })
@@ -106,6 +100,7 @@ const tabsOptions = [
       },
       {
         name: '上传记录文件存储路径',
+        width: 400,
         component: () => {
           return h(NInputGroup, {}, {
             default: () => [

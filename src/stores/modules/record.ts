@@ -6,20 +6,12 @@ interface State {
   data: UploadData[]
 }
 
-// 上传的文件数据，与接口返回的数据相同
+// 接口返回的文件数据
 interface BaseData {
   key?: string
-  name?: string
-  pathname?: string
-  origin_name?: string
   size?: number
   mimetype?: string
-  extension?: string
-  md5?: string
-  sha1?: string
-  links?: {
-    [key: string]: string
-  }
+  url?: string
 }
 
 export interface UploadData extends BaseData {
@@ -30,13 +22,6 @@ export interface UploadData extends BaseData {
   time?: string // 上传时间
   isPublic?: number // 是否公开
   strategies?: number // 上传策略
-}
-
-export interface RecordData extends BaseData {
-  id: string
-  time: string
-  isPublic: boolean
-  strategies: number
 }
 
 export const useUploadRecordStore = defineStore('recordStore', () => {
@@ -80,15 +65,14 @@ export const useUploadRecordStore = defineStore('recordStore', () => {
   function getRecord() {
     const appStore = useAppStore()
     const { recordSavePath } = storeToRefs(appStore)
+
     state.data
-      .filter(item => item.links && item.key)
-      .forEach((item: UploadData) => {
-        const { key = '', time = '', isPublic = false, strategies = 0, ...rest } = item
-        const obj: RecordData = { id: key, time, isPublic: Boolean(isPublic), strategies, ...rest }
-        const newLog = JSON.stringify(obj)
-        window.ipcRenderer.send('create-ur-file', newLog, recordSavePath.value)
+      .filter(item => item.url && item.key)
+      .forEach(({ key, time, size, mimetype, url }: UploadData) => {
+        window.ipcRenderer.send('create-ur-file', JSON.stringify({ key, time, size, mimetype, url }), recordSavePath.value)
       })
   }
+  
   return {
     ...toRefs(state),
     setData,

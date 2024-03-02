@@ -4,12 +4,11 @@ import type { UploadCustomRequestOptions } from 'naive-ui'
 import { useUploadRecordStore } from '~/stores'
 
 const uploadRecordStore = useUploadRecordStore()
-const message = useMessage()
 
 // 上传文件，将文件信息存储到store中
 async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
   if (!file.file) {
-    message.error('文件不存在')
+    window.$message.error('文件不存在')
     return
   }
 

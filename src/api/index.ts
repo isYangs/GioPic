@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios'
-import request from '~/utils/request'
+import { request } from '~/utils'
 
 interface UploadData {
   file: File
@@ -27,49 +27,26 @@ function createRequest(url: string, token?: string, customHeaders?: Record<strin
 
 const requestData = {
   /**
-   * 从指定的 URL 获取 API 地址的标题。
+   * 兰空获取策略
    *
-   * @param {string} url - API 地址的 URL。
-   * @returns {Promise} 返回一个 Promise，当 API 地址的标题获取成功时，Promise 将被解析。
+   * @param url - 图床API地址，例如传入appStore中的apiUrl。
+   * @param token - 用于身份验证的 token，例如传入appStore中的token。
+   * @returns 返回一个 Promise，当策略获取成功时，Promise 将被解析。
    */
-  getApiUrlTitle: (url: string) => {
-    const req = createRequest(url)
-    return req('', 'get')
-  },
-
-  /**
-   * 从指定的 URL 获取用户的个人信息。
-   *
-   * @param {string} url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param {string} token - 用于身份验证的 token，例如传入appStore中的token。
-   * @returns {Promise} 返回一个 Promise，当用户信息获取成功时，Promise 将被解析。
-   */
-  getUserProfile: (url: string, token: string) => {
-    const req = createRequest(url, token)
-    return req('/api/v1/profile', 'get')
-  },
-
-  /**
-   * 从指定的 URL 获取策略。
-   *
-   * @param {string} url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param {string} token - 用于身份验证的 token，例如传入appStore中的token。
-   * @returns {Promise} 返回一个 Promise，当策略获取成功时，Promise 将被解析。
-   */
-  getStrategies: (url: string, token: string) => {
+  getLskyStrategies: (url: string, token: string) => {
     const req = createRequest(url, token)
     return req('/api/v1/strategies', 'get')
   },
 
   /**
-   * 上传图片
+   * 兰空上传图片
    *
-   * @param {string} url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param {string} token - 用于身份验证的 token，例如传入appStore中的token。
-   * @param {UploadData} data - 接收一个对象，对象中传入上传的图片，权限，策略id，相册id，过期时间。
-   * @returns {Promise} 返回一个Promise对象，表示异步上传操作
+   * @param url - 图床API地址，例如传入appStore中的apiUrl。
+   * @param token - 用于身份验证的 token，例如传入appStore中的token。
+   * @param data - 接收一个对象，对象中传入上传的图片，权限，策略id，相册id，过期时间。
+   * @returns 返回一个Promise对象，表示异步上传操作
    */
-  uploadImage: (url: string, token: string, data: UploadData) => {
+  uploadLskyImage: (url: string, token: string, data: UploadData) => {
     const req = createRequest(url, token, {
       'Content-Type': 'multipart/form-data',
     })

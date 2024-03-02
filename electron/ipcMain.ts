@@ -135,4 +135,10 @@ export function setupIpcMain(win: BrowserWindow) {
 
     event.reply('delete-ur-file-status', true)
   })
+
+  // 根据当前用户的操作系统，设置记录文件的默认保存路径
+  ipcMain.on('get-default-ur-file-path', (event) => {
+    const defaultPath = app.getPath('documents')
+    event.reply('get-default-ur-file-path-reply', defaultPath)
+  })
 }

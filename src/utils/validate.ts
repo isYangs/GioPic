@@ -16,31 +16,16 @@ export function validateUrl(url: string) {
 }
 
 /**
- * 验证Token是否有效
+ * 验证兰空Token是否有效
  *
  * @param token - 要验证的Token
  * @returns 如果Token有效，返回true；否则返回错误信息
  */
-export function validateToken(token: string) {
+export function validateLskyToken(token: string) {
   if (!token)
     return new Error('Token不能为空')
   else if (!tokenPattern.test(token))
     return new Error('Token格式不正确，请参考示例格式填写！')
-
-  return true
-}
-
-/**
- * 验证背景图URL是否合法。
- *
- * @param bgImgUrl - 需要验证的背景图 URL。
- * @returns 如果URL合法，返回true；否则返回错误信息
- */
-export function validateBgImgUrl(bgImgUrl: string) {
-  if (!bgImgUrl)
-    return new Error('背景图地址不能为空')
-  else if (!urlPattern.test(bgImgUrl))
-    return new Error('请输入正确的URL地址，并且保证图片可以正常访问')
 
   return true
 }

@@ -10,6 +10,10 @@ body,
   overflow: hidden;
 }
 
+img {
+  transform: translate3d(0, 0, 0);
+}
+
 /*
 -------------------------
     NaiveUI 组件样式处理 
@@ -62,6 +66,7 @@ body,
 .run-enter-active {
   animation: lightSpeedInRight .4s linear 0s;
 }
+
 .run-leave-active {
   animation: lightSpeedOutRight .2s linear 0s;
 }

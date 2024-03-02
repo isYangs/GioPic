@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
-import { convertFileSize } from '~/utils/convert'
+import { convertFileSize } from '~/utils'
 
 export interface State {
   name: string | null

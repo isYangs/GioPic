@@ -55,6 +55,20 @@ const menuOptions = computed((): MenuOption[] => [
         RouterLink,
         {
           to: {
+            name: '/Images/',
+          },
+        },
+        { default: () => '图片广场' },
+      ),
+    key: '/Images',
+    icon: renderIcon('i-ic-baseline-photo-library'),
+  },
+  {
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
             name: '/Setting/',
           },
         },
