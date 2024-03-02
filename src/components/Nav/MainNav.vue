@@ -40,7 +40,7 @@ function handleThemeChange(type: 'light' | 'dark') {
           style="--n-color: transparent"
         />
       </div>
-      <h1 v-if="!isMenuCollapsed" text-2xl font-600 font-sans style="-webkit-app-region: no-drag">
+      <h1 v-if="!isMenuCollapsed" text-2xl font-600 style="-webkit-app-region: no-drag">
         GioPic
       </h1>
     </div>
