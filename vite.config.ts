@@ -59,10 +59,10 @@ export default defineConfig({
     }),
     electron({
       main: {
-        entry: 'electron/main.ts',
+        entry: 'electron/main/index.ts',
       },
       preload: {
-        input: path.join(__dirname, 'electron/preload.ts'),
+        input: path.join(__dirname, 'electron/preload/index.ts'),
       },
       renderer: {},
     }),

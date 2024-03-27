@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import type { BrowserWindow } from 'electron'
 import { app, dialog, ipcMain } from 'electron'
-import DataBase from './db'
+import DataBase from '../../db'
 
 export function setupIpcMain(win: BrowserWindow) {
   ipcMain.on('window-min', () => {

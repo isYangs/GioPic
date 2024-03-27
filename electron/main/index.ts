@@ -1,8 +1,8 @@
 import path from 'node:path'
 import type { MenuItemConstructorOptions } from 'electron'
 import { BrowserWindow, Menu, Tray, app, nativeImage, shell } from 'electron'
-import { fixElectronCors } from './cors'
-import { setupIpcMain } from './ipcMain'
+import { fixElectronCors } from './utils/cors'
+import { setupIpcMain } from './utils/ipcMain'
 
 // The built directory structure
 //
