@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 dist-electron
+dist-native
 release
 *.local
 
@@ -20,6 +21,7 @@ release
 !.vscode/settings.json
 .idea
 .DS_Store
+.env
 *.suo
 *.ntvs*
 *.njsproj

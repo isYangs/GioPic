@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
+    "rebuild": "electron rebuild.js",
+    "postinstall": "npm run rebuild",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -14,6 +16,7 @@
     "@vueuse/core": "^10.9.0",
     "animate.css": "^4.1.1",
     "axios": "^1.6.8",
+    "better-sqlite3": "^9.4.3",
     "date-fns": "^3.6.0",
     "p-limit": "^5.0.0",
     "pinia": "^2.1.7",
@@ -24,6 +27,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.11.1",
     "@iconify/json": "^2.2.196",
+    "@types/better-sqlite3": "^7.6.9",
     "@unocss/eslint-config": "^0.58.7",
     "@unocss/eslint-plugin": "^0.58.7",
     "@unocss/preset-rem-to-px": "^0.58.7",
