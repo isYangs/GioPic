@@ -40,7 +40,6 @@
     "eslint-plugin-format": "^0.1.0",
     "naive-ui": "^2.38.1",
     "prettier": "^3.2.5",
-    "terser": "^5.30.0",
     "typescript": "^5.4.3",
     "unocss": "^0.58.7",
     "unplugin-auto-import": "^0.17.5",

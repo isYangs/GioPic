@@ -82,9 +82,6 @@ devDependencies:
   prettier:
     specifier: ^3.2.5
     version: 3.2.5
-  terser:
-    specifier: ^5.30.0
-    version: 5.30.0
   typescript:
     specifier: ^5.4.3
     version: 5.4.3
@@ -105,7 +102,7 @@ devDependencies:
     version: 0.0.3
   vite:
     specifier: ^4.5.3
-    version: 4.5.3(terser@5.30.0)
+    version: 4.5.3
   vite-plugin-electron:
     specifier: ^0.14.1
     version: 0.14.1(vite-plugin-electron-renderer@0.14.5)
@@ -1049,13 +1046,6 @@ packages:
     engines: {node: '>=6.0.0'}
     dev: true
 
-  /@jridgewell/source-map@0.3.6:
-    resolution: {integrity: sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==}
-    dependencies:
-      '@jridgewell/gen-mapping': 0.3.5
-      '@jridgewell/trace-mapping': 0.3.25
-    dev: true
-
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
 
@@ -1632,7 +1622,7 @@ packages:
       '@unocss/core': 0.58.7
       '@unocss/reset': 0.58.7
       '@unocss/vite': 0.58.7(vite@4.5.3)
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     transitivePeerDependencies:
       - rollup
     dev: true
@@ -1862,7 +1852,7 @@ packages:
       chokidar: 3.6.0
       fast-glob: 3.3.2
       magic-string: 0.30.8
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     transitivePeerDependencies:
       - rollup
     dev: true
@@ -1878,7 +1868,7 @@ packages:
       vite: ^4.0.0 || ^5.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
       vue: 3.4.21(typescript@5.4.3)
     dev: true
 
@@ -2692,10 +2682,6 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
-
-  /commander@2.20.3:
-    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
-    dev: true
 
   /commander@5.1.0:
     resolution: {integrity: sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==}
@@ -5837,17 +5823,6 @@ packages:
       fs-extra: 10.1.0
     dev: true
 
-  /terser@5.30.0:
-    resolution: {integrity: sha512-Y/SblUl5kEyEFzhMAQdsxVHh+utAxd4IuRNJzKywY/4uzSogh3G219jqbDDxYu4MXO9CzY3tSEqmZvW6AoEDJw==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      '@jridgewell/source-map': 0.3.6
-      acorn: 8.11.3
-      commander: 2.20.3
-      source-map-support: 0.5.21
-    dev: true
-
   /text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
     dev: true
@@ -6053,7 +6028,7 @@ packages:
       '@unocss/transformer-directives': 0.58.7
       '@unocss/transformer-variant-group': 0.58.7
       '@unocss/vite': 0.58.7(vite@4.5.3)
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     transitivePeerDependencies:
       - postcss
       - rollup
@@ -6211,7 +6186,7 @@ packages:
     peerDependencies:
       vite: ^2.6.0 || ^3.0.0 || ^4.0.0 || ^5.0.0-0
     dependencies:
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     dev: true
 
   /vite-plugin-electron-renderer@0.14.5:
@@ -6248,7 +6223,7 @@ packages:
       perfect-debounce: 1.0.0
       picocolors: 1.0.0
       sirv: 2.0.4
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     transitivePeerDependencies:
       - rollup
       - supports-color
@@ -6265,7 +6240,7 @@ packages:
       '@vue/devtools-shared': 7.0.24
       execa: 8.0.1
       sirv: 2.0.4
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
       vite-plugin-inspect: 0.8.3(vite@4.5.3)
       vite-plugin-vue-inspector: 4.0.2(vite@4.5.3)
     transitivePeerDependencies:
@@ -6289,12 +6264,12 @@ packages:
       '@vue/compiler-dom': 3.4.21
       kolorist: 1.8.0
       magic-string: 0.30.8
-      vite: 4.5.3(terser@5.30.0)
+      vite: 4.5.3
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /vite@4.5.3(terser@5.30.0):
+  /vite@4.5.3:
     resolution: {integrity: sha512-kQL23kMeX92v3ph7IauVkXkikdDRsYMGTVl5KY2E9OY4ONLvkHf04MDTbnfo6NKxZiDLWzVpP5oTa8hQD8U3dg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -6325,7 +6300,6 @@ packages:
       esbuild: 0.18.20
       postcss: 8.4.38
       rollup: 3.29.4
-      terser: 5.30.0
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
