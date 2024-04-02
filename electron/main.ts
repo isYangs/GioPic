@@ -99,8 +99,8 @@ function createWindow() {
   if (NODE_ENV === 'development')
     win.webContents.openDevTools()
 
-  setupIpcMain(win)
   initDB()
+  setupIpcMain(win)
 }
 
 app.on('ready', () => {

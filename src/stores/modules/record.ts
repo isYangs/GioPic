@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import type { FileInfo } from 'naive-ui/es/upload/src/interface'
-import { useAppStore } from '~/stores'
 
 interface State {
   data: UploadData[]
@@ -24,7 +23,7 @@ export interface UploadData extends BaseData {
   strategies?: number // 上传策略
 }
 
-export const useUploadRecordStore = defineStore('recordStore', () => {
+export const useUploadDataStore = defineStore('uploadDataStore', () => {
   const state: State = reactive({
     data: [], // 上传的文件数组对象（在FileInfo中包含File对象）
   })
@@ -62,21 +61,18 @@ export const useUploadRecordStore = defineStore('recordStore', () => {
   /**
    * 获取记录并发送到主进程以创建上传记录文件。
    */
-  function getRecord() {
-    const appStore = useAppStore()
-    const { recordSavePath } = storeToRefs(appStore)
-
+  function getUploadData() {
     state.data
       .filter(item => item.url && item.key)
       .forEach(({ key, time, size, mimetype, url }: UploadData) => {
-        window.ipcRenderer.send('create-ur-file', JSON.stringify({ key, time, size, mimetype, url }), recordSavePath.value)
+        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, time, size, mimetype, url }))
       })
   }
-  
+
   return {
     ...toRefs(state),
     setData,
     delData,
-    getRecord,
+    getUploadData,
   }
 })

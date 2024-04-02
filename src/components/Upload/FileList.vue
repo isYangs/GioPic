@@ -4,14 +4,14 @@ import pLimit from 'p-limit'
 import { convertFileSize, getFormatLinkType } from '~/utils'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
-import { useAppStore, useLskyStore, useUploadRecordStore } from '~/stores'
+import { useAppStore, useLskyStore, useUploadDataStore } from '~/stores'
 
 const appStore = useAppStore()
 const lskyStore = useLskyStore()
-const uploadRecordStore = useUploadRecordStore()
+const uploadDataStore = useUploadDataStore()
 const { imgLinkFormatVal, isImgListDelDialog } = storeToRefs(appStore)
 const { api, token, strategiesVal } = storeToRefs(lskyStore)
-const { data } = storeToRefs(uploadRecordStore)
+const { data } = storeToRefs(uploadDataStore)
 const imgLinkTabsKey = ref(0)
 const isAllPublic = ref(1)
 const isUpload = ref(false)
@@ -33,7 +33,7 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
     return
   }
 
-  uploadRecordStore.setData({ isLoading: true }, index)
+  uploadDataStore.setData({ isLoading: true }, index)
 
   try {
     const { data, status } = await requestData.uploadLskyImage(api.value, token.value, {
@@ -44,19 +44,19 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
 
     if (status !== 200) {
       window.$message.error('上传失败')
-      uploadRecordStore.setData({ uploadFailed: true }, index)
+      uploadDataStore.setData({ uploadFailed: true }, index)
       return
     }
 
     if (!data.status) {
       window.$message.error(data.message)
-      uploadRecordStore.setData({ uploadFailed: true }, index)
+      uploadDataStore.setData({ uploadFailed: true }, index)
       return
     }
 
     const { key, size, mimetype, links } = data.data
 
-    uploadRecordStore.setData(
+    uploadDataStore.setData(
       {
         key,
         size,
@@ -74,19 +74,19 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
   }
   catch (error) {
     window.$message.error('上传失败')
-    uploadRecordStore.setData({ uploadFailed: true }, index)
+    uploadDataStore.setData({ uploadFailed: true }, index)
   }
   finally {
-    uploadRecordStore.setData({ isLoading: false }, index)
+    uploadDataStore.setData({ isLoading: false }, index)
     if (isGetRecord)
-      uploadRecordStore.getRecord()
+    uploadDataStore.getUploadData()
   }
 }
 
 // 当接收到上传记录文件状态时，进行处理
-window.ipcRenderer.on('create-ur-file-status', (_e, status) => {
+window.ipcRenderer.on('create-uploadData-status', (_e, status) => {
   if (!status)
-    window.$message.error('创建记录文件失败')
+    window.$message.error('上传数据写入数据库失败')
 })
 
 // 全部上传方法
@@ -130,7 +130,7 @@ async function handleAllUpload() {
           // 检查是否所有的上传任务都已完成
           if (uploadingTasks.size === 0) {
             isUpload.value = false
-            uploadRecordStore.getRecord()
+            uploadDataStore.getUploadData()
           }
         })
         .catch((error) => {
@@ -154,7 +154,7 @@ async function handleAllUpload() {
 // 删除图片方法
 function handleClose(index: number) {
   if (isImgListDelDialog.value) {
-    uploadRecordStore.delData(index)
+    uploadDataStore.delData(index)
     return
   }
 
@@ -195,7 +195,7 @@ function handleClose(index: number) {
               type: 'warning',
               size: 'small',
               onClick: () => {
-                uploadRecordStore.delData(index)
+                uploadDataStore.delData(index)
                 n.destroy()
               },
             },
@@ -211,7 +211,7 @@ function handleClose(index: number) {
 
 // 清空列表方法
 function handleAllClear() {
-  uploadRecordStore.delData()
+  uploadDataStore.delData()
 }
 
 // 复制全部URL方法

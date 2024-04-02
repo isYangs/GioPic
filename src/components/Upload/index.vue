@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5'
 import type { UploadCustomRequestOptions } from 'naive-ui'
-import { useUploadRecordStore } from '~/stores'
+import { useUploadDataStore } from '~/stores'
 
-const uploadRecordStore = useUploadRecordStore()
+const uploadDataStore = useUploadDataStore()
 
 // 上传文件，将文件信息存储到store中
 async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
@@ -14,7 +14,7 @@ async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
 
   const fileUrl = URL.createObjectURL(file.file)
 
-  uploadRecordStore.setData({
+  uploadDataStore.setData({
     fileInfo: { ...file },
     fileUrl,
     isLoading: false,

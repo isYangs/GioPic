@@ -1,16 +1,15 @@
-type Tables = 'db_info'
+type Tables = 'upload_data'
 
 const tables = new Map<Tables, string>()
 
-tables.set('db_info', `
-  CREATE TABLE "db_info" (
-    "id" INTEGER NOT NULL UNIQUE,
-    "field_name" TEXT,
-    "field_value" TEXT,
-    PRIMARY KEY("id" AUTOINCREMENT)
+tables.set('upload_data', `
+  CREATE TABLE IF NOT EXISTS "upload_data" (
+    "key" TEXT NOT NULL PRIMARY KEY,
+    "time" TEXT NOT NULL,
+    "mimetype" TEXT NOT NULL,
+    "size" REAL NOT NULL,
+    "url" TEXT NOT NULL
   );
 `)
 
 export default tables
-
-export const DB_VERSION = '1'

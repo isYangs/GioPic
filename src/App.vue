@@ -3,15 +3,7 @@ import { useAppStore } from './stores'
 
 const appStroe = useAppStore()
 // const router = useRouter()
-const { isMenuCollapsed, recordSavePath } = storeToRefs(appStroe)
-
-window.ipcRenderer.on('get-default-ur-file-path-reply', (_e, path) => {
-  recordSavePath.value = path
-})
-
-// 设置默认的上传记录文件存储路径
-if (!recordSavePath.value)
-  window.ipcRenderer.send('get-default-ur-file-path')
+const { isMenuCollapsed } = storeToRefs(appStroe)
 
 // router.beforeEach((to, from, next) => {
 

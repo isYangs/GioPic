@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NInput, NInputGroup, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import { getLinkTypeOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 
@@ -10,7 +10,6 @@ const {
   themeType,
   themeAuto,
   imgLinkFormatVal,
-  recordSavePath,
 } = storeToRefs(appStore)
 const osThemeRef = useOsTheme()
 const shortcutKeys = ref('')
@@ -98,28 +97,6 @@ const tabsOptions = [
           })
         },
       },
-      {
-        name: '上传记录文件存储路径',
-        width: 400,
-        component: () => {
-          return h(NInputGroup, {}, {
-            default: () => [
-              h(NInput, {
-                value: recordSavePath.value,
-                placeholder: '请点击选择上传记录文件存储路径',
-                readonly: true,
-                onClick: handleSelectPath,
-              }),
-              h(NButton, {
-                ghost: true,
-                onClick: handleSelectPath,
-              }, {
-                default: () => '选择路径',
-              }),
-            ],
-          })
-        },
-      },
     ],
   },
   {
@@ -157,13 +134,6 @@ const tabsOptions = [
     ],
   },
 ]
-
-function handleSelectPath() {
-  window.ipcRenderer.send('open-directory-dialog', 'openDirectory')
-  window.ipcRenderer.on('selectedPath', (_e, files) => {
-    recordSavePath.value = files
-  })
-}
 </script>
 
 <template>
