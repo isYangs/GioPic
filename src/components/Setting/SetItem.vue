@@ -1,22 +1,12 @@
 <script setup lang="ts">
-import type { FormInst, FormRules } from 'naive-ui'
-import type { VNode } from 'vue'
+import type { FormInst } from 'naive-ui'
+import type { TabOption } from '~/types'
 
 export interface SetItem {
   formValidation: (onSuccess: () => void, onError: () => void) => void
 }
 
-defineProps<{
-  title: string
-  items: {
-    name: string
-    path?: string
-    tip?: string
-    width?: boolean | number
-    component: () => VNode
-  }[]
-  rules?: FormRules
-}>()
+defineProps<TabOption>()
 
 const setFormRef = ref<FormInst | null>(null)
 
@@ -58,8 +48,17 @@ defineExpose({ formValidation })
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">
       <n-card v-for="(item, index) in items" :key="index" mb3 wfull rounded-2 class="set-item" :content-style="{ padding: '0 20px' }">
-        <div flex="~ col 1" pr font-500>
-          {{ item.name }}
+        <div flex="~ col 1" pr font-500 text="3.8" tracking-wider>
+          <div flex="~" items="center">
+            {{ item.name }}
+            <n-tag v-if="item.isDev" :bordered="false" round size="small" type="warning" ml1>
+              开发中
+              <template #icon>
+                <div i-material-symbols-code />
+              </template>
+            </n-tag>
+          </div>
+
           <n-text v-if="item.tip" text-xs op80>
             {{ item.tip }}
           </n-text>

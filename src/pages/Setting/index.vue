@@ -2,6 +2,7 @@
 import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import { getLinkTypeOptions } from '~/utils'
 import { useAppStore } from '~/stores'
+import type { TabOption } from '~/types'
 
 const appStore = useAppStore()
 const {
@@ -14,7 +15,7 @@ const {
 const osThemeRef = useOsTheme()
 const shortcutKeys = ref('')
 
-const tabsOptions = [
+const tabsOptions: TabOption[] = [
   {
     title: '常规',
     items: [
@@ -104,6 +105,7 @@ const tabsOptions = [
     items: [
       {
         name: '上传图片',
+        isDev: true,
         component: () => {
           return h(NInput, {
             value: shortcutKeys.value,
