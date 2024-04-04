@@ -33,14 +33,12 @@ const { isMenuCollapsed } = storeToRefs(appStroe)
         >
           <Menu />
         </n-layout-sider>
-        <n-layout :native-scrollbar="false" class="hscreen" embedded>
-          <n-scrollbar style="height: calc(100vh - 60px);">
-            <RouterView v-slot="{ Component }" wh-full px6 pt6>
-              <Transition name="run" mode="out-in">
-                <component :is="Component" />
-              </Transition>
-            </RouterView>
-          </n-scrollbar>
+        <n-layout :native-scrollbar="false" embedded hscreen>
+          <RouterView v-slot="{ Component }" wh-full px6 pt6>
+            <Transition name="run" mode="out-in">
+              <component :is="Component" />
+            </Transition>
+          </RouterView>
         </n-layout>
       </n-layout>
     </n-layout>
