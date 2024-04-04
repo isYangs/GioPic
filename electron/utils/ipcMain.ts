@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import { app, ipcMain } from 'electron'
-import { insertUploadData } from '../db/modules'
+import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 
 export function setupIpcMain(win: BrowserWindow) {
   ipcMain.on('window-min', () => {
@@ -34,5 +34,15 @@ export function setupIpcMain(win: BrowserWindow) {
     catch (error) {
       event.reply('create-uploadData-status', false)
     }
+  })
+
+  ipcMain.on('get-uploadData', (event) => {
+    const data = queryUploadData()
+    event.reply('get-uploadData-status', data)
+  })
+
+  ipcMain.on('delete-uploadData', (event, key) => {
+    deleteUploadData(key)
+    event.reply('delete-uploadData-status', true)
   })
 }
