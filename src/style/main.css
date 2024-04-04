@@ -58,6 +58,10 @@ img {
   display: none;
 }
 
+.n-scrollbar-content{
+  height: 100%;
+}
+
 /*
 -------------------------
     过渡动画样式处理
