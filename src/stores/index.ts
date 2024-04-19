@@ -1,10 +1,10 @@
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 
-export * from './modules/app'
-export * from './modules/app/lsky'
-export * from './modules/user'
-export * from './modules/record'
+export * from './app'
+export * from './storageApp'
+export * from './record'
+export * from './step'
 
 const store = createPinia()
 store.use(

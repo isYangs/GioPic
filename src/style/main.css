@@ -62,15 +62,26 @@ img {
   height: 100%;
 }
 
+.n-message-container {
+  bottom: 30px !important;
+}
+
+.n-message-container .n-message-wrapper .n-message {
+  border-radius: 12px;
+}
+
 /*
 -------------------------
     过渡动画样式处理
 -------------------------
 */
-.run-enter-active {
-  animation: lightSpeedInRight .4s linear 0s;
+.router-enter-active,
+.router-leave-active {
+  transition: all 0.2s ease;
 }
 
-.run-leave-active {
-  animation: lightSpeedOutRight .2s linear 0s;
+.router-enter-from,
+.router-leave-to {
+  opacity: 0;
+  transform: translateX(10px);
 }

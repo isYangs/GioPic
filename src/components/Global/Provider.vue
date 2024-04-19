@@ -10,9 +10,10 @@ const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
 const lightThemeOverrides: GlobalThemeOverrides = {
   common: {
-    primaryColor: '#333639',
-    primaryColorHover: '#333639',
-    primaryColorSuppl: '#333639',
+    primaryColor: 'rgb(51,54,57)',
+    primaryColorHover: 'rgb(51,54,57)',
+    primaryColorSuppl: 'rgb(51,54,57)',
+    primaryColorPressed: 'rgb(149,158,168)',
     modalColor: 'rgb(250,250,252)',
   },
   Menu: {
@@ -34,6 +35,7 @@ const darkThemeOverrides: GlobalThemeOverrides = {
     primaryColor: 'rgba(255,255,255,.82)',
     primaryColorHover: 'rgba(255,255,255,.82)',
     primaryColorSuppl: 'rgba(255,255,255,.82)',
+    primaryColorPressed: 'rgba(255,255,255,.26)',
   },
   Menu: {
     itemColorActive: 'rgb(31,40,50)',
@@ -93,7 +95,7 @@ watch(osThemeRef, (val) => {
     <n-loading-bar-provider>
       <n-dialog-provider>
         <n-notification-provider>
-          <n-message-provider :max="1">
+          <n-message-provider :max="1" placement="bottom">
             <slot />
             <NaiveProviderContext />
           </n-message-provider>

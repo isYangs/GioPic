@@ -33,7 +33,7 @@ const requestData = {
    * @param token - 用于身份验证的 token，例如传入appStore中的token。
    * @returns 返回一个 Promise，当策略获取成功时，Promise 将被解析。
    */
-  getLskyStrategies: (url: string, token: string) => {
+  getLskyProStrategies: (url: string, token: string) => {
     const req = createRequest(url, token)
     return req('/api/v1/strategies', 'get')
   },

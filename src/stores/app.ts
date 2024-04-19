@@ -1,20 +1,15 @@
 import { defineStore } from 'pinia'
-import type { SelectGroupOption, SelectOption } from 'naive-ui'
 
 interface State {
   appCloseType: 'close' | 'hide'
-  isMenuCollapsed: boolean
   appCloseTip: boolean
-  themeType: 'light' | 'dark' | null
-  themeAuto: boolean
-  isSettingsDrawer: boolean
-  isUploadRecord: boolean
-  strategies: (SelectOption | SelectGroupOption)[]
-  strategiesVal: number | null
+  isMenuCollapsed: boolean
   imgLinkFormatVal: string[]
+  themeAuto: boolean
+  themeType: 'light' | 'dark' | null
+
   isImgListDelDialog: boolean
   isUploadRecordDelDialog: boolean
-  recordSavePath: string
   lastCallTimes: { [key: string]: number }
 }
 
@@ -28,17 +23,10 @@ export const useAppStore = defineStore(
       isMenuCollapsed: false, // 是否折叠菜单
       imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
 
-      // 系统
-      recordSavePath: '', // 记录文件存储的路径
-
       // 主题
       themeType: 'light', // 主题类型 'light' | 'dark'
       themeAuto: false, // 是否自动切换主题
 
-      isSettingsDrawer: false, // 是否显示设置面板
-      isUploadRecord: false, // 是否显示上传记录面板
-      strategies: [], // 存储策略
-      strategiesVal: null, // 存储策略
       isImgListDelDialog: false, // 是否显示图片列表删除对话框
       isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框
       lastCallTimes: {}, // 上次调用时间，用于限制函数调用频率
@@ -64,7 +52,6 @@ export const useAppStore = defineStore(
       paths: [
         'appCloseType',
         'appCloseTip',
-        'recordSavePath',
         'themeType',
         'themeAuto',
         'imgLinkFormatVal',

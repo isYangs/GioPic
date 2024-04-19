@@ -48,5 +48,5 @@ async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
       </n-p>
     </n-upload-dragger>
   </n-upload>
-  <FileList />
+  <!-- <FileList /> -->
 </template>

@@ -35,22 +35,23 @@ function handleOpneAppCloseTip() {
 }
 
 function handleAppCloseTip(type: string) {
-  if (type === 'close') {
-    if (appCloseTipCheckbox.value)
-      appCloseTip.value = false
-    appCloseType.value = 'close'
-    handleAppClose()
-  }
-  else if (type === 'hide') {
-    if (appCloseTipCheckbox.value)
-      appCloseTip.value = false
-    appCloseType.value = 'hide'
-    appCloseTipModal.value = false
-    setTimeout(handleAppHide, 500)
-  }
-  else {
-    appCloseTipModal.value = false
-    appCloseTipCheckbox.value = false
+  switch (type) {
+    case 'close':
+      if (appCloseTipCheckbox.value)
+        appCloseTip.value = false
+      appCloseType.value = 'close'
+      handleAppClose()
+      break
+    case 'hide':
+      if (appCloseTipCheckbox.value)
+        appCloseTip.value = false
+      appCloseType.value = 'hide'
+      appCloseTipModal.value = false
+      setTimeout(handleAppHide, 500)
+      break
+    default:
+      appCloseTipModal.value = false
+      appCloseTipCheckbox.value = false
   }
 }
 window.ipcRenderer.on('window-maxOrRestore-reply', (_, val) => {
@@ -100,7 +101,7 @@ window.ipcRenderer.on('window-maxOrRestore-reply', (_, val) => {
         <n-button strong secondary :focusable="false" @click="handleAppCloseTip('cancel')">
           取消
         </n-button>
-        <n-flex class="type">
+        <n-flex>
           <n-button strong secondary :focusable="false" @click="handleAppCloseTip('close')">
             退出
           </n-button>

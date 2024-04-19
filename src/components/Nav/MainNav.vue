@@ -6,26 +6,38 @@ const appStroe = useAppStore()
 const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStroe)
 const router = useRouter()
 
-const themeOptions = [
-  {
-    label: '浅色主题',
-    key: 'light',
-    icon() {
-      return h('div', { class: 'i-material-symbols-light-mode' })
-    },
-  },
-  {
-    label: '深色主题',
-    key: 'dark',
-    icon() {
-      return h('div', { class: 'i-material-symbols-dark-mode' })
-    },
-  },
-]
+function renderIcon(icon: string) {
+  return () => h('div', { class: `${icon} ` })
+}
 
-function handleThemeChange(type: 'light' | 'dark') {
-  themeAuto.value = false
-  themeType.value = type
+const themeOptions = computed(() => [
+  {
+    label: themeType.value === 'light' ? '浅色模式' : '深色模式',
+    key: 'lightTodark',
+    icon: renderIcon(themeType.value === 'light' ? 'i-material-symbols-light-mode' : 'i-material-symbols-dark-mode'),
+  },
+  {
+    label: '程序设置',
+    key: 'setting',
+    icon: renderIcon('i-material-symbols-settings-rounded'),
+  },
+])
+
+function handleThemeChange(key: string) {
+  switch (key) {
+    case 'lightTodark': {
+      themeType.value = themeType.value === 'dark' ? 'light' : 'dark'
+      window.$message.info(`已切换至${themeType.value === 'light' ? '浅色' : '深色'}模式`, { showIcon: false })
+      themeAuto.value = false
+      break
+    }
+    case 'setting': {
+      router.push('/Setting')
+      break
+    }
+    default:
+      break
+  }
 }
 </script>
 
@@ -62,7 +74,7 @@ function handleThemeChange(type: 'light' | 'dark') {
         <n-dropdown :options="themeOptions" trigger="click" @select="handleThemeChange">
           <n-button :focusable="false" quaternary h8 w8>
             <template #icon>
-              <div i-mdi-theme-light-dark />
+              <div i-icon-park-outline-setting-two />
             </template>
           </n-button>
         </n-dropdown>
