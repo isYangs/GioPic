@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { MenuItemConstructorOptions } from 'electron'
-import { BrowserWindow, Menu, Tray, app, nativeImage, shell } from 'electron'
+import { BrowserWindow, Menu, Tray, app, nativeImage, session, shell } from 'electron'
 import { init as initDB } from './db'
 import { fixElectronCors, setupIpcMain } from './utils/app'
 
@@ -13,6 +13,8 @@ import { fixElectronCors, setupIpcMain } from './utils/app'
 // │ │ ├── main.js
 // │ │ └── preload.js
 // │
+
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 // 设置环境变量
 process.env.DIST = path.join(__dirname, '../dist')
@@ -96,8 +98,12 @@ function createWindow() {
     win.loadFile(path.join(process.env.DIST, 'index.html'))
 
   // 在开发模式下打开开发者工具
-  if (NODE_ENV === 'development')
+  if (NODE_ENV === 'development') {
     win.webContents.openDevTools()
+    session.defaultSession.loadExtension(
+      path.resolve(__dirname, '../extension/VueDevTools'),
+    )
+  }
 
   initDB()
   setupIpcMain(win)
