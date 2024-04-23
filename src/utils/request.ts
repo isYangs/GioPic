@@ -1,13 +1,10 @@
 import axios from 'axios'
-import { createDiscreteApi } from 'naive-ui'
-import type { MessageType } from 'naive-ui'
 
-const { message } = createDiscreteApi(['message'])
-
-function tip(msg: string, type: MessageType = 'error') {
-  message.create(msg, {
-    duration: 5 * 1000,
-    type,
+function tip(content: string) {
+  window.$notification.error({
+    title: '请求错误',
+    duration: 5 * 10000,
+    content,
   })
 }
 

@@ -94,7 +94,7 @@ watch(osThemeRef, (val) => {
   >
     <n-loading-bar-provider>
       <n-dialog-provider>
-        <n-notification-provider>
+        <n-notification-provider :max="1" container-style="margin:3.5rem 0 0">
           <n-message-provider :max="1" placement="bottom">
             <slot />
             <NaiveProviderContext />
