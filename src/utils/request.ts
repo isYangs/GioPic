@@ -3,7 +3,7 @@ import axios from 'axios'
 function tip(content: string) {
   window.$notification.error({
     title: '请求错误',
-    duration: 5 * 10000,
+    duration: 3 * 1000,
     content,
   })
 }
