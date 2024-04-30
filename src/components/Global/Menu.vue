@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import type { MenuOption } from 'naive-ui'
 import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
-import { useAppStore } from '~/stores'
+import { useAppStore, useStorageListStore } from '~/stores'
+import { renderIcon } from '~/utils'
 
-const appStroe = useAppStore()
-const { isMenuCollapsed } = storeToRefs(appStroe)
 const router = useRouter()
+const appStroe = useAppStore()
+const storageListStore = useStorageListStore()
+const { isMenuCollapsed } = storeToRefs(appStroe)
+const { storageListMenu } = storeToRefs(storageListStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
-const createStorageRef = ref<any>(null)
+const createStorageRef = ref<null | {
+  createStorageModal: boolean
+}>(null)
 
 const userStorageList = ref({
   label: () =>
@@ -21,14 +27,34 @@ const userStorageList = ref({
         strong: true,
         secondary: true,
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
-        onClick: () => createStorageRef.value?.openCreateStorageModal(),
+        onClick: () => {
+          if (createStorageRef.value)
+            createStorageRef.value.createStorageModal = true
+        },
       }),
     ]),
   key: 'user-storage',
-  children: [],
+  children: [] as MenuOption[],
 })
 
-const menuOptions = reactive([
+userStorageList.value.children = storageListMenu.value.map((item) => {
+  return {
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            path: `/Setting/${item.id}`,
+          },
+        },
+        { default: () => item.name },
+      ),
+    key: `/Setting/${item.id}`,
+    icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+  }
+})
+
+const menuOptions = computed(() => [
   {
     type: 'group',
     label: '我的图片',
@@ -81,10 +107,6 @@ watch(
   },
 )
 
-function renderIcon(icon: string) {
-  return () => h('div', { class: `${icon} ` })
-}
-
 function updateValue(value: string) {
   router.push(value)
 }
@@ -97,10 +119,11 @@ function updateValue(value: string) {
     :collapsed="isMenuCollapsed"
     :collapsed-width="64"
     :collapsed-icon-size="22"
+    :default-expanded-keys="['user-storage']"
     :indent="22"
     @update:value="updateValue"
   />
-  <CreateStorageList :menu-options="menuOptions" ref="createStorageRef" />
+  <CreateStorageList ref="createStorageRef" />
 </template>
 
 <style scoped>

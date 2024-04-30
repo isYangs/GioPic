@@ -9,8 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     CreateStorageList: typeof import('./../components/Modal/CreateStorageList.vue')['default']
     FileList: typeof import('./../components/Upload/FileList.vue')['default']
-    Lsky: typeof import('./../components/Global/Storage/Lsky.vue')['default']
-    LskyPro: typeof import('./../components/Global/Storage/LskyPro.vue')['default']
     MainNav: typeof import('./../components/Nav/MainNav.vue')['default']
     Menu: typeof import('./../components/Global/Menu.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
@@ -19,6 +17,7 @@ declare module 'vue' {
     NCheckbox: typeof import('naive-ui')['NCheckbox']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
+    NDivider: typeof import('naive-ui')['NDivider']
     NDropdown: typeof import('naive-ui')['NDropdown']
     NEmpty: typeof import('naive-ui')['NEmpty']
     NFlex: typeof import('naive-ui')['NFlex']

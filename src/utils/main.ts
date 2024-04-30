@@ -1,3 +1,5 @@
+import { NButton, NInput, NSelect } from 'naive-ui'
+import { useStorageListStore } from '../stores/storageList'
 import type { StorageListName } from '~/types'
 
 interface LinkTypeMap { [key: string]: string }
@@ -63,4 +65,79 @@ export const selectStorageOptions = [
 export function getStorageName(val: StorageListName) {
   const option = selectStorageOptions.find(item => item.value === val)
   return option ? option.label : ''
+}
+
+export function getKeys() {
+  const storageListStore = useStorageListStore()
+  const { lskyApi, lskyToken, lskyStrategies, lskyStrategiesVal, lskyProApi, lskyProToken, lskyProStrategies, lskyProStrategiesVal } = storeToRefs(storageListStore)
+  const isLsky = storageListStore.selectStorageVal === 'lsky'
+  return {
+    apiKey: isLsky ? lskyApi : lskyProApi,
+    tokenKey: isLsky ? lskyToken : lskyProToken,
+    storageKey: isLsky ? lskyStrategies : lskyProStrategies,
+    storageValKey: isLsky ? lskyStrategiesVal : lskyProStrategiesVal,
+  }
+}
+
+export function createApiSettingOptions(name: string, tip: string, path: string, placeholder: string) {
+  const { apiKey } = getKeys()
+  return {
+    name,
+    tip,
+    width: 300,
+    path,
+    component: () => {
+      return h(NInput, {
+        value: apiKey.value,
+        placeholder,
+        onUpdateValue: (val: string) => {
+          apiKey.value = val
+        },
+      })
+    },
+  }
+}
+
+export function createTokenSettingOptions(name: string, tip: string, path: string, placeholder: string) {
+  const { tokenKey } = getKeys()
+  return {
+    name,
+    tip,
+    width: 300,
+    path,
+    component: () => {
+      return h(NInput, {
+        value: tokenKey.value,
+        placeholder,
+        onUpdateValue: (val: string) => {
+          tokenKey.value = val
+        },
+      })
+    },
+  }
+}
+
+export function createStrategiesSettingOptions(name: string, btnName: string, click: () => void) {
+  const { storageKey, storageValKey } = getKeys()
+  return {
+    name,
+    component: () => {
+      return h('div', { class: 'flex' }, {
+        default: () => [
+          h(NSelect, {
+            value: storageValKey.value,
+            onUpdateValue: (val: number) => {
+              storageValKey.value = val
+            },
+            options: storageKey.value,
+          }),
+          h(NButton, {
+            onClick: click,
+          }, {
+            default: () => btnName,
+          }),
+        ],
+      })
+    },
+  }
 }
