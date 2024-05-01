@@ -15,7 +15,7 @@ export function createQueryStatement() {
  */
 export function createInsertStatement() {
   const db = getDB()
-  return db.prepare<[GP.DB.UplaodData]>(`
+  return db.prepare<[GP.DB.UploadData]>(`
     INSERT INTO "main"."upload_data" ("key", "time", "size", "mimetype", "url")
     VALUES (@key, @time, @size, @mimetype, @url)
   `)

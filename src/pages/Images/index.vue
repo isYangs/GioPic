@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const uploadData = ref<GP.DB.UplaodData[]>([])
+const uploadData = ref<GP.DB.UploadData[]>([])
 
 onMounted(() => {
   window.ipcRenderer.send('get-uploadData')
@@ -7,7 +7,6 @@ onMounted(() => {
 
 window.ipcRenderer.on('get-uploadData-status', (_e, data) => {
   uploadData.value = data
-  console.log(uploadData)
 })
 </script>
 

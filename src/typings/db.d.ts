@@ -1,6 +1,6 @@
 declare namespace GP {
   namespace DB {
-    interface UplaodData {
+    interface UploadData {
       key: string
       time: string
       size: number

@@ -5,14 +5,14 @@ import { createDeleteStatement, createInsertStatement, createQueryStatement } fr
  */
 export function queryUploadData() {
   const queryStatement = createQueryStatement()
-  return queryStatement.all() as GP.DB.UplaodData[]
+  return queryStatement.all() as GP.DB.UploadData[]
 }
 
 /**
  * 插入上传数据
  * @param data 上传数据对象
  */
-export function insertUploadData(data: GP.DB.UplaodData) {
+export function insertUploadData(data: GP.DB.UploadData) {
   const insertStatement = createInsertStatement()
   insertStatement.run(data)
 }
