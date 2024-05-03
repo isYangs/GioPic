@@ -1,8 +1,4 @@
-:root {
-  --link-text-color: #fb923c;
-  --link-text-color-hover: #38bdf8;
-}
-
+html,
 body,
 #app {
   width: 100%;
@@ -58,10 +54,6 @@ img {
   display: none;
 }
 
-.n-scrollbar-content{
-  height: 100%;
-}
-
 .n-message-container {
   bottom: 30px !important;
 }
@@ -70,6 +62,10 @@ img {
   border-radius: 12px;
 }
 
+.n-scrollbar >.n-scrollbar-rail {
+  right: 0 !important;
+  z-index: 20;
+}
 /*
 -------------------------
     过渡动画样式处理

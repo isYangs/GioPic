@@ -91,6 +91,7 @@ watch(osThemeRef, (val) => {
     :theme="theme"
     :theme-overrides="theme === null ? lightThemeOverrides : darkThemeOverrides"
     abstract
+    inline-theme-disabled
   >
     <n-loading-bar-provider>
       <n-dialog-provider>

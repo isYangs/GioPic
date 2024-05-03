@@ -12,13 +12,14 @@ const { isMenuCollapsed } = storeToRefs(appStroe)
 
 <template>
   <Provider>
-    <n-layout hfull>
+    <n-layout position="absolute" :class="{ height: '100%' }">
       <n-layout-header bordered>
         <MainNav />
       </n-layout-header>
       <n-layout
-        has-sider wh-full position="absolute"
-        style="top:61px;"
+        has-sider
+        position="absolute"
+        style="top:61px; bottom:0; overflow: auto;"
       >
         <n-layout-sider
           bordered
@@ -33,8 +34,8 @@ const { isMenuCollapsed } = storeToRefs(appStroe)
         >
           <Menu />
         </n-layout-sider>
-        <n-layout :native-scrollbar="false" embedded hscreen>
-          <router-view v-slot="{ Component }" wh-full px6 pt6>
+        <n-layout content-style="padding: 24px;" :native-scrollbar="false">
+          <router-view v-slot="{ Component }">
             <keep-alive>
               <Transition name="router" mode="out-in">
                 <component :is="Component" />
