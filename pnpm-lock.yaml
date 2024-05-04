@@ -17,9 +17,9 @@ dependencies:
   better-sqlite3:
     specifier: ^9.6.0
     version: 9.6.0
-  date-fns:
-    specifier: ^3.6.0
-    version: 3.6.0
+  dayjs:
+    specifier: ^1.11.11
+    version: 1.11.11
   p-limit:
     specifier: ^5.0.0
     version: 5.0.0
@@ -39,7 +39,7 @@ dependencies:
 devDependencies:
   '@antfu/eslint-config':
     specifier: ^2.16.1
-    version: 2.16.1(@unocss/eslint-plugin@0.58.9)(@vue/compiler-sfc@3.4.23)(eslint-plugin-format@0.1.1)(eslint@8.57.0)(typescript@5.4.5)
+    version: 2.16.1(@unocss/eslint-plugin@0.58.9)(@vue/compiler-sfc@3.4.26)(eslint-plugin-format@0.1.1)(eslint@8.57.0)(typescript@5.4.5)
   '@iconify/json':
     specifier: ^2.2.206
     version: 2.2.206
@@ -132,7 +132,7 @@ packages:
       '@jridgewell/trace-mapping': 0.3.25
     dev: true
 
-  /@antfu/eslint-config@2.16.1(@unocss/eslint-plugin@0.58.9)(@vue/compiler-sfc@3.4.23)(eslint-plugin-format@0.1.1)(eslint@8.57.0)(typescript@5.4.5):
+  /@antfu/eslint-config@2.16.1(@unocss/eslint-plugin@0.58.9)(@vue/compiler-sfc@3.4.26)(eslint-plugin-format@0.1.1)(eslint@8.57.0)(typescript@5.4.5):
     resolution: {integrity: sha512-7oHCor9ZgVb8FguStNZMOZLRdyYdr1/t6EhhWVSXZjuq7086OFdlksdav6jcflOzazo0doRlP12urzoYq+r1cg==}
     hasBin: true
     peerDependencies:
@@ -202,7 +202,7 @@ packages:
       eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.7.1)(eslint@8.57.0)(typescript@5.4.5)
       eslint-plugin-vue: 9.25.0(eslint@8.57.0)
       eslint-plugin-yml: 1.14.0(eslint@8.57.0)
-      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.23)(eslint@8.57.0)
+      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.26)(eslint@8.57.0)
       globals: 15.0.0
       jsonc-eslint-parser: 2.4.0
       local-pkg: 0.5.0
@@ -2786,8 +2786,8 @@ packages:
       '@babel/runtime': 7.24.4
     dev: true
 
-  /date-fns@3.6.0:
-    resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
+  /dayjs@1.11.11:
+    resolution: {integrity: sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==}
     dev: false
 
   /de-indent@1.0.2:
@@ -3478,13 +3478,13 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-processor-vue-blocks@0.1.2(@vue/compiler-sfc@3.4.23)(eslint@8.57.0):
+  /eslint-processor-vue-blocks@0.1.2(@vue/compiler-sfc@3.4.26)(eslint@8.57.0):
     resolution: {integrity: sha512-PfpJ4uKHnqeL/fXUnzYkOax3aIenlwewXRX8jFinA1a2yCFnLgMuiH3xvCgvHHUlV2xJWQHbCTdiJWGwb3NqpQ==}
     peerDependencies:
       '@vue/compiler-sfc': ^3.3.0
       eslint: ^8.50.0 || ^9.0.0
     dependencies:
-      '@vue/compiler-sfc': 3.4.23
+      '@vue/compiler-sfc': 3.4.26
       eslint: 8.57.0
     dev: true
 
