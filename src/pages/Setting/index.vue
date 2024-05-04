@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
-import { getLinkTypeOptions } from '~/utils'
+import { linkTypeOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
 
@@ -61,7 +61,7 @@ const tabsOptions: TabOption[] = [
             onUpdateValue: (val) => {
               imgLinkFormatVal.value = val
             },
-            options: getLinkTypeOptions(),
+            options: linkTypeOptions(),
           })
         },
       },
@@ -154,9 +154,7 @@ const tabsOptions: TabOption[] = [
           :name="tab.title"
           :tab="tab.title"
         >
-          <n-scrollbar style="height: calc(100vh - 220px);">
-            <SetItem :title="tab.title" :items="tab.items" />
-          </n-scrollbar>
+          <SetItem :title="tab.title" :items="tab.items" />
         </n-tab-pane>
       </n-tabs>
     </div>

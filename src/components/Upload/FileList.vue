@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-import { convertFileSize, getFormatLinkType } from '~/utils'
+import { convertFileSize, getLinkType } from '~/utils'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
-import { useAppStore, useLskyStore, useUploadDataStore } from '~/stores'
+import { useAppStore, useStorageListStore, useUploadDataStore } from '~/stores'
 
 const appStore = useAppStore()
-const lskyStore = useLskyStore()
+const storageListStore = useStorageListStore()
 const uploadDataStore = useUploadDataStore()
 const { imgLinkFormatVal, isImgListDelDialog } = storeToRefs(appStore)
-const { api, token, strategiesVal } = storeToRefs(lskyStore)
+const { lskyProApi, lskyProToken, lskyProStrategiesVal } = storeToRefs(storageListStore)
 const { data } = storeToRefs(uploadDataStore)
 const imgLinkTabsKey = ref(0)
 const isAllPublic = ref(1)
@@ -23,12 +23,12 @@ const isPublicOptions = [
 
 // 上传方法
 async function handleUpload(index: number, file: File, isGetRecord: boolean = true) {
-  if (api.value === '' || token.value === '') {
+  if (lskyProApi.value === '' || lskyProToken.value === '') {
     window.$message.error('请先填写图床设置')
     return
   }
 
-  if (strategiesVal.value === null) {
+  if (lskyProStrategiesVal.value === null) {
     window.$message.error('请先选择存储策略')
     return
   }
@@ -36,10 +36,10 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data, status } = await requestData.uploadLskyImage(api.value, token.value, {
+    const { data, status } = await requestData.uploadLskyProImage(lskyProApi.value, lskyProToken.value, {
       file,
       permission: isAllPublic.value,
-      strategy_id: strategiesVal.value,
+      strategy_id: lskyProStrategiesVal.value,
     })
 
     if (status !== 200) {
@@ -54,18 +54,21 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
       return
     }
 
-    const { key, size, mimetype, links } = data.data
+    console.log(data.data)
+
+    const { key, name, size, mimetype, links } = data.data
 
     uploadDataStore.setData(
       {
         key,
+        name,
         size,
         mimetype,
         url: links.url,
         uploadFailed: false,
         time: new Date().toISOString(),
         isPublic: isAllPublic.value,
-        strategies: strategiesVal.value,
+        strategies: lskyProStrategiesVal.value,
       },
       index,
     )
@@ -79,7 +82,7 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
   finally {
     uploadDataStore.setData({ isLoading: false }, index)
     if (isGetRecord)
-    uploadDataStore.getUploadData()
+      uploadDataStore.getUploadData()
   }
 }
 
@@ -91,12 +94,12 @@ window.ipcRenderer.on('create-uploadData-status', (_e, status) => {
 
 // 全部上传方法
 async function handleAllUpload() {
-  if (api.value === '' || token.value === '') {
+  if (lskyProApi.value === '' || lskyProToken.value === '') {
     window.$message.error('请先填写图床设置')
     return
   }
 
-  if (strategiesVal.value === null) {
+  if (lskyProStrategiesVal.value === null) {
     window.$message.error('请先选择存储策略')
     return
   }
@@ -256,65 +259,63 @@ watch(imgLinkFormatVal, () => {
       <n-select v-model:value="isAllPublic" w30 :options="isPublicOptions" />
     </n-flex>
     <n-flex wfull justify="space-between">
-      <n-scrollbar style="height: calc(100vh - 358px);">
-        <n-image-group>
-          <n-card v-for="(file, index) in data" :key="index" content-style="padding: 10px;" relative not-last="mb2">
-            <n-spin :show="file.isLoading">
-              <n-flex justify="space-between">
-                <n-flex justify="center" h30 w52>
-                  <n-image :src="file.fileUrl" object-fit="cover" />
-                </n-flex>
-                <template v-if="file.url">
-                  <n-tabs :key="imgLinkTabsKey" flex="1 nowrap" overflow-auto type="line">
-                    <n-tab-pane
-                      v-for="linkType in imgLinkFormatVal"
-                      :key="linkType"
-                      wfull
-                      :name="linkType"
-                      :tab="getFormatLinkType(linkType)"
-                    >
-                      <n-input v-model:value="file.url" type="text" placeholder="基本的 Input" />
-                    </n-tab-pane>
-                  </n-tabs>
-                </template>
-                <template v-else>
-                  <n-tabs flex="1 nowrap" overflow-auto type="line">
-                    <n-tab-pane wfull flex-1 name="file_info" tab="详情">
-                      <div wh-full flex="center row wrap" justify-between>
-                        <n-tag :bordered="false" type="info">
-                          <span block max-w-100 text-overflow>文件名： {{ file.fileInfo ? file.fileInfo.name : '无' }}</span>
-                        </n-tag>
-                        <n-tag :bordered="false" type="info">
-                          文件大小：{{ file.fileInfo ? convertFileSize(Number(file.fileInfo.file?.size)) : '无' }}
-                        </n-tag>
-                        <n-tag :bordered="false" type="info">
-                          文件类型：{{ file.fileInfo ? file.fileInfo.type : '无' }}
-                        </n-tag>
-                        <NButton
-                          size="small"
-                          secondary
-                          strong
-                          @click="file.fileInfo && file.fileInfo.file && handleUpload(index, file.fileInfo.file)"
-                        >
-                          上传
-                        </NButton>
-                      </div>
-                    </n-tab-pane>
-                  </n-tabs>
-                </template>
+      <n-image-group>
+        <n-card v-for="(file, index) in data" :key="index" content-style="padding: 10px;" relative not-last="mb2">
+          <n-spin :show="file.isLoading">
+            <n-flex justify="space-between">
+              <n-flex justify="center" h30 w52>
+                <n-image :src="file.fileUrl" object-fit="cover" />
               </n-flex>
-              <template #description>
-                正在上传，请耐心等待...
+              <template v-if="file.url">
+                <n-tabs :key="imgLinkTabsKey" flex="1 nowrap" overflow-auto type="line">
+                  <n-tab-pane
+                    v-for="linkType in imgLinkFormatVal"
+                    :key="linkType"
+                    wfull
+                    :name="linkType"
+                    :tab="getLinkType(linkType)"
+                  >
+                    <n-input v-model:value="file.url" type="text" placeholder="基本的 Input" />
+                  </n-tab-pane>
+                </n-tabs>
               </template>
-            </n-spin>
-            <NButton v-if="!file.isLoading" quaternary absolute right-2 top-.5 h5 w5 @click="handleClose(index)">
-              <template #icon>
-                <div i-ic-sharp-close h5 w5 text-dark-50 />
+              <template v-else>
+                <n-tabs flex="1 nowrap" overflow-auto type="line">
+                  <n-tab-pane wfull flex-1 name="file_info" tab="详情">
+                    <div wh-full flex="center row wrap" justify-between>
+                      <n-tag :bordered="false" type="info">
+                        <span block max-w-100 text-overflow>文件名： {{ file.fileInfo ? file.fileInfo.name : '无' }}</span>
+                      </n-tag>
+                      <n-tag :bordered="false" type="info">
+                        文件大小：{{ file.fileInfo ? convertFileSize(Number(file.fileInfo.file?.size)) : '无' }}
+                      </n-tag>
+                      <n-tag :bordered="false" type="info">
+                        文件类型：{{ file.fileInfo ? file.fileInfo.type : '无' }}
+                      </n-tag>
+                      <NButton
+                        size="small"
+                        secondary
+                        strong
+                        @click="file.fileInfo && file.fileInfo.file && handleUpload(index, file.fileInfo.file)"
+                      >
+                        上传
+                      </NButton>
+                    </div>
+                  </n-tab-pane>
+                </n-tabs>
               </template>
-            </NButton>
-          </n-card>
-        </n-image-group>
-      </n-scrollbar>
+            </n-flex>
+            <template #description>
+              正在上传，请耐心等待...
+            </template>
+          </n-spin>
+          <NButton v-if="!file.isLoading" quaternary absolute right-2 top-.5 h5 w5 @click="handleClose(index)">
+            <template #icon>
+              <div i-ic-sharp-close h5 w5 text-dark-50 />
+            </template>
+          </NButton>
+        </n-card>
+      </n-image-group>
     </n-flex>
   </template>
 </template>

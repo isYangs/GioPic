@@ -7,6 +7,7 @@ interface State {
 
 // 接口返回的文件数据
 interface BaseData {
+  name?: string
   key?: string
   size?: number
   mimetype?: string
@@ -64,8 +65,8 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
   function getUploadData() {
     state.data
       .filter(item => item.url && item.key)
-      .forEach(({ key, time, size, mimetype, url }: UploadData) => {
-        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, time, size, mimetype, url }))
+      .forEach(({ key, name, time, size, mimetype, url }: UploadData) => {
+        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, name, time, size, mimetype, url }))
       })
   }
 
