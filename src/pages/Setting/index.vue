@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
-import { linkTypeOptions } from '~/utils'
+import { getLinkTypeOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
 
@@ -61,7 +61,7 @@ const tabsOptions: TabOption[] = [
             onUpdateValue: (val) => {
               imgLinkFormatVal.value = val
             },
-            options: linkTypeOptions(),
+            options: getLinkTypeOptions(),
           })
         },
       },
