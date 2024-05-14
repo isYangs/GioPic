@@ -8,6 +8,7 @@ const appStore = useAppStore()
 const {
   appCloseTip,
   appCloseType,
+  autoStart,
   themeType,
   themeAuto,
   imgLinkFormatVal,
@@ -70,6 +71,19 @@ const tabsOptions: TabOption[] = [
   {
     title: '系统',
     items: [
+      {
+        name: '是否开机自启动',
+        component: () => {
+          return h(NSwitch, {
+            value: autoStart.value,
+            round: false,
+            onUpdateValue: (val: boolean) => {
+              autoStart.value = val
+              window.ipcRenderer.send('auto-start', val)
+            },
+          })
+        },
+      },
       {
         name: '关闭程序时',
         component: () => {

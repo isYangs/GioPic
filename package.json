@@ -1,7 +1,6 @@
 {
   "name": "giopic",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.1",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

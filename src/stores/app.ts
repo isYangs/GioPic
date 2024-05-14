@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 interface State {
   appCloseType: 'close' | 'hide'
   appCloseTip: boolean
+  autoStart: boolean
   isMenuCollapsed: boolean
   imgLinkFormatVal: string[]
   themeAuto: boolean
@@ -20,6 +21,7 @@ export const useAppStore = defineStore(
       // 基础
       appCloseType: 'hide', // 关闭类型 'close' | 'hide'
       appCloseTip: false, // 是否显示关闭应用对话框
+      autoStart: false, // 是否开机自启动
       isMenuCollapsed: false, // 是否折叠菜单
       imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
 
@@ -52,6 +54,7 @@ export const useAppStore = defineStore(
       paths: [
         'appCloseType',
         'appCloseTip',
+        'autoStart',
         'themeType',
         'themeAuto',
         'imgLinkFormatVal',
