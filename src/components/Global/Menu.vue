@@ -103,7 +103,6 @@ const menuOptions = computed(() => [
 watch(
   () => router.currentRoute.value.path,
   (path) => {
-    console.log('Path changed:', path)
     menuActiveKey.value = path
   },
 )
