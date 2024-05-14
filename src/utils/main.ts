@@ -1,4 +1,5 @@
 import { NButton, NInput, NSelect } from 'naive-ui'
+import type { Router } from 'vue-router'
 import { useStorageListStore } from '../stores/storageList'
 import type { StorageListName } from '~/types'
 
@@ -40,11 +41,11 @@ export function getLinkTypeOptions() {
 export const selectStorageOptions = [
   {
     label: '兰空社区版',
-    value: 'Lsky',
+    value: 'lsky',
   },
   {
     label: '兰空企业版',
-    value: 'LskyPro',
+    value: 'lskyPro',
   },
 ]
 
@@ -54,29 +55,16 @@ export function getStorageName(val: StorageListName) {
   return option ? option.label : ''
 }
 
-export function getKeys() {
+export function getKeys(type: StorageListName) {
   const storageListStore = useStorageListStore()
-  const {
-    lskyApi,
-    lskyToken,
-    lskyStrategies,
-    lskyStrategiesVal,
-    lskyProApi,
-    lskyProToken,
-    lskyProStrategies,
-    lskyProStrategiesVal,
-  } = storeToRefs(storageListStore)
-  const isLsky = storageListStore.selectStorageVal === 'lsky'
-  return {
-    apiKey: isLsky ? lskyApi : lskyProApi,
-    tokenKey: isLsky ? lskyToken : lskyProToken,
-    storageKey: isLsky ? lskyStrategies : lskyProStrategies,
-    storageValKey: isLsky ? lskyStrategiesVal : lskyProStrategiesVal,
-  }
+  const { storageList } = storeToRefs(storageListStore)
+
+  const storageIndex = storageList.value.findIndex(item => item.id === type)
+  return storageList.value[storageIndex]
 }
 
-export function createApiSettingOptions(name: string, tip: string, path: string, placeholder: string) {
-  const { apiKey } = getKeys()
+export function createApiSettingOptions(id: StorageListName, name: string, tip: string, path: string, placeholder: string) {
+  let { api } = getKeys(id)
   return {
     name,
     tip,
@@ -84,18 +72,18 @@ export function createApiSettingOptions(name: string, tip: string, path: string,
     path,
     component: () => {
       return h(NInput, {
-        value: apiKey.value,
+        value: api,
         placeholder,
         onUpdateValue: (val: string) => {
-          apiKey.value = val
+          api = val
         },
       })
     },
   }
 }
 
-export function createTokenSettingOptions(name: string, tip: string, path: string, placeholder: string) {
-  const { tokenKey } = getKeys()
+export function createTokenSettingOptions(id: StorageListName, name: string, tip: string, path: string, placeholder: string) {
+  let { token } = getKeys(id)
   return {
     name,
     tip,
@@ -103,29 +91,29 @@ export function createTokenSettingOptions(name: string, tip: string, path: strin
     path,
     component: () => {
       return h(NInput, {
-        value: tokenKey.value,
+        value: token,
         placeholder,
         onUpdateValue: (val: string) => {
-          tokenKey.value = val
+          token = val
         },
       })
     },
   }
 }
 
-export function createStrategiesSettingOptions(name: string, btnName: string, click: () => void) {
-  const { storageKey, storageValKey } = getKeys()
+export function createStrategiesSettingOptions(id: StorageListName, name: string, btnName: string, click: () => void) {
+  let { strategies, strategiesVal } = getKeys(id)
   return {
     name,
     component: () => {
       return h('div', { class: 'flex' }, {
         default: () => [
           h(NSelect, {
-            value: storageValKey.value,
+            value: strategiesVal,
             onUpdateValue: (val: number) => {
-              storageValKey.value = val
+              strategiesVal = val
             },
-            options: storageKey.value,
+            options: strategies,
           }),
           h(NButton, {
             onClick: click,
@@ -138,6 +126,7 @@ export function createStrategiesSettingOptions(name: string, btnName: string, cl
   }
 }
 
+// 生成链接
 export function generateLink(type: string, url: string, name: string): string {
   switch (type) {
     case 'html':
@@ -151,4 +140,12 @@ export function generateLink(type: string, url: string, name: string): string {
     default:
       return url
   }
+}
+
+// 全局路由跳转
+export function routerPush(router: Router) {
+  window.ipcRenderer.on('open-setting', () => {
+    if (router)
+      router.push('/Setting')
+  })
 }

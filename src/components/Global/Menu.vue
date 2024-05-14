@@ -9,7 +9,7 @@ const router = useRouter()
 const appStroe = useAppStore()
 const storageListStore = useStorageListStore()
 const { isMenuCollapsed } = storeToRefs(appStroe)
-const { storageListMenu } = storeToRefs(storageListStore)
+const { storageList } = storeToRefs(storageListStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 const createStorageRef = ref<null | {
   createStorageModal: boolean
@@ -37,7 +37,7 @@ const userStorageList = ref({
   children: [] as MenuOption[],
 })
 
-userStorageList.value.children = storageListMenu.value.map((item) => {
+userStorageList.value.children = storageList.value.map((item) => {
   return {
     label: () =>
       h(
@@ -103,6 +103,7 @@ const menuOptions = computed(() => [
 watch(
   () => router.currentRoute.value.path,
   (path) => {
+    console.log('Path changed:', path)
     menuActiveKey.value = path
   },
 )

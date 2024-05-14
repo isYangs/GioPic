@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { FormInst, FormRules } from 'naive-ui'
-import { createFormRule, getKeys, getStorageName, selectStorageOptions, validateLskyToken, validateUrl } from '~/utils'
+import { createFormRule, getStorageName, selectStorageOptions, validateLskyToken, validateUrl } from '~/utils'
 import { useStorageListStore } from '~/stores'
+import type { StorageListName } from '~/types'
 
 const storageListStore = useStorageListStore()
-const {
-  selectStorageVal,
-  storageListMenu,
-} = storeToRefs(storageListStore)
+const { storageList } = storeToRefs(storageListStore)
+const selectStorageVal = ref<StorageListName>('lskyPro')
 const createStorageModal = ref(false)
 const formRef = ref<FormInst | null>(null)
 const api = ref('')
@@ -36,9 +35,14 @@ async function saveCreateStorageModal() {
         return false
       }
 
-      const { apiKey, tokenKey } = getKeys()
-      apiKey.value = api.value
-      tokenKey.value = token.value
+      storageList.value.push({
+        id: selectStorageVal.value,
+        name: getStorageName(selectStorageVal.value),
+        api: api.value,
+        token: token.value,
+        strategies: [],
+        strategiesVal: null,
+      })
 
       return true
     })
@@ -46,17 +50,11 @@ async function saveCreateStorageModal() {
     if (!isValid)
       return
 
-    if (!await storageListStore.getLskyStrategies(api.value, token.value)) {
+    if (!await storageListStore.getStrategies(selectStorageVal.value)) {
       window.$message.error('获取策略列表失败，请检查设置是否填写有误')
       return
     }
-    storageListMenu.value.push({
-      name: getStorageName(selectStorageVal.value),
-      id: selectStorageVal.value,
-      settingOptions: [
 
-      ],
-    })
     closeCreateStorageModal()
   }
   finally {

@@ -86,12 +86,6 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
   }
 }
 
-// 当接收到上传记录文件状态时，进行处理
-window.ipcRenderer.on('create-uploadData-status', (_e, status) => {
-  if (!status)
-    window.$message.error('上传数据写入数据库失败')
-})
-
 // 全部上传方法
 async function handleAllUpload() {
   if (lskyProApi.value === '' || lskyProToken.value === '') {

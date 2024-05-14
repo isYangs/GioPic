@@ -3,18 +3,16 @@ import requestData from '~/api'
 import type { StorageListName } from '~/types'
 
 interface State {
-  selectStorageVal: StorageListName
-  storageListMenu: { name: string, id: StorageListName, settingOptions: [] }[]
+  storageList: Storage[]
+}
 
-  lskyApi: string
-  lskyToken: string
-  lskyStrategies: []
-  lskyStrategiesVal: number | null
-
-  lskyProApi: string
-  lskyProToken: string
-  lskyProStrategies: []
-  lskyProStrategiesVal: number | null
+interface Storage {
+  id: StorageListName
+  name: string
+  api: string
+  token: string
+  strategies: []
+  strategiesVal: number | null
 }
 
 interface StrategiesData {
@@ -26,20 +24,7 @@ export const useStorageListStore = defineStore(
   'storageListStore',
   () => {
     const state: State = reactive({
-      selectStorageVal: 'lskyPro',
-      storageListMenu: [],
-
-      // 兰空图床
-      lskyApi: '',
-      lskyToken: '',
-      lskyStrategies: [],
-      lskyStrategiesVal: null,
-
-      // 兰空图床企业版
-      lskyProApi: '',
-      lskyProToken: '',
-      lskyProStrategies: [],
-      lskyProStrategiesVal: null,
+      storageList: [],
     })
 
     /**
@@ -52,11 +37,20 @@ export const useStorageListStore = defineStore(
     /**
      * 获取所有的存储策略
      */
-    async function getLskyStrategies(api: string, token: string): Promise<boolean> {
-      const isLsky = state.selectStorageVal === 'lsky'
+    async function getStrategies(type: StorageListName): Promise<boolean> {
+      const isLsky = type === 'lsky'
+
+      const storageIndex = state.storageList.findIndex(item => item.id === type)
+
+      if (storageIndex === -1) {
+        window.$message.error(`No storage found with id: ${type}`)
+        return false
+      }
+
+      const storage = state.storageList[storageIndex]
 
       const requestDataFunction = isLsky ? requestData.getLskyStrategies : requestData.getLskyProStrategies
-      const { data, status } = await requestDataFunction(api, token)
+      const { data, status } = await requestDataFunction(storage.api, storage.token)
 
       if (status !== 200)
         return false
@@ -68,15 +62,10 @@ export const useStorageListStore = defineStore(
         value: item.id,
       }))
 
-      const strategiesKey = isLsky ? 'lskyStrategies' : 'lskyProStrategies'
-      const strategiesValKey = isLsky ? 'lskyStrategiesVal' : 'lskyProStrategiesVal'
+      state.storageList[storageIndex].strategies = strategiesData
 
-      console.log(strategiesKey, strategiesValKey)
-
-      setState({ [strategiesKey]: strategiesData })
-
-      if (state[strategiesValKey] === null && strategiesData.length > 0)
-        setState({ [strategiesValKey]: Number(strategiesData[0].value) })
+      if (state.storageList[storageIndex].strategiesVal === null && strategiesData.length > 0)
+        state.storageList[storageIndex].strategiesVal = Number(strategiesData[0].value)
 
       return true
     }
@@ -84,13 +73,13 @@ export const useStorageListStore = defineStore(
     return {
       ...toRefs(state),
       setState,
-      getLskyStrategies,
+      getStrategies,
     }
   },
   {
     persist: {
       key: '__giopic_storage_list_store__',
-      paths: ['selectStorageVal', 'strategiesVal', 'storageListMenu', 'lskyProApi', 'lskyProToken', 'lskyProStrategies', 'lskyProStrategiesVal'],
+      paths: ['storageList'],
     },
   },
 )
