@@ -1,6 +1,4 @@
-import { NButton, NInput, NSelect } from 'naive-ui'
 import type { Router } from 'vue-router'
-import { useStorageListStore } from '../stores/storageList'
 import type { StorageListName } from '~/types'
 
 interface LinkTypeMap { [key: string]: string }
@@ -53,77 +51,6 @@ export const selectStorageOptions = [
 export function getStorageName(val: StorageListName) {
   const option = selectStorageOptions.find(item => item.value === val)
   return option ? option.label : ''
-}
-
-export function getKeys(type: StorageListName) {
-  const storageListStore = useStorageListStore()
-  const { storageList } = storeToRefs(storageListStore)
-
-  const storageIndex = storageList.value.findIndex(item => item.id === type)
-  return storageList.value[storageIndex]
-}
-
-export function createApiSettingOptions(id: StorageListName, name: string, tip: string, path: string, placeholder: string) {
-  let { api } = getKeys(id)
-  return {
-    name,
-    tip,
-    width: 300,
-    path,
-    component: () => {
-      return h(NInput, {
-        value: api,
-        placeholder,
-        onUpdateValue: (val: string) => {
-          api = val
-        },
-      })
-    },
-  }
-}
-
-export function createTokenSettingOptions(id: StorageListName, name: string, tip: string, path: string, placeholder: string) {
-  let { token } = getKeys(id)
-  return {
-    name,
-    tip,
-    width: 300,
-    path,
-    component: () => {
-      return h(NInput, {
-        value: token,
-        placeholder,
-        onUpdateValue: (val: string) => {
-          token = val
-        },
-      })
-    },
-  }
-}
-
-export function createStrategiesSettingOptions(id: StorageListName, name: string, btnName: string, click: () => void) {
-  let { strategies, strategiesVal } = getKeys(id)
-  return {
-    name,
-    component: () => {
-      return h('div', { class: 'flex' }, {
-        default: () => [
-          h(NSelect, {
-            value: strategiesVal,
-            onUpdateValue: (val: number) => {
-              strategiesVal = val
-            },
-            options: strategies,
-          }),
-          h(NButton, {
-            onClick: click,
-          }, {
-            default: () => btnName,
-          }),
-        ],
-      })
-    },
-  }
 }
 
 // 生成链接
