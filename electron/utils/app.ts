@@ -11,7 +11,7 @@ let tray = null
 
 // 初始化系统
 export function initSystem(win: BrowserWindow) {
-  createMenu()
+  createMenu(win)
   createSystemTray(win)
   registerGlobalShortcut(win)
 }
@@ -92,7 +92,7 @@ export function autoStart(val: boolean) {
 }
 
 // 创建菜单
-function createMenu() {
+function createMenu(win: BrowserWindow) {
   // macOS 的设置
   if (process.platform === 'darwin') {
     const template: MenuItemConstructorOptions[] = [
@@ -100,6 +100,7 @@ function createMenu() {
         label: 'GioPic',
         submenu: [
           { label: '关于', accelerator: 'Command+I', click: openAbout },
+          { label: '设置', accelerator: 'CommandOrControl+,', click: () => openSetting(win) },
           { type: 'separator' },
           { label: '隐藏', role: 'hide' },
           { label: '隐藏其他', role: 'hideOthers' },
