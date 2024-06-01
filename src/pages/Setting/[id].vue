@@ -4,6 +4,7 @@ import { useStorageListStore } from '~/stores'
 import type { StorageListName } from '~/types'
 import { getStorageName } from '~/utils'
 
+const router = useRouter()
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as StorageListName)
 const storageListStore = useStorageListStore()
@@ -47,6 +48,10 @@ const settingOptions = computed(() => [
   {
     name: '存储策略',
     component: () => {
+      const keys = getKeys(id.value)
+      if (!keys)
+        return h('div')
+
       return h('div', { class: 'flex' }, {
         default: () => [
           h(NSelect, {
@@ -54,7 +59,7 @@ const settingOptions = computed(() => [
             onUpdateValue: (val: number) => {
               strategiesVal.value = val
             },
-            options: getKeys(id.value).strategies,
+            options: keys.strategies,
           }),
           h(NButton, {
             onClick: async () => {
@@ -78,16 +83,43 @@ function getKeys(type: StorageListName) {
 }
 
 function saveSetting() {
-  getKeys(id.value).api = api.value
-  getKeys(id.value).token = token.value
-  getKeys(id.value).strategiesVal = strategiesVal.value
+  const keys = getKeys(id.value)
+  keys.api = api.value
+  keys.token = token.value
+  keys.strategiesVal = strategiesVal.value
+  window.$message.success('保存成功')
+}
+
+function delSetting() {
+  const index = storageList.value.findIndex(item => item.id === id.value)
+  console.log(index)
+  if (index !== -1) {
+    storageList.value.splice(index, 1)
+    api.value = ''
+    token.value = ''
+    strategiesVal.value = null
+
+    router.push(storageList.value.length > 0 ? `/Setting/${storageList.value[0].id}` : '/')
+
+    window.$message.success('删除成功')
+  }
+  else {
+    window.$message.error('删除失败，未找到对应的存储项')
+  }
 }
 
 watchEffect(() => {
   id.value = route.params.id as StorageListName
-  api.value = getKeys(id.value).api
-  token.value = getKeys(id.value).token
-  strategiesVal.value = getKeys(id.value).strategiesVal
+  const keys = getKeys(id.value)
+  if (!keys) {
+    api.value = ''
+    token.value = ''
+    strategiesVal.value = null
+    return
+  }
+  api.value = keys.api
+  token.value = keys.token
+  strategiesVal.value = keys.strategiesVal
 })
 </script>
 
@@ -98,7 +130,7 @@ watchEffect(() => {
       <NButton type="primary" @click="saveSetting">
         保存设置
       </NButton>
-      <NButton type="error">
+      <NButton type="error" @click="delSetting">
         删除此存储
       </NButton>
     </n-flex>

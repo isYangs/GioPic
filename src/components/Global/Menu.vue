@@ -37,23 +37,6 @@ const userStorageList = ref({
   children: [] as MenuOption[],
 })
 
-userStorageList.value.children = storageList.value.map((item) => {
-  return {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            path: `/Setting/${item.id}`,
-          },
-        },
-        { default: () => item.name },
-      ),
-    key: `/Setting/${item.id}`,
-    icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
-  }
-})
-
 const menuOptions = computed(() => [
   {
     type: 'group',
@@ -106,6 +89,25 @@ watch(
     menuActiveKey.value = path
   },
 )
+
+watchEffect(() => {
+  userStorageList.value.children = storageList.value.map((item) => {
+    return {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: {
+              path: `/Setting/${item.id}`,
+            },
+          },
+          { default: () => item.name },
+        ),
+      key: `/Setting/${item.id}`,
+      icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+    }
+  })
+})
 
 function updateValue(value: string) {
   router.push(value)
