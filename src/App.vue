@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { useAppStore } from './stores'
+import { useAppStore, useStorageListStore } from './stores'
 import { routerPush } from './utils'
 
 const appStroe = useAppStore()
+const storageListStore = useStorageListStore()
+const { defaultStorage } = storeToRefs(appStroe)
+const { storageList } = storeToRefs(storageListStore)
 const router = useRouter()
 const { isMenuCollapsed } = storeToRefs(appStroe)
 
 // router.beforeEach((to, from, next) => {
 
 // })
+
+defaultStorage.value = storageList.value[0].id
 
 onMounted(() => {
   routerPush(router)

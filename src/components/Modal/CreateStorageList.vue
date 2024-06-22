@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { FormInst, FormRules } from 'naive-ui'
 import { createFormRule, getStorageName, selectStorageOptions, validateLskyToken, validateUrl } from '~/utils'
-import { useStorageListStore } from '~/stores'
+import { useAppStore, useStorageListStore } from '~/stores'
 import type { StorageListName } from '~/types'
 
+const appStore = useAppStore()
+const { defaultStorage } = storeToRefs(appStore)
 const storageListStore = useStorageListStore()
 const { storageList } = storeToRefs(storageListStore)
 const selectStorageVal = ref<StorageListName>('lskyPro')
@@ -34,6 +36,8 @@ async function saveCreateStorageModal() {
         window.$message.error('保存失败，请检查设置是否填写有误')
         return false
       }
+
+      defaultStorage.value = selectStorageVal.value
 
       storageList.value.push({
         id: selectStorageVal.value,

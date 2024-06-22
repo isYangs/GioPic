@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import { getLinkTypeOptions } from '~/utils'
-import { useAppStore } from '~/stores'
-import type { TabOption } from '~/types'
+import { useAppStore, useStorageListStore } from '~/stores'
+import type { StorageListName, TabOption } from '~/types'
 
 const appStore = useAppStore()
 const {
   appCloseTip,
   appCloseType,
   autoStart,
+  defaultStorage,
   themeType,
   themeAuto,
   imgLinkFormatVal,
 } = storeToRefs(appStore)
+const storageListStore = useStorageListStore()
+
 const osThemeRef = useOsTheme()
+
 const shortcutKeys = ref('')
 
 const tabsOptions: TabOption[] = [
@@ -63,6 +67,18 @@ const tabsOptions: TabOption[] = [
               imgLinkFormatVal.value = val
             },
             options: getLinkTypeOptions(),
+          })
+        },
+      },
+      {
+        name: '默认上传存储程序',
+        component: () => {
+          return h(NSelect, {
+            value: defaultStorage.value,
+            onUpdateValue: (val: StorageListName) => {
+              defaultStorage.value = val
+            },
+            options: storageListStore.getStorageListOptions(),
           })
         },
       },
@@ -163,7 +179,7 @@ const tabsOptions: TabOption[] = [
         animated
       >
         <n-tab-pane
-          v-for="tab, in tabsOptions"
+          v-for="tab in tabsOptions"
           :key="tab.title"
           :name="tab.title"
           :tab="tab.title"

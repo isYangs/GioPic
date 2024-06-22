@@ -5,14 +5,16 @@ import { convertFileSize, getLinkType } from '~/utils'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
 import { useAppStore, useStorageListStore, useUploadDataStore } from '~/stores'
+import type { StorageListName } from '~/types'
 
 const appStore = useAppStore()
 const storageListStore = useStorageListStore()
 const uploadDataStore = useUploadDataStore()
-const { imgLinkFormatVal, isImgListDelDialog } = storeToRefs(appStore)
-const { lskyProApi, lskyProToken, lskyProStrategiesVal } = storeToRefs(storageListStore)
+const { defaultStorage, imgLinkFormatVal, isImgListDelDialog } = storeToRefs(appStore)
+const { storageList } = storeToRefs(storageListStore)
 const { data } = storeToRefs(uploadDataStore)
 const imgLinkTabsKey = ref(0)
+const uploadStorageListId = ref(defaultStorage.value)
 const isAllPublic = ref(1)
 const isUpload = ref(false)
 
@@ -21,25 +23,36 @@ const isPublicOptions = [
   { label: '全部私有', value: 0 },
 ]
 
+function getKeys(type: StorageListName) {
+  const storageIndex = storageList.value.findIndex(item => item.id === type)
+  return storageList.value[storageIndex]
+}
+
 // 上传方法
-async function handleUpload(index: number, file: File, isGetRecord: boolean = true) {
-  if (lskyProApi.value === '' || lskyProToken.value === '') {
-    window.$message.error('请先填写图床设置')
+async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
+  if (!uploadStorageListId.value) {
+    window.$message.error('你要上传到那个存储程序呢？🤔')
     return
   }
 
-  if (lskyProStrategiesVal.value === null) {
-    window.$message.error('请先选择存储策略')
+  const keys = getKeys(uploadStorageListId.value)
+  if (keys.api === '' || keys.token === '') {
+    window.$message.error('不配置存储程序，我怎么上传？🤔')
+    return
+  }
+
+  if (keys.strategiesVal === null) {
+    window.$message.error('我还不知道你要存在那个策略中啊！😓')
     return
   }
 
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data, status } = await requestData.uploadLskyProImage(lskyProApi.value, lskyProToken.value, {
+    const { data, status } = await requestData.uploadImage(keys.id, keys.api, keys.token, {
       file,
       permission: isAllPublic.value,
-      strategy_id: lskyProStrategiesVal.value,
+      strategy_id: keys.strategiesVal,
     })
 
     if (status !== 200) {
@@ -68,7 +81,7 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
         uploadFailed: false,
         time: new Date().toISOString(),
         isPublic: isAllPublic.value,
-        strategies: lskyProStrategiesVal.value,
+        strategies: keys.strategiesVal,
       },
       index,
     )
@@ -87,14 +100,20 @@ async function handleUpload(index: number, file: File, isGetRecord: boolean = tr
 }
 
 // 全部上传方法
-async function handleAllUpload() {
-  if (lskyProApi.value === '' || lskyProToken.value === '') {
-    window.$message.error('请先填写图床设置')
+async function allUplaodImage() {
+  if (!uploadStorageListId.value) {
+    window.$message.error('你要上传到那个存储程序呢？🤔')
     return
   }
 
-  if (lskyProStrategiesVal.value === null) {
-    window.$message.error('请先选择存储策略')
+  const keys = getKeys(uploadStorageListId.value)
+  if (keys.api === '' || keys.token === '') {
+    window.$message.error('不配置存储程序，我怎么上传？🤔')
+    return
+  }
+
+  if (keys.strategiesVal === null) {
+    window.$message.error('我还不知道你要存在那个策略中啊！😓')
     return
   }
 
@@ -120,7 +139,7 @@ async function handleAllUpload() {
 
     // 创建一个新的上传任务
     const task = limit(() =>
-      handleUpload(originalIndex, item.fileInfo.file, false)
+      uploadImage(originalIndex, item.fileInfo.file, false)
         .then(() => {
           // 从正在进行的上传任务中移除这个任务
           uploadingTasks.delete(task)
@@ -241,7 +260,7 @@ watch(imgLinkFormatVal, () => {
 <template>
   <template v-if="data.length">
     <n-flex my2 ml1 wfull>
-      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="handleAllUpload">
+      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="allUplaodImage">
         全部上传
       </NButton>
       <NButton type="error" @click="handleAllClear">
@@ -251,6 +270,7 @@ watch(imgLinkFormatVal, () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" w30 :options="isPublicOptions" />
+      <n-select v-model:value="uploadStorageListId" w30 :options="storageListStore.getStorageListOptions()" />
     </n-flex>
     <n-flex wfull justify="space-between">
       <n-image-group>
@@ -290,7 +310,7 @@ watch(imgLinkFormatVal, () => {
                         size="small"
                         secondary
                         strong
-                        @click="file.fileInfo && file.fileInfo.file && handleUpload(index, file.fileInfo.file)"
+                        @click="file.fileInfo && file.fileInfo.file && uploadImage(index, file.fileInfo.file)"
                       >
                         上传
                       </NButton>

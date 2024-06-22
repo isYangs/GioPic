@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
+import type { StorageListName } from '~/types'
 
 interface State {
   appCloseType: 'close' | 'hide'
   appCloseTip: boolean
   autoStart: boolean
+  defaultStorage: StorageListName | null
   isMenuCollapsed: boolean
   imgLinkFormatVal: string[]
   themeAuto: boolean
@@ -22,6 +24,7 @@ export const useAppStore = defineStore(
       appCloseType: 'hide', // 关闭类型 'close' | 'hide'
       appCloseTip: false, // 是否显示关闭应用对话框
       autoStart: false, // 是否开机自启动
+      defaultStorage: null, // 默认上传存储程序
       isMenuCollapsed: false, // 是否折叠菜单
       imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
 

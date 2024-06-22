@@ -34,6 +34,15 @@ export const useStorageListStore = defineStore(
       Object.assign(state, newState)
     }
 
+    function getStorageListOptions() {
+      return state.storageList.map((item) => {
+        return {
+          label: item.name,
+          value: item.id,
+        }
+      })
+    }
+
     /**
      * 获取所有的存储策略
      */
@@ -74,6 +83,7 @@ export const useStorageListStore = defineStore(
       ...toRefs(state),
       setState,
       getStrategies,
+      getStorageListOptions,
     }
   },
   {
