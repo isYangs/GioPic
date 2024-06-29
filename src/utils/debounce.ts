@@ -5,27 +5,27 @@
  * @param {string} errorMessage - 重复触发时的提醒消息
  * @returns {Function} - 返回一个新的函数，该函数在指定的时间间隔内最多只会执行一次
  */
-function debounce(func, delay, errorMessage) {
-  let timerId
-  let lastCallTime = 0
 
-  // 返回一个新的函数
-  return (...args) => {
+function debounce(
+  func: (...args: any[]) => void,
+  delay: number,
+  errorMessage?: string,
+): (...args: any[]) => void {
+  let timerId: ReturnType<typeof setTimeout>
+  let lastCallTime: number = 0
+
+  return (...args: any[]) => {
     const currentTime = Date.now()
     const elapsed = currentTime - lastCallTime
 
-    // 如果两次触发时间间隔小于 delay，弹出提醒
     if (elapsed < delay && errorMessage) {
-      $message.warning(errorMessage)
+      window.$message.warning(errorMessage)
       return
     }
 
-    // 清除上一个定时器
     clearTimeout(timerId)
-
-    // 设置新的定时器，在指定的延迟时间后执行函数
     timerId = setTimeout(() => {
-      func.apply(this, args)
+      func(...args)
       lastCallTime = Date.now()
     }, delay)
   }
