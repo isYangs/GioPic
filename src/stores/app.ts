@@ -5,6 +5,7 @@ interface State {
   appCloseType: 'close' | 'hide'
   appCloseTip: boolean
   autoStart: boolean
+  autoUpdate: boolean
   defaultStorage: StorageListName | null
   isMenuCollapsed: boolean
   imgLinkFormatVal: string[]
@@ -24,6 +25,7 @@ export const useAppStore = defineStore(
       appCloseType: 'hide', // 关闭类型 'close' | 'hide'
       appCloseTip: false, // 是否显示关闭应用对话框
       autoStart: false, // 是否开机自启动
+      autoUpdate: false, // 是否自动更新
       defaultStorage: null, // 默认上传存储程序
       isMenuCollapsed: false, // 是否折叠菜单
       imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式

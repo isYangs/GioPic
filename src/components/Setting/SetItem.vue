@@ -12,14 +12,8 @@ const setFormRef = ref<FormInst | null>(null)
 
 // 通过组件判断是否为需要设置宽度的组件
 function checkComponentType(item: any) {
-  switch (item.component().type.name) {
-    case 'Select':
-      return item.component().props?.multiple !== false
-    case 'InputGroup':
-      return true
-    default:
-      return false
-  }
+  const componentType = item.component().type.name
+  return componentType === 'Select' && item.component().props?.multiple !== false || componentType === 'InputGroup'
 }
 
 // 设置宽度
@@ -42,12 +36,12 @@ defineExpose({ formValidation })
 </script>
 
 <template>
-  <div pt7.5>
+  <div pt7.5 class="set-type">
     <n-h3 prefix="bar">
       {{ title }}
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">
-      <n-card v-for="(item, index) in items" :key="index" mb3 wfull rounded-2 class="set-item" :content-style="{ padding: '0 20px' }">
+      <n-card v-for="(item, index) in items" :key="index" class="set-item" mb3 wh-full rounded-2 :content-style="{ padding: '0 20px' }">
         <div flex="~ col 1" pr font-500 text="3.8" tracking-wider>
           <div flex="~" items="center">
             {{ item.name }}
