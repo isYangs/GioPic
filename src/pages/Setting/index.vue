@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { NButton, NInput, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import ShortcutInput from '~/components/Setting/ShortcutInput.vue'
 import { getLinkTypeOptions } from '~/utils'
 import { useAppStore, useStorageListStore } from '~/stores'
 import type { StorageListName, TabOption } from '~/types'
@@ -21,7 +22,7 @@ const storageListStore = useStorageListStore()
 const osThemeRef = useOsTheme()
 const shortcutKeys = ref('')
 
-// 
+//
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
 
@@ -129,13 +130,10 @@ const tabsOptions: TabOption[] = [
       {
         name: '上传图片',
         isDev: true,
-        component: () => h(NInput, {
+        component: () => h(ShortcutInput, {
           value: shortcutKeys.value,
           placeholder: '请输入快捷键',
-          onKeydown: (e: KeyboardEvent) => {
-            e.preventDefault()
-            console.log(e)
-          },
+          onUpdateValue: (val: string) => shortcutKeys.value = val,
         }),
       },
     ],

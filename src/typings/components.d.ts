@@ -58,6 +58,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SetItem: typeof import('./../components/Setting/SetItem.vue')['default']
+    ShortcutInput: typeof import('./../components/Setting/ShortcutInput.vue')['default']
     TitleBar: typeof import('./../components/Nav/TitleBar.vue')['default']
     Upload: typeof import('./../components/Upload/index.vue')['default']
   }
