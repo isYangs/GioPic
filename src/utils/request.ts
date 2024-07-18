@@ -1,11 +1,13 @@
 import axios from 'axios'
 
 function tip(content: string) {
-  window.$notification.error({
-    title: '请求错误',
-    duration: 3 * 1000,
-    content,
+  const notify = new window.Notification('请求错误', {
+    body: content,
   })
+
+  notify.onclick = () => {
+
+  }
 }
 
 /**
