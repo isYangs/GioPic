@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import Logo from '~/assets/logo.svg'
 import { useAppStore } from '~/stores'
+import { renderIcon } from '~/utils';
 
 const appStroe = useAppStore()
 const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStroe)
 const router = useRouter()
-
-function renderIcon(icon: string) {
-  return () => h('div', { class: `${icon} ` })
-}
 
 const themeOptions = computed(() => [
   {
@@ -23,7 +20,7 @@ const themeOptions = computed(() => [
   },
 ])
 
-function handleThemeChange(key: string) {
+function themeChange(key: string) {
   switch (key) {
     case 'lightTodark': {
       themeType.value = themeType.value === 'dark' ? 'light' : 'dark'
@@ -71,7 +68,7 @@ function handleThemeChange(key: string) {
 
     <div mla flex="~" style="-webkit-app-region: no-drag">
       <div>
-        <n-dropdown :options="themeOptions" trigger="click" @select="handleThemeChange">
+        <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
           <n-button :focusable="false" quaternary h8 w8>
             <template #icon>
               <div i-icon-park-outline-setting-two />
