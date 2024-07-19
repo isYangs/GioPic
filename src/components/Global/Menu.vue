@@ -1,41 +1,12 @@
 <script setup lang="ts">
-import type { MenuOption } from 'naive-ui'
-import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
-import { useAppStore, useStorageListStore } from '~/stores'
+import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
 const router = useRouter()
 const appStroe = useAppStore()
-const storageListStore = useStorageListStore()
 const { isMenuCollapsed } = storeToRefs(appStroe)
-const { storageList } = storeToRefs(storageListStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
-const createStorageRef = ref<null | {
-  createStorageModal: boolean
-}>(null)
-
-const userStorageList = ref({
-  label: () =>
-    h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
-      h('span', { class: '' }, ['创建的存储']),
-      h(NButton, {
-        class: 'w9 h5',
-        size: 'small',
-        type: 'tertiary',
-        round: true,
-        strong: true,
-        secondary: true,
-        renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
-        onClick: () => {
-          if (createStorageRef.value)
-            createStorageRef.value.createStorageModal = true
-        },
-      }),
-    ]),
-  key: 'user-storage',
-  children: [] as MenuOption[],
-})
 
 const menuOptions = computed(() => [
   {
@@ -78,8 +49,41 @@ const menuOptions = computed(() => [
     type: 'divider',
   },
   {
-    ...userStorageList.value,
-    show: !isMenuCollapsed.value,
+    label: () =>
+      h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
+        h('span', { class: '' }, ['存储程序设置']),
+      ]),
+    key: 'user-storage',
+    children: [
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: {
+                path: `/Setting/lskyPro`,
+              },
+            },
+            { default: () => '兰空企业版' },
+          ),
+        key: `/Setting/lskyPro`,
+        icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: {
+                path: `/Setting/lsky`,
+              },
+            },
+            { default: () => '兰空社区版' },
+          ),
+        key: `/Setting/lsky`,
+        icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+      },
+    ],
   },
 ])
 
@@ -89,25 +93,6 @@ watch(
     menuActiveKey.value = path
   },
 )
-
-watchEffect(() => {
-  userStorageList.value.children = storageList.value.map((item) => {
-    return {
-      label: () =>
-        h(
-          RouterLink,
-          {
-            to: {
-              path: `/Setting/${item.id}`,
-            },
-          },
-          { default: () => item.name },
-        ),
-      key: `/Setting/${item.id}`,
-      icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
-    }
-  })
-})
 
 function updateValue(value: string) {
   router.push(value)
@@ -125,7 +110,6 @@ function updateValue(value: string) {
     :indent="22"
     @update:value="updateValue"
   />
-  <CreateStorageList ref="createStorageRef" />
 </template>
 
 <style scoped>

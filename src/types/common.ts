@@ -12,4 +12,4 @@ export interface TabOption {
   rules?: import('naive-ui').FormRules
 }
 
-export type StorageListName = 'lsky' | 'lskyPro'
+export type ProgramsName = 'lsky' | 'lskyPro'

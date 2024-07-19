@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios'
-import type { StorageListName } from '~/types'
+import type { ProgramsName } from '~/types'
 import { request } from '~/utils'
 
 interface UploadData {
@@ -59,7 +59,7 @@ const requestData = {
    * @param data - 接收一个对象，对象中传入上传的图片，权限，策略id，相册id，过期时间。
    * @returns 返回一个Promise对象，表示异步上传操作
    */
-  uploadImage: (type: StorageListName, url: string, token: string, data: UploadData) => {
+  uploadImage: (type: ProgramsName, url: string, token: string, data: UploadData) => {
     switch (type) {
       case 'lsky':
         return requestData._uploadLskyImage(url, token, data)

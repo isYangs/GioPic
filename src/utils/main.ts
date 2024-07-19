@@ -1,5 +1,5 @@
 import type { Router } from 'vue-router'
-import type { StorageListName } from '~/types'
+import type { ProgramsName } from '~/types'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -35,24 +35,6 @@ export function getLinkTypeOptions() {
   return Object.entries(linkTypeMap).map(([value, label]) => ({ label, value, key: value }))
 }
 
-// 存储策略选项
-export const selectStorageOptions = [
-  {
-    label: '兰空社区版',
-    value: 'lsky',
-  },
-  {
-    label: '兰空企业版',
-    value: 'lskyPro',
-  },
-]
-
-// 获取存储程序的名字
-export function getStorageName(val: StorageListName) {
-  const option = selectStorageOptions.find(item => item.value === val)
-  return option ? option.label : ''
-}
-
 // 生成链接
 export function generateLink(type: string, url: string, name: string): string {
   switch (type) {
@@ -67,6 +49,24 @@ export function generateLink(type: string, url: string, name: string): string {
     default:
       return url
   }
+}
+
+// 选择存储程序选项
+export const selectProgramsOptions = [
+  {
+    label: '兰空社区版',
+    value: 'lsky',
+  },
+  {
+    label: '兰空企业版',
+    value: 'lskyPro',
+  },
+]
+
+// 获取存储程序的名字
+export function getProgramsName(val: ProgramsName) {
+  const option = selectProgramsOptions.find(item => item.value === val)
+  return option ? option.label : ''
 }
 
 // 全局路由跳转

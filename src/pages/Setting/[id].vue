@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { NButton, NInput, NSelect } from 'naive-ui'
-import { useStorageListStore } from '~/stores'
-import type { StorageListName } from '~/types'
-import { getStorageName } from '~/utils'
+import { useProgramsStore } from '~/stores'
+import { getProgramsName } from '~/utils'
+import type { ProgramsName } from '~/types'
 
-const router = useRouter()
 const route = useRoute('/Setting/[id]')
-const id = ref(route.params.id as StorageListName)
-const storageListStore = useStorageListStore()
-const { storageList } = storeToRefs(storageListStore)
-
+const id = ref(route.params.id as ProgramsName)
+const programsStore = useProgramsStore()
 const api = ref('')
 const token = ref('')
 const strategiesVal = ref<number | null>(null)
+
+const settings = computed(() => programsStore.getPrograms(id.value))
 
 const settingOptions = computed(() => [
   {
@@ -48,10 +47,6 @@ const settingOptions = computed(() => [
   {
     name: '存储策略',
     component: () => {
-      const keys = getKeys(id.value)
-      if (!keys)
-        return h('div')
-
       return h('div', { class: 'flex' }, {
         default: () => [
           h(NSelect, {
@@ -59,12 +54,12 @@ const settingOptions = computed(() => [
             onUpdateValue: (val: number) => {
               strategiesVal.value = val
             },
-            options: keys.strategies,
+            options: settings.value.strategies,
           }),
           h(NButton, {
             onClick: async () => {
               const loading = window.$message.loading('正在获取策略列表...')
-              if (!await storageListStore.getStrategies(id.value))
+              if (!await programsStore.getStrategies(id.value))
                 window.$message.error('获取策略列表失败，请检查设置是否填写有误')
               loading.destroy()
             },
@@ -77,61 +72,31 @@ const settingOptions = computed(() => [
   },
 ])
 
-function getKeys(type: StorageListName) {
-  const storageIndex = storageList.value.findIndex(item => item.id === type)
-  return storageList.value[storageIndex]
-}
-
 function saveSetting() {
-  const keys = getKeys(id.value)
-  keys.api = api.value
-  keys.token = token.value
-  keys.strategiesVal = strategiesVal.value
+  programsStore.setPrograms(id.value, 'api', api.value)
+  programsStore.setPrograms(id.value, 'token', token.value)
+  programsStore.setPrograms(id.value, 'strategiesVal', strategiesVal.value)
   window.$message.success('保存成功')
 }
 
-function delSetting() {
-  const index = storageList.value.findIndex(item => item.id === id.value)
-  console.log(index)
-  if (index !== -1) {
-    storageList.value.splice(index, 1)
-    api.value = ''
-    token.value = ''
-    strategiesVal.value = null
+// 初始化输入框的值
+watch(settings, (newSettings) => {
+  api.value = newSettings.api
+  token.value = newSettings.token
+  strategiesVal.value = newSettings.strategiesVal
+}, { immediate: true })
 
-    router.push(storageList.value.length > 0 ? `/Setting/${storageList.value[0].id}` : '/')
-
-    window.$message.success('删除成功')
-  }
-  else {
-    window.$message.error('删除失败，未找到对应的存储项')
-  }
-}
-
-watchEffect(() => {
-  id.value = route.params.id as StorageListName
-  const keys = getKeys(id.value)
-  if (!keys) {
-    api.value = ''
-    token.value = ''
-    strategiesVal.value = null
-    return
-  }
-  api.value = keys.api
-  token.value = keys.token
-  strategiesVal.value = keys.strategiesVal
+watch(() => route.params.id, (newId) => {
+  id.value = newId as ProgramsName
 })
 </script>
 
 <template>
   <div wh-full>
-    <SetItem ref="setItemRef" :title="`${getStorageName(id)}设置`" :items="settingOptions" style="padding-top: 0;" />
+    <SetItem ref="setItemRef" :title="getProgramsName(id)" :items="settingOptions" style="padding-top: 0;" />
     <n-flex justify="end" mt3>
       <NButton type="primary" @click="saveSetting">
         保存设置
-      </NButton>
-      <NButton type="error" @click="delSetting">
-        删除此存储
       </NButton>
     </n-flex>
   </div>

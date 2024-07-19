@@ -12,7 +12,7 @@ img {
 
 /*
 -------------------------
-    NaiveUI 组件样式处理 
+    NaiveUI 组件样式处理
 -------------------------
 */
 .n-layout-toggle-bar {
@@ -46,11 +46,11 @@ img {
   bottom: 50px;
 }
 
-.n-image-preview-toolbar>.n-base-icon {
+.n-image-preview-toolbar > .n-base-icon {
   width: 1.5em;
 }
 
-.n-image-preview-toolbar>.n-base-icon:nth-last-child(2) {
+.n-image-preview-toolbar > .n-base-icon:nth-last-child(2) {
   display: none;
 }
 
@@ -62,7 +62,7 @@ img {
   border-radius: 12px;
 }
 
-.n-scrollbar >.n-scrollbar-rail {
+.n-scrollbar > .n-scrollbar-rail {
   right: 0 !important;
   z-index: 20;
 }

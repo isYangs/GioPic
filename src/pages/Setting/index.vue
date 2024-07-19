@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import ShortcutInput from '~/components/Setting/ShortcutInput.vue'
-import { getLinkTypeOptions } from '~/utils'
-import { useAppStore, useStorageListStore } from '~/stores'
-import type { StorageListName, TabOption } from '~/types'
+import { getLinkTypeOptions, selectProgramsOptions } from '~/utils'
+import { useAppStore } from '~/stores'
+import type { ProgramsName, TabOption } from '~/types'
 import debounce from '~/utils/debounce.ts'
 
 const appStore = useAppStore()
@@ -12,12 +12,11 @@ const {
   appCloseType,
   autoStart,
   autoUpdate,
-  defaultStorage,
+  defaultPrograms,
   themeType,
   themeAuto,
   imgLinkFormatVal,
 } = storeToRefs(appStore)
-const storageListStore = useStorageListStore()
 
 const osThemeRef = useOsTheme()
 const shortcutKeys = ref('')
@@ -71,9 +70,9 @@ const tabsOptions: TabOption[] = [
       {
         name: '默认上传存储程序',
         component: () => h(NSelect, {
-          value: defaultStorage.value,
-          onUpdateValue: (val: StorageListName) => defaultStorage.value = val,
-          options: storageListStore.getStorageListOptions(),
+          value: defaultPrograms.value,
+          onUpdateValue: (val: ProgramsName) => defaultPrograms.value = val,
+          options: selectProgramsOptions,
         }),
       },
     ],
