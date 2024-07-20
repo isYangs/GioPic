@@ -79,15 +79,12 @@ function saveSetting() {
   window.$message.success('保存成功')
 }
 
-// 初始化输入框的值
-watch(settings, (newSettings) => {
-  api.value = newSettings.api
-  token.value = newSettings.token
-  strategiesVal.value = newSettings.strategiesVal
-}, { immediate: true })
+watchEffect(() => {
+  id.value = route.params.id as ProgramsName
 
-watch(() => route.params.id, (newId) => {
-  id.value = newId as ProgramsName
+  api.value = settings.value.api
+  token.value = settings.value.token
+  strategiesVal.value = settings.value.strategiesVal
 })
 </script>
 

@@ -75,6 +75,7 @@ export const useProgramsStore = defineStore(
     }
 
     return {
+      ...toRefs(state),
       setPrograms,
       getPrograms,
       getStrategies,
