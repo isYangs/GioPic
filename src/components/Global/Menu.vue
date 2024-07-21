@@ -54,6 +54,7 @@ const menuOptions = computed(() => [
         h('span', { class: '' }, ['存储程序设置']),
       ]),
     key: 'user-storage',
+    show: !isMenuCollapsed.value,
     children: [
       {
         label: () =>

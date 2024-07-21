@@ -21,7 +21,6 @@ const {
 const osThemeRef = useOsTheme()
 const shortcutKeys = ref('')
 
-//
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
 

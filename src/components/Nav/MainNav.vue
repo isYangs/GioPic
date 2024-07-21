@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Logo from '~/assets/logo.svg'
 import { useAppStore } from '~/stores'
-import { renderIcon } from '~/utils';
+import { renderIcon } from '~/utils'
 
 const appStroe = useAppStore()
 const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStroe)
@@ -9,7 +9,7 @@ const router = useRouter()
 
 const themeOptions = computed(() => [
   {
-    label: themeType.value === 'light' ? '浅色模式' : '深色模式',
+    label: themeType.value === 'light' ? '深色模式' : '浅色模式',
     key: 'lightTodark',
     icon: renderIcon(themeType.value === 'light' ? 'i-material-symbols-light-mode' : 'i-material-symbols-dark-mode'),
   },
