@@ -42,11 +42,3 @@ export function validateStrategiesVal(strategiesVal: number | null) {
 
   return true
 }
-
-// 验证存储策略是否合法
-export function validateImgLinkFormatVal(imgLinkFormatVal: string[]) {
-  if (!imgLinkFormatVal || imgLinkFormatVal.length === 0)
-    return new Error('图片链接格式不能为空')
-
-  return true
-}

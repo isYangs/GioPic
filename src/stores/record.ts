@@ -12,6 +12,7 @@ interface BaseData {
   size?: number
   mimetype?: string
   url?: string
+  origin_name?: string
 }
 
 export interface UploadData extends BaseData {
@@ -65,8 +66,8 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
   function getUploadData() {
     state.data
       .filter(item => item.url && item.key)
-      .forEach(({ key, name, time, size, mimetype, url }: UploadData) => {
-        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, name, time, size, mimetype, url }))
+      .forEach(({ key, name, time, size, mimetype, url, origin_name }: UploadData) => {
+        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, name, time, size, mimetype, url, origin_name }))
       })
   }
 

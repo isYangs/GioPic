@@ -38,6 +38,9 @@ function createWindow() {
     },
   })
 
+  // 设置应用程序名称
+  app.setAppUserModelId(app.getName())
+
   // 测试向渲染进程发送激活的推送消息
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', new Date().toLocaleString())

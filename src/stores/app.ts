@@ -8,7 +8,6 @@ interface State {
   autoUpdate: boolean
   defaultPrograms: ProgramsName
   isMenuCollapsed: boolean
-  imgLinkFormatVal: string[]
 
   themeAuto: boolean
   themeType: 'light' | 'dark' | null
@@ -29,7 +28,6 @@ export const useAppStore = defineStore(
       autoUpdate: false, // 是否自动更新
       defaultPrograms: 'lskyPro', // 默认上传存储程序
       isMenuCollapsed: false, // 是否折叠菜单
-      imgLinkFormatVal: ['url', 'html', 'markdown', 'bbcode'], // 图片链接格式
 
       // 主题
       themeType: 'light', // 主题类型 'light' | 'dark'
@@ -63,7 +61,6 @@ export const useAppStore = defineStore(
         'autoStart',
         'themeType',
         'themeAuto',
-        'imgLinkFormatVal',
         'lastCallTimes',
       ],
     },

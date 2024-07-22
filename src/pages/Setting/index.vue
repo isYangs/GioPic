@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import ShortcutInput from '~/components/Setting/ShortcutInput.vue'
-import { getLinkTypeOptions, selectProgramsOptions } from '~/utils'
+import { selectProgramsOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 import type { ProgramsName, TabOption } from '~/types'
 import debounce from '~/utils/debounce.ts'
@@ -15,7 +15,6 @@ const {
   defaultPrograms,
   themeType,
   themeAuto,
-  imgLinkFormatVal,
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
@@ -52,18 +51,6 @@ const tabsOptions: TabOption[] = [
             if (val)
               themeType.value = osThemeRef.value
           },
-        }),
-      },
-      {
-        name: '链接展示格式',
-        tip: '图片上传后要展示的链接格式',
-        width: 400,
-        component: () => h(NSelect, {
-          value: imgLinkFormatVal.value,
-          placeholder: '请选择要展示什么格式的链接',
-          multiple: true,
-          onUpdateValue: val => imgLinkFormatVal.value = val,
-          options: getLinkTypeOptions(),
         }),
       },
       {
