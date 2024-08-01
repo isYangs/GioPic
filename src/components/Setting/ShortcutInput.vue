@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { NInput } from 'naive-ui'
-
 const props = defineProps<{
   value: string
   placeholder?: string
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:value', value: string): void
+  (e: 'updateValue', value: string): void
 }>()
 
+const shortcut = ref(false)
+const modalKeys = ref<string[]>([])
 const keys = ref<string[]>(props.value ? props.value.split('+') : [])
-
-// 按键映射表
+const pressedKeys = ref<Set<string>>(new Set())
+const message = useMessage()
+const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+const modifierKeys = isMac ? ['Meta', 'Control', 'Alt', 'Shift'] : ['Control', 'Alt', 'Shift']
 const keyMap: { [key: string]: string } = {
   Meta: 'Cmd',
   Control: 'Ctrl',
@@ -24,65 +26,142 @@ const displayValue = computed(() =>
   keys.value.map(key => keyMap[key] || key.toUpperCase()).join(' + '),
 )
 
-watch(keys, (newKeys) => {
-  emit('update:value', newKeys.join('+'))
-})
+const modalDisplayValue = computed(() =>
+  modalKeys.value.map(key => keyMap[key] || key.toUpperCase()).join(' + '),
+)
 
-const message = useMessage()
+// 添加按键到序列中
+function addKey(key: string, targetKeys: string[]) {
+  const isModifierKey = keyMap[key]
+  const isLetterOrSymbol = /^[a-zA-Z0-9]$/.test(key) || /^[\p{P}\p{S}]$/u.test(key)
 
-// 检测操作系统
-const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
-const modifierKeys = isMac ? ['Cmd', 'Ctrl', 'Option', 'Shift'] : ['Ctrl', 'Alt', 'Shift']
-
-function addKey(key: string) {
-  if (keys.value.length === 0) {
-    // 第一个按键必须是 keyMap 中的键
-    if (keyMap[key])
-      keys.value.push(key)
+  if (targetKeys.length === 0) {
+    if (isModifierKey)
+      targetKeys.push(key)
     else
-      message.warning(`第一个按键必须是 ${modifierKeys.join('、')} 键。`)
+      message.warning(`第一个键必须为${modifierKeys.join('、')}键`)
   }
-  else if (!keys.value.includes(key) && keys.value.length < 3) {
-    // 如果按键在 keyMap 中，使用原值，否则转换为大写
-    const normalizedKey = keyMap[key] ? key : key.toUpperCase()
-    keys.value.push(normalizedKey)
+  else if (targetKeys.length === 1) {
+    if (isLetterOrSymbol) {
+      const normalizedKey = keyMap[key] ? key : key.toUpperCase()
+      targetKeys.push(normalizedKey)
+    }
+    else {
+      message.warning(`第二个键必须为字母或符号`)
+    }
   }
 }
 
-function onKeyDown(event: KeyboardEvent) {
+// 处理键盘按下
+function onKeyDown(event: KeyboardEvent, targetKeys: string[]) {
   if (event.isComposing)
     return
 
+  let key = event.key
+  // 在 Windows 系统上将 Meta 键映射到 Ctrl 键
+  if (!isMac && key === 'Meta')
+    key = 'Control'
+
   event.preventDefault()
-  const key = event.key
+  pressedKeys.value.add(key)
 
-  if (event.key === 'Backspace')
-    keys.value.pop()
-  else
-    addKey(key)
+  // 检查是否同时按下修饰键和字母/符号键
+  if (pressedKeys.value.size === 2) {
+    const keysArray = Array.from(pressedKeys.value)
+    const modifierKey = keysArray.find(key => keyMap[key])
+    const letterOrSymbolKey = keysArray.find(key => /^[a-zA-Z0-9]$/.test(key) || /^[\p{P}\p{S}]$/u.test(key))
+
+    if (modifierKey && letterOrSymbolKey) {
+      addKey(modifierKey, targetKeys)
+      addKey(letterOrSymbolKey, targetKeys)
+      pressedKeys.value.clear()
+    }
+  }
+  else if (key === 'Backspace') {
+    targetKeys.length = 0
+  }
 }
 
-function onCompositionEnd(event: CompositionEvent) {
-  const key = event.data
-  addKey(key)
+// 处理键盘弹起
+function onKeyUp(event: KeyboardEvent) {
+  pressedKeys.value.delete(event.key)
 }
 
-function clearKeys() {
-  keys.value = []
+function clearKeys(targetKeys: string[]) {
+  targetKeys.length = 0
 }
+
+function openShortcut() {
+  modalKeys.value = [...keys.value]
+  shortcut.value = true
+}
+
+function closeShortcut() {
+  shortcut.value = false
+}
+
+async function checkAndSaveShortcut() {
+  const shortcut = modalKeys.value.join('+')
+  const isRegistered = await window.ipcRenderer.invoke('check-shortcut', shortcut)
+
+  if (isRegistered) {
+    message.warning('该快捷键已被占用，请选择其他快捷键')
+  } else {
+    keys.value = [...modalKeys.value]
+    emit('updateValue', keys.value.join('+'))
+    closeShortcut()
+  }
+}
+
+watch(keys, (newKeys) => {
+  emit('updateValue', newKeys.join('+'))
+}, { deep: true })
 </script>
 
 <template>
-  <NInput
-    :value="displayValue"
-    :placeholder="placeholder"
-    clearable
-    @keydown.prevent="onKeyDown"
-    @compositionend="onCompositionEnd"
-    @clear="clearKeys"
-  />
-</template>
+  <n-input-group>
+    <n-input
+      :disabled="true"
+      :value="displayValue"
+      :placeholder="placeholder"
+      class="text-center !w28"
+    />
+    <n-button @click="openShortcut">
+      <div class="i-codicon-record-keys" />
+    </n-button>
+  </n-input-group>
 
-<style scoped>
-/* 可以根据需要添加样式 */
-</style>
+  <n-modal
+    v-model:show="shortcut"
+    :auto-focus="false"
+    :mask-closable="false"
+    :bordered="false"
+    :close-on-esc="false"
+    :closable="false"
+    preset="card"
+    title="快捷键设置"
+    transform-origin="center"
+  >
+    <div class="ma mb2 max-w-100 text-4">
+      <n-input
+        class="text-center"
+        :value="modalDisplayValue"
+        :placeholder="placeholder"
+        clearable
+        @keydown.prevent="onKeyDown($event, modalKeys)"
+        @keyup="onKeyUp"
+        @clear="clearKeys(modalKeys)"
+      />
+    </div>
+    <template #footer>
+      <n-flex justify="space-between">
+        <n-button strong secondary :focusable="false" @click="closeShortcut">
+          取消
+        </n-button>
+        <n-button type="primary" :focusable="false" strong secondary @click="checkAndSaveShortcut">
+          保存
+        </n-button>
+      </n-flex>
+    </template>
+  </n-modal>
+</template>

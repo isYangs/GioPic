@@ -12,6 +12,8 @@ interface State {
   themeAuto: boolean
   themeType: 'light' | 'dark' | null
 
+  uploadHotKey: string
+
   isImgListDelDialog: boolean
   isUploadRecordDelDialog: boolean
   lastCallTimes: { [key: string]: number }
@@ -32,6 +34,9 @@ export const useAppStore = defineStore(
       // 主题
       themeType: 'light', // 主题类型 'light' | 'dark'
       themeAuto: false, // 是否自动切换主题
+
+      // 快捷键
+      uploadHotKey: 'Meta+U', // 上传快捷键
 
       isImgListDelDialog: false, // 是否显示图片列表删除对话框
       isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框
@@ -61,6 +66,9 @@ export const useAppStore = defineStore(
         'autoStart',
         'themeType',
         'themeAuto',
+        'autoUpdate',
+        'defaultPrograms',
+        'uploadHotKey',
         'lastCallTimes',
       ],
     },

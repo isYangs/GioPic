@@ -67,7 +67,7 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     state.data
       .filter(item => item.url && item.key)
       .forEach(({ key, name, time, size, mimetype, url, origin_name }: UploadData) => {
-        window.ipcRenderer.send('create-uploadData', JSON.stringify({ key, name, time, size, mimetype, url, origin_name }))
+        window.ipcRenderer.invoke('create-uploadData', JSON.stringify({ key, name, time, size, mimetype, url, origin_name }))
       })
   }
 

@@ -82,11 +82,13 @@ export function autoStart(val: boolean) {
     app.setLoginItemSettings({
       openAtLogin: val,
       path: process.execPath,
+      args: val ? ['--hidden'] : [],
     })
   }
   else {
     app.setLoginItemSettings({
       openAtLogin: val,
+      args: val ? ['--hidden'] : [],
     })
   }
 }

@@ -8,20 +8,21 @@ const appCloseTipModal = ref(false)
 const appCloseTipCheckbox = ref(false)
 
 function handleAppmin() {
-  window.ipcRenderer.send('window-min')
+  window.ipcRenderer.invoke('window-min')
 }
 
-function handleAppMaxOrRestore() {
-  window.ipcRenderer.send('window-maxOrRestore')
+async function handleAppMaxOrRestore() {
+  const isMaximized = await window.ipcRenderer.invoke('window-maxOrRestore')
+  defaultWindowState.value = isMaximized
 }
 
 function handleAppClose() {
   appCloseTipModal.value = false
-  window.ipcRenderer.send('window-close')
+  window.ipcRenderer.invoke('window-close')
 }
 function handleAppHide() {
   appCloseTipModal.value = false
-  window.ipcRenderer.send('window-hide')
+  window.ipcRenderer.invoke('window-hide')
 }
 
 function handleOpneAppCloseTip() {
@@ -54,9 +55,6 @@ function handleAppCloseTip(type: string) {
       appCloseTipCheckbox.value = false
   }
 }
-window.ipcRenderer.on('window-maxOrRestore-reply', (_, val) => {
-  defaultWindowState.value = val
-})
 </script>
 
 <template>

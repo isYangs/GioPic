@@ -15,10 +15,10 @@ const {
   defaultPrograms,
   themeType,
   themeAuto,
+  uploadHotKey,
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
-const shortcutKeys = ref('')
 
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
@@ -73,7 +73,7 @@ const tabsOptions: TabOption[] = [
           round: false,
           onUpdateValue: (val: boolean) => {
             autoStart.value = val
-            window.ipcRenderer.send('auto-start', val)
+            window.ipcRenderer.invoke('auto-start', val)
           },
         }),
       },
@@ -116,9 +116,9 @@ const tabsOptions: TabOption[] = [
         name: '上传图片',
         isDev: true,
         component: () => h(ShortcutInput, {
-          value: shortcutKeys.value,
+          value: uploadHotKey.value,
           placeholder: '请输入快捷键',
-          onUpdateValue: (val: string) => shortcutKeys.value = val,
+          onUpdateValue: (val: string) => uploadHotKey.value = val,
         }),
       },
     ],

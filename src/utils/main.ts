@@ -54,12 +54,12 @@ export function generateLink(type: string, url: string, name: string): string {
 // 选择存储程序选项
 export const selectProgramsOptions = [
   {
-    label: '兰空社区版',
-    value: 'lsky',
-  },
-  {
     label: '兰空企业版',
     value: 'lskyPro',
+  },
+  {
+    label: '兰空社区版',
+    value: 'lsky',
   },
 ]
 

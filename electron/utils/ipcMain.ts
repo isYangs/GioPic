@@ -1,46 +1,51 @@
 import type { BrowserWindow } from 'electron'
-import { app, ipcMain } from 'electron'
+import { app, globalShortcut, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 
 export function setupIpcMain(win: BrowserWindow) {
-  ipcMain.on('window-min', () => {
+  ipcMain.handle('window-min', () => {
     win.minimize()
   })
 
-  ipcMain.on('window-maxOrRestore', (event) => {
+  ipcMain.handle('window-maxOrRestore', () => {
     if (win.isMaximized())
       win.unmaximize()
     else
       win.maximize()
 
-    event.reply('window-maxOrRestore-reply', win?.isMaximized())
+    return win.isMaximized()
   })
 
-  ipcMain.on('window-hide', () => {
+  ipcMain.handle('window-hide', () => {
     win.hide()
   })
 
-  ipcMain.on('window-close', () => {
+  ipcMain.handle('window-close', () => {
     app.quit()
     win.close()
   })
 
-  ipcMain.on('auto-start', (_event, val) => {
+  ipcMain.handle('auto-start', (_event, val) => {
     autoStart(val)
   })
 
-  ipcMain.on('create-uploadData', (_event, dataString) => {
+  ipcMain.handle('check-shortcut', (_event, key: string) => {
+    const isRegistered = globalShortcut.isRegistered(key)
+    return isRegistered
+  })
+
+  ipcMain.handle('create-uploadData', (_event, dataString) => {
     const data = JSON.parse(dataString)
     insertUploadData(data)
   })
 
-  ipcMain.on('get-uploadData', (event) => {
+  ipcMain.handle('get-uploadData', () => {
     const data = queryUploadData()
-    event.reply('get-uploadData-status', data)
+    return data
   })
 
-  ipcMain.on('delete-uploadData', (_event, key) => {
+  ipcMain.handle('del-uploadData', (_event, key) => {
     deleteUploadData(key)
   })
 }
