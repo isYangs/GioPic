@@ -5,6 +5,7 @@ import { generateLink, getLinkTypeOptions, selectProgramsOptions } from '~/utils
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
 import { useAppStore, useProgramsStore, useUploadDataStore } from '~/stores'
+import debounce from '~/utils/debounce'
 
 const appStore = useAppStore()
 const programsStore = useProgramsStore()
@@ -39,10 +40,16 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
     return
   }
 
+  // 检查文件是否已经上传
+  if (data.value[index].uploaded) {
+    window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
+    return
+  }
+
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data, status } = await requestData.uploadImage(uploadProgramsId.value, programs.value.api, programs.value.token, {
+    const { data: responseData, status } = await requestData.uploadImage(uploadProgramsId.value, programs.value.api, programs.value.token, {
       file,
       permission: isAllPublic.value,
       strategy_id: programs.value.strategiesVal,
@@ -54,15 +61,15 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
       return
     }
 
-    if (!data.status) {
-      window.$message.error(data.message)
+    if (!responseData.status) {
+      window.$message.error(responseData.message)
       uploadDataStore.setData({ uploadFailed: true }, index)
       return
     }
 
-    console.log(data.data)
+    console.log(responseData.data)
 
-    const { key, name, size, mimetype, links, origin_name } = data.data
+    const { key, name, size, mimetype, links, origin_name } = responseData.data
 
     uploadDataStore.setData(
       {
@@ -76,6 +83,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
         time: new Date().toISOString(),
         isPublic: isAllPublic.value,
         strategies: programs.value.strategiesVal,
+        uploaded: true, // 标记文件为已上传
       },
       index,
     )
@@ -93,7 +101,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 }
 
 // 全部上传方法
-async function allUplaodImage() {
+async function allUploadImage() {
   if (!defaultPrograms.value) {
     window.$message.error('你要上传到那个存储程序呢？🤔')
     return
@@ -109,7 +117,7 @@ async function allUplaodImage() {
     return
   }
 
-  const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed)
+  const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
     window.$message.info('没有需要上传的图片')
@@ -122,7 +130,7 @@ async function allUplaodImage() {
   const uploadingTasks = new Set()
 
   const tasks = uploadList.map((item: any, index: number) => {
-    if (item.links || item.uploadFailed) {
+    if (item.links || item.uploadFailed || item.uploaded) {
       window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
       return null
     }
@@ -254,12 +262,25 @@ function copyAllUrl() {
       window.$message.error('复制失败')
     })
 }
+
+const debouncedAllUploadImage = debounce(async () => {
+  if (isUpload.value) {
+    window.$message.info('上传正在进行中，请稍候...')
+    return
+  }
+  await allUploadImage()
+}, 1000)
+
+window.ipcRenderer.on('upload-shortcut', () => {
+  console.log('快捷键触发了')
+  debouncedAllUploadImage()
+})
 </script>
 
 <template>
   <template v-if="data.length">
     <n-flex my2 ml1 wfull>
-      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="allUplaodImage">
+      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="allUploadImage">
         全部上传
       </NButton>
       <NButton type="error" @click="allClear">
@@ -274,19 +295,19 @@ function copyAllUrl() {
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">
         <n-grid-item v-for="(file, index) in data" :key="index">
-          <n-card content-style="padding: 5px;" relative not-last="mb2">
+          <n-card content-style="padding: 5px;" class="relative not-last:mb2">
             <template #header>
-              <n-ellipsis style="max-width: 220px" text-4 font-400>
+              <n-ellipsis style="max-width: 220px" class="text-4 font-400">
                 {{ file.fileInfo?.name }}
               </n-ellipsis>
-              <NButton quaternary absolute right-0 top-.5 h5 w5 @click="delImage(index)">
+              <NButton quaternary class="absolute right-0 top-.5 h5 w5" @click="delImage(index)">
                 <template #icon>
                   <div i-ic-sharp-close h5 w5 text-dark-50 />
                 </template>
               </NButton>
             </template>
             <n-spin :show="file.isLoading">
-              <n-flex justify="center" h50>
+              <n-flex justify="center" class="h50">
                 <n-image :src="file.fileUrl" object-fit="cover" />
               </n-flex>
             </n-spin>
@@ -297,14 +318,14 @@ function copyAllUrl() {
               <n-flex justify="center">
                 <template v-if="file && file.url && file.origin_name">
                   <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type) => file.url && file.origin_name && copyLink(type, file.url, file.origin_name)">
-                    <NButton secondary strong wfull type="info" @click="copyLink('url', file.url, file.origin_name)">
+                    <NButton secondary strong class="wfull" type="info" @click="copyLink('url', file.url, file.origin_name)">
                       复制链接
                     </NButton>
                   </n-dropdown>
                 </template>
                 <template v-else>
                   <NButton
-                    secondary strong wfull
+                    secondary strong class="wfull"
                     :disabled="file.isLoading"
                     type="primary"
                     @click="file.fileInfo && file.fileInfo.file && uploadImage(index, file.fileInfo.file)"

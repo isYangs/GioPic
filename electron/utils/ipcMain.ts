@@ -1,5 +1,5 @@
 import type { BrowserWindow } from 'electron'
-import { app, globalShortcut, ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 
@@ -28,11 +28,6 @@ export function setupIpcMain(win: BrowserWindow) {
 
   ipcMain.handle('auto-start', (_event, val) => {
     autoStart(val)
-  })
-
-  ipcMain.handle('check-shortcut', (_event, key: string) => {
-    const isRegistered = globalShortcut.isRegistered(key)
-    return isRegistered
   })
 
   ipcMain.handle('create-uploadData', (_event, dataString) => {

@@ -6,7 +6,7 @@ import { useUploadDataStore } from '~/stores'
 const uploadDataStore = useUploadDataStore()
 
 // 上传文件，将文件信息存储到store中
-async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
+async function upload({ file, onFinish }: UploadCustomRequestOptions) {
   if (!file.file) {
     window.$message.error('文件不存在')
     return
@@ -29,7 +29,7 @@ async function handleUpload({ file, onFinish }: UploadCustomRequestOptions) {
 
     directory-dnd multiple
     auto-upload="false"
-    :custom-request="handleUpload"
+    :custom-request="upload"
     accept="image/*"
     action=""
     :file-list-style="{ display: 'none' }"

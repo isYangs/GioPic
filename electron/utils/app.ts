@@ -7,13 +7,19 @@ export * from './cors'
 export * from './ipcMain'
 
 let tray = null
-// const isMac = process.platform === 'darwin'
 
 // 初始化系统
 export function initSystem(win: BrowserWindow) {
   createMenu(win)
   createSystemTray(win)
-  registerGlobalShortcut(win)
+
+  win.on('focus', () => {
+    regGlobalShortcut(win)
+  })
+
+  win.on('blur', () => {
+    unGlobalShortcut()
+  })
 }
 
 // 创建系统托盘
@@ -55,10 +61,21 @@ function createTrayMenu(win: BrowserWindow) {
 }
 
 // 注册全局快捷键
-function registerGlobalShortcut(win: BrowserWindow) {
+function regGlobalShortcut(win: BrowserWindow) {
+  // 打开设置快捷键
   globalShortcut.register('CommandOrControl+,', () => {
     openSetting(win)
   })
+
+  // 上传快捷键
+  globalShortcut.register('CommandOrControl+U', () => {
+    win?.webContents.send('upload-shortcut')
+  })
+}
+
+// 注销全局快捷键
+function unGlobalShortcut() {
+  globalShortcut.unregisterAll()
 }
 
 // 打开设置

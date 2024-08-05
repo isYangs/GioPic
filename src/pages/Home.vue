@@ -12,6 +12,3 @@ definePage({
     <Upload />
   </div>
 </template>
-
-<style scoped>
-</style>

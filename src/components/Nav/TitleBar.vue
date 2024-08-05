@@ -1,82 +1,86 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useAppStore } from '~/stores'
 
 const appStroe = useAppStore()
 const { appCloseTip, appCloseType } = storeToRefs(appStroe)
 const defaultWindowState = ref(false)
-const appCloseTipModal = ref(false)
-const appCloseTipCheckbox = ref(false)
+const closeTipModal = ref(false)
+const closeTipCheckbox = ref(false)
 
-function handleAppmin() {
+function minimizeApp() {
   window.ipcRenderer.invoke('window-min')
 }
 
-async function handleAppMaxOrRestore() {
+async function toggleMaximizeOrRestoreApp() {
   const isMaximized = await window.ipcRenderer.invoke('window-maxOrRestore')
   defaultWindowState.value = isMaximized
 }
 
-function handleAppClose() {
-  appCloseTipModal.value = false
+function closeApp() {
+  closeTipModal.value = false
   window.ipcRenderer.invoke('window-close')
 }
-function handleAppHide() {
-  appCloseTipModal.value = false
+
+function hideApp() {
+  closeTipModal.value = false
   window.ipcRenderer.invoke('window-hide')
 }
 
-function handleOpneAppCloseTip() {
+function openCloseTipModal() {
   if (appCloseTip.value) {
-    appCloseTipModal.value = true
-    appCloseTipCheckbox.value = false
+    closeTipModal.value = true
+    closeTipCheckbox.value = false
   }
   else {
-    appCloseType.value === 'close' ? handleAppClose() : handleAppHide()
+    appCloseType.value === 'close' ? closeApp() : hideApp()
   }
 }
 
-function handleAppCloseTip(type: string) {
+function closeTip(type: string) {
   switch (type) {
     case 'close':
-      if (appCloseTipCheckbox.value)
+      if (closeTipCheckbox.value)
         appCloseTip.value = false
+
       appCloseType.value = 'close'
-      handleAppClose()
+      closeApp()
       break
     case 'hide':
-      if (appCloseTipCheckbox.value)
+      if (closeTipCheckbox.value)
         appCloseTip.value = false
+
       appCloseType.value = 'hide'
-      appCloseTipModal.value = false
-      setTimeout(handleAppHide, 500)
+      closeTipModal.value = false
+      setTimeout(hideApp, 500)
       break
     default:
-      appCloseTipModal.value = false
-      appCloseTipCheckbox.value = false
+      closeTipModal.value = false
+      closeTipCheckbox.value = false
   }
 }
 </script>
 
 <template>
   <div w37 flex="~ center">
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="handleAppmin">
+    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="minimizeApp">
       <template #icon>
         <div i-mdi-window-minimize />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5>
+    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="toggleMaximizeOrRestoreApp">
       <template #icon>
-        <div :class="defaultWindowState ? 'i-mdi-window-restore' : 'i-mdi-window-maximize' " @click="handleAppMaxOrRestore" />
+        <div :class="defaultWindowState ? 'i-mdi-window-restore' : 'i-mdi-window-maximize'" />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="handleOpneAppCloseTip">
+    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="openCloseTipModal">
       <template #icon>
         <div i-mdi-window-close />
       </template>
     </n-button>
   </div>
   <n-modal
-    v-model:show="appCloseTipModal"
+    v-model:show="closeTipModal"
     :auto-focus="false"
     :mask-closable="false"
     :bordered="false"
@@ -89,21 +93,19 @@ function handleAppCloseTip(type: string) {
     <div mb2 text-4>
       确认关闭软件吗？
     </div>
-    <n-checkbox
-      v-model:checked="appCloseTipCheckbox"
-    >
+    <n-checkbox v-model:checked="closeTipCheckbox">
       记住且不再询问
     </n-checkbox>
     <template #footer>
       <n-flex justify="space-between">
-        <n-button strong secondary :focusable="false" @click="handleAppCloseTip('cancel')">
+        <n-button strong secondary :focusable="false" @click="closeTip('cancel')">
           取消
         </n-button>
         <n-flex>
-          <n-button strong secondary :focusable="false" @click="handleAppCloseTip('close')">
+          <n-button strong secondary :focusable="false" @click="closeTip('close')">
             退出
           </n-button>
-          <n-button type="primary" :focusable="false" strong secondary @click="handleAppCloseTip('hide')">
+          <n-button type="primary" :focusable="false" strong secondary @click="closeTip('hide')">
             最小化
           </n-button>
         </n-flex>

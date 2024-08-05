@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
-import ShortcutInput from '~/components/Setting/ShortcutInput.vue'
 import { selectProgramsOptions } from '~/utils'
 import { useAppStore } from '~/stores'
 import type { ProgramsName, TabOption } from '~/types'
@@ -15,7 +14,6 @@ const {
   defaultPrograms,
   themeType,
   themeAuto,
-  uploadHotKey,
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
@@ -105,20 +103,6 @@ const tabsOptions: TabOption[] = [
           value: autoUpdate.value,
           round: false,
           onUpdateValue: (val: boolean) => autoUpdate.value = val,
-        }),
-      },
-    ],
-  },
-  {
-    title: '快捷键',
-    items: [
-      {
-        name: '上传图片',
-        isDev: true,
-        component: () => h(ShortcutInput, {
-          value: uploadHotKey.value,
-          placeholder: '请输入快捷键',
-          onUpdateValue: (val: string) => uploadHotKey.value = val,
         }),
       },
     ],

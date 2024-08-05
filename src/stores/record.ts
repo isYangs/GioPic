@@ -20,6 +20,7 @@ export interface UploadData extends BaseData {
   fileInfo?: FileInfo // 文件信息
   isLoading?: boolean // 是否正在上传
   uploadFailed?: boolean // 是否上传失败
+  uploaded?: boolean // 是否上传成功
   time?: string // 上传时间
   isPublic?: number // 是否公开
   strategies?: number // 上传策略
