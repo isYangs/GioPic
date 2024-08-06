@@ -60,7 +60,7 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
             </n-flex>
             <template #footer>
               <n-flex justify="center">
-                <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type) => copyLink(type, item.key)">
+                <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type:string) => copyLink(type, item.key)">
                   <n-button secondary strong @click="copyLink('url', item.key)">
                     复制链接
                   </n-button>

@@ -89,7 +89,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
     )
     window.$message.success('上传成功')
   }
-  catch (error) {
+  catch {
     window.$message.error('上传失败')
     uploadDataStore.setData({ uploadFailed: true }, index)
   }
@@ -317,7 +317,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
             <template #footer>
               <n-flex justify="center">
                 <template v-if="file && file.url && file.origin_name">
-                  <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type) => file.url && file.origin_name && copyLink(type, file.url, file.origin_name)">
+                  <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type:string) => file.url && file.origin_name && copyLink(type, file.url, file.origin_name)">
                     <NButton secondary strong class="wfull" type="info" @click="copyLink('url', file.url, file.origin_name)">
                       复制链接
                     </NButton>
