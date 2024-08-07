@@ -26,7 +26,7 @@ export function init(): boolean | null {
       nativeBinding,
     })
   }
-  catch (error) {
+  catch {
     db = new Database(databasePath, {
       nativeBinding,
     })

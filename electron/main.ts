@@ -61,7 +61,7 @@ function createWindow() {
 
   // 在开发模式下打开开发者工具
   if (NODE_ENV === 'development') {
-    win.webContents.openDevTools()
+    win.webContents.openDevTools({ mode: ('detach') })
     session.defaultSession.loadExtension(
       path.resolve(__dirname, '../extension/VueDevTools'),
     )
