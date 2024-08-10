@@ -113,14 +113,14 @@ async function allUploadImage() {
   }
 
   if (programs.value.strategiesVal === null) {
-    window.$message.error('我还不知道你要存在那个策略中啊！😓')
+    window.$message.error('我还不知道你要存在哪个策略中啊！😓')
     return
   }
 
   const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
-    window.$message.info('没有需要上传的图片')
+    window.$message.info('没有需要上传的图片。')
     return
   }
 
@@ -300,7 +300,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
               <n-ellipsis style="max-width: 220px" class="text-4 font-400">
                 {{ file.fileInfo?.name }}
               </n-ellipsis>
-              <NButton quaternary class="absolute right-0 top-.5 h5 w5" @click="delImage(index)">
+              <NButton quaternary class="absolute right-.5 top-.5 h5 w5" @click="delImage(index)">
                 <template #icon>
                   <div i-ic-sharp-close h5 w5 text-dark-50 />
                 </template>
@@ -308,7 +308,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
             </template>
             <n-spin :show="file.isLoading">
               <n-flex justify="center" class="h50">
-                <n-image :src="file.fileUrl" object-fit="cover" />
+                <n-image :src="file.fileUrl" object-fit="cover" style="border-radius: 2px; image-rendering: optimizeQuality;" />
               </n-flex>
             </n-spin>
             <template #description>
