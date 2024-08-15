@@ -1,10 +1,16 @@
 {
   "name": "giopic",
   "version": "0.0.1",
+  "author": "isYangs",
+  "github": "https://github.com/isYangs/GioPic",
+  "license": "AGPL-3.0",
+  "license-file": "LICENSE",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
+    "build:win": "vue-tsc && vite build && electron-builder --win",
+    "build:mac": "vue-tsc && vite build && electron-builder --mac",
     "rebuild": "electron rebuild.js",
     "postinstall": "npm run rebuild",
     "preview": "vite preview",
@@ -12,11 +18,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@electron-toolkit/utils": "^3.0.0",
     "@vueuse/core": "^10.11.0",
     "animate.css": "^4.1.1",
     "axios": "^1.7.3",
     "better-sqlite3": "^9.6.0",
     "dayjs": "^1.11.12",
+    "electron-log": "^5.1.7",
+    "electron-updater": "^6.2.1",
     "p-limit": "^5.0.0",
     "pinia": "^2.2.0",
     "pinia-plugin-persistedstate": "^3.2.1",

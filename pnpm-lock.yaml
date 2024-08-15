@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@electron-toolkit/utils':
+        specifier: ^3.0.0
+        version: 3.0.0(electron@26.6.10)
       '@vueuse/core':
         specifier: ^10.11.0
         version: 10.11.0(vue@3.4.35(typescript@5.5.4))
@@ -23,6 +26,12 @@ importers:
       dayjs:
         specifier: ^1.11.12
         version: 1.11.12
+      electron-log:
+        specifier: ^5.1.7
+        version: 5.1.7
+      electron-updater:
+        specifier: ^6.2.1
+        version: 6.2.1
       p-limit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -346,6 +355,11 @@ packages:
 
   '@dprint/toml@0.6.2':
     resolution: {integrity: sha512-Mk5unEANsL/L+WHYU3NpDXt1ARU5bNU5k5OZELxaJodDycKG6RoRnSlZXpW6+7UN2PSnETAFVUdKrh937ZwtHA==}
+
+  '@electron-toolkit/utils@3.0.0':
+    resolution: {integrity: sha512-GaXHDhiT7KCvMJjXdp/QqpYinq69T/Pdl49Z1XLf8mKGf63dnsODMWyrmIjEQ0z/vG7dO8qF3fvmI6Eb2lUNZA==}
+    peerDependencies:
+      electron: '>=13.0.0'
 
   '@electron/asar@3.2.10':
     resolution: {integrity: sha512-mvBSwIBUeiRscrCeJE1LwctAriBj65eUDm0Pc11iE5gRwzkmsdbS7FnZ1XUWjpSeQWL1L5g12Fc/SchPM9DUOw==}
@@ -1486,11 +1500,18 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
+  electron-log@5.1.7:
+    resolution: {integrity: sha512-/PjrS9zGkrZCDTHt6IgNE3FeciBbi4wd7U76NG9jAoNXF99E9IJdvBkqvaUJ1NjLojYDKs0kTvn9YhKy1/Zi+Q==}
+    engines: {node: '>= 14'}
+
   electron-publish@24.13.1:
     resolution: {integrity: sha512-2ZgdEqJ8e9D17Hwp5LEq5mLQPjqU3lv/IALvgp+4W8VeNhryfGhYEQC/PgDPMrnWUp+l60Ou5SJLsu+k4mhQ8A==}
 
   electron-to-chromium@1.5.4:
     resolution: {integrity: sha512-orzA81VqLyIGUEA77YkVA1D+N+nNfl2isJVjjmOyrlxuooZ19ynb+dOlaDTqd/idKRS9lDCSBmtzM+kyCsMnkA==}
+
+  electron-updater@6.2.1:
+    resolution: {integrity: sha512-83eKIPW14qwZqUUM6wdsIRwVKZyjmHxQ4/8G+1C6iS5PdDt7b1umYQyj1/qPpH510GmHEQe4q0kCPe3qmb3a0Q==}
 
   electron@26.6.10:
     resolution: {integrity: sha512-pV2SD0RXzAiNRb/2yZrsVmVkBOMrf+DVsPulIgRjlL0+My9BL5spFuhHVMQO9yHl9tFpWtuRpQv0ofM/i9P8xg==}
@@ -2265,8 +2286,14 @@ packages:
   lodash.difference@4.5.0:
     resolution: {integrity: sha512-dS2j+W26TQ7taQBGN8Lbbq04ssV3emRw4NY58WErlTO29pIqS0HmoT5aJ9+TUQ1N3G+JOZSji4eugsWwGp9yPA==}
 
+  lodash.escaperegexp@4.1.2:
+    resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
+
   lodash.flatten@4.4.0:
     resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
+
+  lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -2974,6 +3001,9 @@ packages:
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
 
+  tiny-typed-emitter@2.1.0:
+    resolution: {integrity: sha512-qVtvMxeXbVej0cQWKqVSSAHmKZEHAvxdF8HEUBFWts8h+xEo5m/lEiPakuyZ3BnCBjOD8i24kzNOiOLLgsSxhA==}
+
   tmp-promise@3.0.3:
     resolution: {integrity: sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==}
 
@@ -3614,6 +3644,10 @@ snapshots:
   '@dprint/markdown@0.17.2': {}
 
   '@dprint/toml@0.6.2': {}
+
+  '@electron-toolkit/utils@3.0.0(electron@26.6.10)':
+    dependencies:
+      electron: 26.6.10
 
   '@electron/asar@3.2.10':
     dependencies:
@@ -5003,6 +5037,8 @@ snapshots:
       - electron-builder-squirrel-windows
       - supports-color
 
+  electron-log@5.1.7: {}
+
   electron-publish@24.13.1:
     dependencies:
       '@types/fs-extra': 9.0.13
@@ -5016,6 +5052,19 @@ snapshots:
       - supports-color
 
   electron-to-chromium@1.5.4: {}
+
+  electron-updater@6.2.1:
+    dependencies:
+      builder-util-runtime: 9.2.4
+      fs-extra: 10.1.0
+      js-yaml: 4.1.0
+      lazy-val: 1.0.5
+      lodash.escaperegexp: 4.1.2
+      lodash.isequal: 4.5.0
+      semver: 7.6.3
+      tiny-typed-emitter: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
 
   electron@26.6.10:
     dependencies:
@@ -5895,7 +5944,11 @@ snapshots:
 
   lodash.difference@4.5.0: {}
 
+  lodash.escaperegexp@4.1.2: {}
+
   lodash.flatten@4.4.0: {}
+
+  lodash.isequal@4.5.0: {}
 
   lodash.isplainobject@4.0.6: {}
 
@@ -6607,6 +6660,8 @@ snapshots:
       fs-extra: 10.1.0
 
   text-table@0.2.0: {}
+
+  tiny-typed-emitter@2.1.0: {}
 
   tmp-promise@3.0.3:
     dependencies:

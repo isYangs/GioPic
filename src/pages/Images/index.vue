@@ -11,12 +11,12 @@ onMounted(() => {
 })
 
 async function getUploadData() {
-  const data = await window.ipcRenderer.invoke('get-uploadData')
+  const data = await window.ipcRenderer.invoke('fetch-all-upload-data')
   uploadData.value = data
 }
 
 function delImage(key: string) {
-  window.ipcRenderer.invoke('del-uploadData', key)
+  window.ipcRenderer.invoke('delete-upload-data', key)
   getUploadData()
 }
 

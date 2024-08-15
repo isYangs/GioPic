@@ -2,13 +2,15 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import Database from 'better-sqlite3'
 import { app } from 'electron'
+import { platform } from '@electron-toolkit/utils'
+import logger from '../utils/logger'
 import tables from './tables'
 
 const root = path.join(__dirname, '..')
 let db: Database.Database
 
 // 定义数据库文件路径，针对macOS系统进行适配
-const DB_PATH = process.platform === 'darwin'
+const DB_PATH = platform.isMacOS
   ? path.join(app.getPath('userData'), '/GPData.db') // 对于macOS，将数据库存放在用户数据目录下
   : path.join(path.dirname(app.getPath('exe')), '/GPData.db') // 对于其他平台，将数据库存放在应用程序目录下
 
@@ -16,6 +18,7 @@ const initTables = (db: Database.Database) => db.exec(`${Array.from(tables.value
 
 // 打开、初始化数据库
 export function init(): boolean | null {
+  logger.info('[db] Initializing database...')
   const databasePath = DB_PATH
   const nativeBinding = path.join(root, import.meta.env.VITE_BETTER_SQLITE3_BINDING)
   let dbFileExists = true
@@ -25,8 +28,10 @@ export function init(): boolean | null {
       fileMustExist: true,
       nativeBinding,
     })
+    logger.info('[db] Database file exists.')
   }
   catch {
+    logger.warn('[db] Database file does not exist, creating a new one.')
     db = new Database(databasePath, {
       nativeBinding,
     })
@@ -34,11 +39,17 @@ export function init(): boolean | null {
     dbFileExists = false
   }
 
-  if (fs.existsSync(DB_PATH))
+  if (fs.existsSync(DB_PATH)) {
+    logger.info('[db] Optimizing database...')
     db.exec('PRAGMA optimize;')
+  }
 
-  process.on('exit', () => db.close())
-  console.log('数据库初始化成功')
+  process.on('exit', () => {
+    db.close()
+    logger.info('[db] Database connection closed.')
+  })
+
+  logger.info(`[db] Database initialized; path: ${DB_PATH}`)
   return dbFileExists
 }
 

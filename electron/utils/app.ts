@@ -1,7 +1,9 @@
 import path from 'node:path'
+import { platform } from '@electron-toolkit/utils'
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import { Menu, Tray, app, dialog, globalShortcut, nativeImage } from 'electron'
 import pkg from '../../package.json'
+import logger from '../utils/logger'
 
 export * from './cors'
 export * from './ipcMain'
@@ -10,6 +12,7 @@ let tray = null
 
 // 初始化系统
 export function initSystem(win: BrowserWindow) {
+  logger.info('[system] Initializing system...')
   createMenu(win)
   createSystemTray(win)
 
@@ -20,17 +23,18 @@ export function initSystem(win: BrowserWindow) {
   win.on('blur', () => {
     unGlobalShortcut()
   })
+
+  logger.info('[system] System initialized.')
 }
 
 // 创建系统托盘
 function createSystemTray(win: BrowserWindow) {
-  tray = new Tray(nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'favicon.png')).resize({ width: 16, height: 16 }))
-
+  const iconPath = path.join(process.env.VITE_PUBLIC, 'favicon.png')
+  const icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
+  tray = new Tray(icon)
   tray.setToolTip('GioPic')
   tray.setContextMenu(createTrayMenu(win))
-
-  // 打开主窗口
-  // tray.on('click', () => win?.show())
+  logger.info('[tray] System tray created.')
 }
 
 // 创建系统托盘菜单
@@ -46,12 +50,16 @@ function createTrayMenu(win: BrowserWindow) {
     {
       label: '设置',
       accelerator: 'CommandOrControl+,',
-      click: () => openSetting(win),
+      click: () => {
+        logger.info('[tray] Open settings clicked.')
+        openSetting(win)
+      },
     },
     { type: 'separator' },
     {
       label: '重启应用',
       click: () => {
+        logger.info('[tray] Restart application clicked.')
         app.relaunch()
         app.exit()
       },
@@ -62,20 +70,21 @@ function createTrayMenu(win: BrowserWindow) {
 
 // 注册全局快捷键
 function regGlobalShortcut(win: BrowserWindow) {
-  // 打开设置快捷键
   globalShortcut.register('CommandOrControl+,', () => {
+    logger.info('[shortcut] Open settings shortcut triggered.')
     openSetting(win)
   })
 
-  // 上传快捷键
   globalShortcut.register('CommandOrControl+U', () => {
     win?.webContents.send('upload-shortcut')
   })
+  logger.info('[shortcut] Global shortcuts registered.')
 }
 
 // 注销全局快捷键
 function unGlobalShortcut() {
   globalShortcut.unregisterAll()
+  logger.info('[shortcut] All global shortcuts unregistered.')
 }
 
 // 打开设置
@@ -95,6 +104,7 @@ function openAbout() {
 
 // 开机自启
 export function autoStart(val: boolean) {
+  logger.info(`[autostart] Setting auto start to ${val}...`)
   if (!app.isPackaged) {
     app.setLoginItemSettings({
       openAtLogin: val,
@@ -108,12 +118,13 @@ export function autoStart(val: boolean) {
       args: val ? ['--hidden'] : [],
     })
   }
+  logger.info(`[autostart] Auto start set to ${val}.`)
 }
 
 // 创建菜单
 function createMenu(win: BrowserWindow) {
-  // macOS 的设置
-  if (process.platform === 'darwin') {
+  logger.info('[menu] Creating application menu...')
+  if (platform.isMacOS) {
     const template: MenuItemConstructorOptions[] = [
       {
         label: 'GioPic',
@@ -138,9 +149,10 @@ function createMenu(win: BrowserWindow) {
     ]
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
+    logger.info('[menu] Application menu created for macOS.')
   }
   else {
-    // windows 和 linux 的设置
     Menu.setApplicationMenu(null)
+    logger.info('[menu] Application menu set to null for Windows/Linux.')
   }
 }

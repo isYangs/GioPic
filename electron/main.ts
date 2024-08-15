@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { BrowserWindow, app, globalShortcut, nativeImage, session, shell } from 'electron'
+import { is, platform } from '@electron-toolkit/utils'
 import { init as initDB } from './db'
 import { fixElectronCors, initSystem, setupIpcMain } from './utils/app'
 
@@ -21,7 +22,6 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.
 
 let win: BrowserWindow | null
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
-const NODE_ENV = process.env.NODE_ENV
 
 // 创建窗口
 function createWindow() {
@@ -60,7 +60,7 @@ function createWindow() {
     win.loadFile(path.join(process.env.DIST, 'index.html'))
 
   // 在开发模式下打开开发者工具
-  if (NODE_ENV === 'development') {
+  if (is.dev) {
     win.webContents.openDevTools({ mode: ('detach') })
     session.defaultSession.loadExtension(
       path.resolve(__dirname, '../extension/VueDevTools'),
@@ -73,7 +73,7 @@ function createWindow() {
 
 // 当所有窗口都关闭时退出，但在 macOS 上除外。在 macOS 上，应用程序及其菜单栏保持活动状态，直到用户使用 Cmd + Q 显式退出。
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!platform.isMacOS) {
     app.quit()
     win = null
   }
