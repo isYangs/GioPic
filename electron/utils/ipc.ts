@@ -1,5 +1,5 @@
 import type { BrowserWindow } from 'electron'
-import { app, ipcMain } from 'electron'
+import { app, autoUpdater, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 import logger from './logger'
@@ -60,6 +60,17 @@ export function setupIpcMain(win: BrowserWindow) {
     }
     catch (e) {
       logger.error(`[upload] Error deleting upload data from the database: ${e}`)
+    }
+  })
+
+  ipcMain.on('check-for-update', async () => {
+    logger.info('[update] Checking for updates...')
+    console.log('check-for-update')
+    try {
+      await autoUpdater.checkForUpdates()
+    }
+    catch (e: any) {
+      logger.error(`[update] Error checking for updates: ${e}`)
     }
   })
 }

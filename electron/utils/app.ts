@@ -6,7 +6,7 @@ import pkg from '../../package.json'
 import logger from '../utils/logger'
 
 export * from './cors'
-export * from './ipcMain'
+export * from './ipc'
 
 let tray = null
 
@@ -78,13 +78,11 @@ function regGlobalShortcut(win: BrowserWindow) {
   globalShortcut.register('CommandOrControl+U', () => {
     win?.webContents.send('upload-shortcut')
   })
-  logger.info('[shortcut] Global shortcuts registered.')
 }
 
 // 注销全局快捷键
 function unGlobalShortcut() {
   globalShortcut.unregisterAll()
-  logger.info('[shortcut] All global shortcuts unregistered.')
 }
 
 // 打开设置
