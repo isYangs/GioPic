@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
-import { selectProgramsOptions } from '~/utils'
 import { useAppStore } from '~/stores'
-import type { ProgramsName, TabOption } from '~/types'
+import type { TabOption } from '~/types'
 import debounce from '~/utils/debounce.ts'
 
 const appStore = useAppStore()
@@ -11,7 +10,6 @@ const {
   appCloseType,
   autoStart,
   autoUpdate,
-  defaultPrograms,
   themeType,
   themeAuto,
 } = storeToRefs(appStore)
@@ -49,14 +47,6 @@ const tabsOptions: TabOption[] = [
             if (val)
               themeType.value = osThemeRef.value
           },
-        }),
-      },
-      {
-        name: '默认上传存储程序',
-        component: () => h(NSelect, {
-          value: defaultPrograms.value,
-          onUpdateValue: (val: ProgramsName) => defaultPrograms.value = val,
-          options: selectProgramsOptions,
         }),
       },
     ],
