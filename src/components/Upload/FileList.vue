@@ -4,6 +4,7 @@ import pLimit from 'p-limit'
 import { generateLink, getLinkTypeOptions, selectProgramsOptions } from '~/utils'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
+import type { ProgramsName } from '~/types'
 import { useAppStore, useProgramsStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 
@@ -23,6 +24,9 @@ const isPublicOptions = [
 
 const programs = computed(() => programsStore.getPrograms(uploadProgramsId.value))
 
+function changeDefaultProgram(val: ProgramsName) {
+  defaultPrograms.value = val
+}
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
   if (!defaultPrograms.value) {
@@ -290,7 +294,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" w30 :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramsId" w30 :options="selectProgramsOptions" />
+      <n-select v-model:value="uploadProgramsId" w30 :options="selectProgramsOptions" @update:value="changeDefaultProgram" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">
