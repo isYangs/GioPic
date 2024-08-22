@@ -53,11 +53,13 @@ const settingOptions = computed(() => [
             value: strategiesVal.value,
             onUpdateValue: (val: number) => {
               strategiesVal.value = val
+              saveSetting()
             },
             options: settings.value.strategies,
           }),
           h(NButton, {
             onClick: async () => {
+              saveSetting()
               const loading = window.$message.loading('正在获取策略列表...')
               if (!await programsStore.getStrategies(id.value))
                 window.$message.error('获取策略列表失败，请检查设置是否填写有误')
@@ -91,10 +93,5 @@ watchEffect(() => {
 <template>
   <div wh-full>
     <SetItem ref="setItemRef" :title="getProgramsName(id)" :items="settingOptions" style="padding-top: 0;" />
-    <n-flex justify="end" mt3>
-      <NButton type="primary" @click="saveSetting">
-        保存设置
-      </NButton>
-    </n-flex>
   </div>
 </template>
