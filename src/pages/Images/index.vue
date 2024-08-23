@@ -44,28 +44,28 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
     <n-image-group>
       <n-grid v-if="uploadData.length > 0" cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">
         <n-grid-item v-for="item in uploadData" :key="item.key">
-          <n-card relative>
+          <n-card class="relative">
             <template #header>
-              <n-ellipsis style="max-width: 220px" text-4 font-400>
+              <n-ellipsis class="max-w55 text-4 font-400">
                 {{ item.name }}
               </n-ellipsis>
-              <n-button quaternary absolute right-0 top-.5 h5 w5 @click="delImage(item.key)">
+              <n-button quaternary class="absolute right-.5 h5 w5" @click="delImage(item.key)">
                 <template #icon>
-                  <div i-ic-sharp-close h5 w5 text-dark-50 />
+                  <div i-ic-round-close class="h5 w5 text-dark-50" />
                 </template>
               </n-button>
             </template>
-            <n-flex justify="center" h50>
-              <n-image :src="item.url" object-fit="cover" />
+            <n-flex justify="center" class="h50">
+              <n-image class="border-rd-sm" :src="item.url" object-fit="cover" style="image-rendering: optimizeQuality;" />
             </n-flex>
             <template #footer>
               <n-flex justify="center">
                 <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type:string) => copyLink(type, item.key)">
-                  <n-button secondary strong @click="copyLink('url', item.key)">
+                  <n-button class="w45%" secondary strong @click="copyLink('url', item.key)">
                     复制链接
                   </n-button>
                 </n-dropdown>
-                <n-button secondary strong @click="openImagesInfoModal(item)">
+                <n-button class="w45%" secondary strong @click="openImagesInfoModal(item)">
                   详细信息
                 </n-button>
               </n-flex>
@@ -74,9 +74,9 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
         </n-grid-item>
       </n-grid>
     </n-image-group>
-    <n-empty v-if="uploadData.length === 0" mt40 size="large" description="还没有图片，快去上传图片吧">
+    <n-empty v-if="uploadData.length === 0" class="mt40" size="large" description="还没有图片，快去上传图片吧">
       <template #icon>
-        <div i-icon-park-outline-error-picture h11 w11 />
+        <div i-ph-image-broken-bold class="h11 w11" />
       </template>
     </n-empty>
     <n-modal
@@ -107,8 +107,6 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
   --n-padding-left: 10px !important;
   --n-padding-right: 10px !important;
   --uno: rounded-2;
-  min-width: 220px;
-  max-width: 240px;
 }
 
 :deep(.n-image) > img {

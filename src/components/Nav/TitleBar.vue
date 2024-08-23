@@ -70,17 +70,17 @@ function closeTip(type: string) {
   <div w37 flex="~ center">
     <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="minimizeApp">
       <template #icon>
-        <div i-mdi-window-minimize />
+        <div i-ic-round-minus />
       </template>
     </n-button>
     <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="toggleMaximizeOrRestoreApp">
       <template #icon>
-        <div :class="defaultWindowState ? 'i-mdi-window-restore' : 'i-mdi-window-maximize'" />
+        <div :class="defaultWindowState ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
       </template>
     </n-button>
     <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="openCloseTipModal">
       <template #icon>
-        <div i-mdi-window-close />
+        <div i-ic-round-close />
       </template>
     </n-button>
   </div>

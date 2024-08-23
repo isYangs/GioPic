@@ -26,7 +26,6 @@ async function upload({ file, onFinish }: UploadCustomRequestOptions) {
 
 <template>
   <n-upload
-
     directory-dnd multiple
     auto-upload="false"
     :custom-request="upload"
@@ -35,15 +34,15 @@ async function upload({ file, onFinish }: UploadCustomRequestOptions) {
     :file-list-style="{ display: 'none' }"
   >
     <n-upload-dragger class="rounded-3">
-      <div style="margin-bottom: 12px">
+      <div class="mb-3">
         <n-icon size="48" :depth="3">
           <ArchiveIcon />
         </n-icon>
       </div>
-      <n-text style="font-size: 16px">
+      <n-text class="text-4">
         点击或者拖动文件到这里，支持上传多文件
       </n-text>
-      <n-p depth="3" style="margin: 8px 0 0 0">
+      <n-p depth="3" class="mt-2">
         禁止上传任何包含(色情，暴力，宣扬恐怖主义)及违反中华人民共和国法律的图片
       </n-p>
     </n-upload-dragger>
