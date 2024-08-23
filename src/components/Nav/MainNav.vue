@@ -11,12 +11,12 @@ const themeOptions = computed(() => [
   {
     label: themeType.value === 'light' ? '深色模式' : '浅色模式',
     key: 'lightTodark',
-    icon: renderIcon(themeType.value === 'light' ? 'i-material-symbols-light-mode' : 'i-material-symbols-dark-mode'),
+    icon: renderIcon(themeType.value === 'light' ? 'i-ph-sun-bold' : 'i-ph-moon-stars-bold'),
   },
   {
     label: '程序设置',
     key: 'setting',
-    icon: renderIcon('i-material-symbols-settings-rounded'),
+    icon: renderIcon('i-ph-gear-six-bold'),
   },
 ])
 
@@ -56,12 +56,12 @@ function themeChange(key: string) {
     <div flex="~" items-center style="-webkit-app-region: no-drag">
       <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="router.go(-1)">
         <template #icon>
-          <div i-tabler-chevron-left />
+          <div i-ph-caret-left-bold />
         </template>
       </n-button>
       <n-button :focusable="false" quaternary h8 w8 @click="router.go(1)">
         <template #icon>
-          <div i-tabler-chevron-right />
+          <div i-ph-caret-right-bold />
         </template>
       </n-button>
     </div>
@@ -71,7 +71,7 @@ function themeChange(key: string) {
         <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
           <n-button :focusable="false" quaternary h8 w8>
             <template #icon>
-              <div i-icon-park-outline-setting-two />
+              <div i-ph-gear-six-bold />
             </template>
           </n-button>
         </n-dropdown>

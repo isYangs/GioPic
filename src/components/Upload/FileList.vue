@@ -290,36 +290,36 @@ window.ipcRenderer.on('upload-shortcut', () => {
 
 <template>
   <template v-if="data.length">
-    <n-flex my2 ml1 wfull>
-      <NButton type="primary" :disabled="data.length <= 1 || isUpload" @click="allUploadImage">
+    <n-flex class="my2 ml1 wfull">
+      <NButton type="primary" secondary :disabled="data.length <= 1 || isUpload" @click="allUploadImage">
         全部上传
       </NButton>
-      <NButton type="error" @click="allClear">
+      <NButton type="error" secondary @click="allClear">
         清空列表
       </NButton>
-      <NButton type="info" :disabled="false" @click="copyAllUrl">
+      <NButton type="info" secondary :disabled="false" @click="copyAllUrl">
         复制全部URL
       </NButton>
-      <n-select v-model:value="isAllPublic" w30 :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramsId" w30 :options="selectProgramsOptions" @update:value="changeDefaultProgram" />
+      <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
+      <n-select v-model:value="uploadProgramsId" class="w30" :options="selectProgramsOptions" @update:value="changeDefaultProgram" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">
         <n-grid-item v-for="(file, index) in data" :key="index">
-          <n-card content-style="padding: 5px;" class="relative not-last:mb2">
+          <n-card class="relative not-last:mb2">
             <template #header>
-              <n-ellipsis style="max-width: 220px" class="text-4 font-400">
+              <n-ellipsis class="max-w55 text-4 font-400">
                 {{ file.fileInfo?.name }}
               </n-ellipsis>
-              <NButton quaternary class="absolute right-.5 top-.5 h5 w5" @click="delImage(index)">
+              <NButton quaternary class="absolute right-.5 h5 w5" @click="delImage(index)">
                 <template #icon>
-                  <div i-ic-sharp-close h5 w5 text-dark-50 />
+                  <div i-ic-round-close class="h5 w5 text-dark-50" />
                 </template>
               </NButton>
             </template>
             <n-spin :show="file.isLoading">
               <n-flex justify="center" class="h50">
-                <n-image :src="file.fileUrl" object-fit="cover" style="border-radius: 2px; image-rendering: optimizeQuality;" />
+                <n-image class="border-rd-sm" :src="file.fileUrl" object-fit="cover" style="image-rendering: optimizeQuality;" />
               </n-flex>
             </n-spin>
             <template #description>
@@ -336,7 +336,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
                 </template>
                 <template v-else>
                   <NButton
-                    secondary strong class="wfull"
+                    tertiary class="wfull"
                     :disabled="file.isLoading"
                     type="primary"
                     @click="file.fileInfo && file.fileInfo.file && uploadImage(index, file.fileInfo.file)"

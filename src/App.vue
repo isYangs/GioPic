@@ -17,7 +17,7 @@ onMounted(() => {
 
 <template>
   <Provider>
-    <n-layout position="absolute" :class="{ height: '100%' }">
+    <n-layout position="absolute">
       <n-layout-header bordered>
         <MainNav />
       </n-layout-header>

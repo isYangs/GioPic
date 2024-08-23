@@ -28,7 +28,7 @@ const menuOptions = computed(() => [
         { default: () => '上传图片' },
       ),
     key: '/',
-    icon: renderIcon('i-ic-sharp-house !w20px !h20px'),
+    icon: renderIcon('i-ph-upload-simple-bold !w20px !h20px'),
   },
   {
     label: () =>
@@ -39,10 +39,10 @@ const menuOptions = computed(() => [
             name: '/Images/',
           },
         },
-        { default: () => '图片广场' },
+        { default: () => '图片列表' },
       ),
     key: '/Images',
-    icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+    icon: renderIcon('i-ph-list-bullets-bold !w20px !h20px'),
   },
   {
     key: 'divider-1',
@@ -68,7 +68,7 @@ const menuOptions = computed(() => [
             { default: () => '兰空企业版' },
           ),
         key: `/Setting/lskyPro`,
-        icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
       },
       {
         label: () =>
@@ -82,7 +82,7 @@ const menuOptions = computed(() => [
             { default: () => '兰空社区版' },
           ),
         key: `/Setting/lsky`,
-        icon: renderIcon('i-ic-baseline-photo-library !w18px !h18px'),
+        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
       },
     ],
   },

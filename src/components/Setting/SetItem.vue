@@ -48,7 +48,7 @@ defineExpose({ formValidation })
             <n-tag v-if="item.isDev" :bordered="false" round size="small" type="warning" ml1>
               开发中
               <template #icon>
-                <div i-material-symbols-code />
+                <div i-ph-code-bold />
               </template>
             </n-tag>
           </div>
