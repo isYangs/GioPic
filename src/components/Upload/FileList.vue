@@ -26,6 +26,13 @@ const programs = computed(() => programsStore.getPrograms(uploadProgramsId.value
 
 function changeDefaultProgram(val: ProgramsName) {
   defaultPrograms.value = val
+
+  // 重置失败图片的状态
+  data.value.forEach((item, index) => {
+    if (item.uploadFailed) {
+      uploadDataStore.setData({ uploadFailed: false }, index)
+    }
+  })
 }
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
@@ -180,7 +187,7 @@ function delImage(index: number) {
 
   const n = window.$dialog.warning({
     title: '提示',
-    content: '确定删除该图片吗？不会删除上传日志和图床中的图片。',
+    content: '确定删除该图片吗？不会删除数据库和图床中的图片。',
     autoFocus: false,
     action: () => {
       return h('div', { class: 'wh-full flex-center justify-between' }, [
