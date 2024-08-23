@@ -33,7 +33,12 @@ function openCloseTipModal() {
     closeTipCheckbox.value = false
   }
   else {
-    appCloseType.value === 'close' ? closeApp() : hideApp()
+    if (appCloseType.value === 'close') {
+      closeApp()
+    }
+    else {
+      hideApp()
+    }
   }
 }
 
