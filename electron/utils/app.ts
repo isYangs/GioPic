@@ -70,6 +70,10 @@ function createTrayMenu(win: BrowserWindow) {
 
 // 注册全局快捷键
 function regGlobalShortcut(win: BrowserWindow) {
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    win.webContents.openDevTools({ mode: ('detach') })
+  })
+
   globalShortcut.register('CommandOrControl+,', () => {
     logger.info('[shortcut] Open settings shortcut triggered.')
     openSetting(win)

@@ -44,6 +44,7 @@
     "@vitejs/plugin-vue": "^4.6.2",
     "electron": "^26.6.10",
     "electron-builder": "^24.13.3",
+    "electron-devtools-installer": "^3.2.0",
     "eslint": "^8.57.0",
     "eslint-plugin-format": "^0.1.2",
     "naive-ui": "^2.39.0",

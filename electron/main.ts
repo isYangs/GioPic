@@ -1,6 +1,7 @@
 import path from 'node:path'
-import { BrowserWindow, app, globalShortcut, nativeImage, session, shell } from 'electron'
+import { BrowserWindow, app, globalShortcut, nativeImage, shell } from 'electron'
 import { is, platform } from '@electron-toolkit/utils'
+import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from './db'
 import { fixElectronCors, initSystem, setupIpcMain } from './utils/app'
 
@@ -62,13 +63,20 @@ function createWindow() {
   // 在开发模式下打开开发者工具
   if (is.dev) {
     win.webContents.openDevTools({ mode: ('detach') })
-    session.defaultSession.loadExtension(
-      path.resolve(__dirname, '../extension/VueDevTools'),
-    )
   }
 
   initDB()
   setupIpcMain(win)
+}
+
+function installExtensions() {
+  return [
+    VUEJS3_DEVTOOLS,
+  ].map(extension => installExtension(extension, {
+    loadExtensionOptions: { allowFileAccess: true },
+  })
+    .then(name => console.log('Added Extension:', name))
+    .catch(err => console.log('An error occurred:', err)))
 }
 
 // 当所有窗口都关闭时退出，但在 macOS 上除外。在 macOS 上，应用程序及其菜单栏保持活动状态，直到用户使用 Cmd + Q 显式退出。
@@ -87,7 +95,8 @@ app.on('activate', () => {
 })
 
 // 等待应用程序准备就绪后创建窗口
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await Promise.all(installExtensions())
   createWindow()
   if (win)
     initSystem(win)

@@ -1,1 +1,0 @@
-(()=>{const e=document.createElement("script");e.src=chrome.runtime.getURL("build/hook-exec.js"),e.onload=()=>{e.remove()},(document.head||document.documentElement).appendChild(e)})();
