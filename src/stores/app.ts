@@ -6,6 +6,7 @@ interface State {
   appCloseTip: boolean
   autoStart: boolean
   autoUpdate: boolean
+  isDevToolsOpen: boolean
   defaultPrograms: ProgramsName
   isMenuCollapsed: boolean
 
@@ -26,6 +27,7 @@ export const useAppStore = defineStore(
       appCloseTip: false, // 是否显示关闭应用对话框
       autoStart: false, // 是否开机自启动
       autoUpdate: false, // 是否自动更新
+      isDevToolsOpen: true, // 是否打开开发者工具
       defaultPrograms: 'lskyPro', // 默认上传存储程序
       isMenuCollapsed: false, // 是否折叠菜单
 
@@ -59,6 +61,7 @@ export const useAppStore = defineStore(
         'appCloseType',
         'appCloseTip',
         'autoStart',
+        'isDevToolsOpen',
         'themeType',
         'themeAuto',
         'autoUpdate',

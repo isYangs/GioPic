@@ -10,6 +10,7 @@ const {
   appCloseType,
   autoStart,
   autoUpdate,
+  isDevToolsOpen,
   themeType,
   themeAuto,
 } = storeToRefs(appStore)
@@ -100,6 +101,18 @@ const tabsOptions: TabOption[] = [
   {
     title: '其他',
     items: [
+      {
+        name: '开发者工具',
+        tip: '开启后可使用 Cmd或Ctrl + Shift + I 打开开发者工具',
+        component: () => h(NSwitch, {
+          value: isDevToolsOpen.value,
+          round: false,
+          onUpdateValue: (val: boolean) => {
+            isDevToolsOpen.value = val
+            window.ipcRenderer.invoke('devtools', val)
+          },
+        }),
+      },
       {
         name: '程序重置',
         tip: '若程序显示异常或出现问题时可尝试此操作',

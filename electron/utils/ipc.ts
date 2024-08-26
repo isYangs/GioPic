@@ -1,5 +1,5 @@
 import type { BrowserWindow } from 'electron'
-import { app, autoUpdater, ipcMain } from 'electron'
+import { app, globalShortcut, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 import logger from './logger'
@@ -63,14 +63,18 @@ export function setupIpcMain(win: BrowserWindow) {
     }
   })
 
-  ipcMain.on('check-for-update', async () => {
-    logger.info('[update] Checking for updates...')
-    console.log('check-for-update')
-    try {
-      await autoUpdater.checkForUpdates()
+  ipcMain.handle('devtools', (_event, val) => {
+    if (val) {
+      globalShortcut.register('CommandOrControl+Shift+I', () => {
+        win?.webContents.openDevTools({ mode: ('detach') })
+      })
     }
-    catch (e: any) {
-      logger.error(`[update] Error checking for updates: ${e}`)
+    else {
+      globalShortcut.unregister('CommandOrControl+Shift+I')
     }
+  })
+
+  ipcMain.handle('app-version', () => {
+    return app.getVersion()
   })
 }
