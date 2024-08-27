@@ -55,8 +55,12 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
                 </template>
               </n-button>
             </template>
-            <n-flex justify="center" class="h50">
-              <n-image class="border-rd-sm" :src="item.url" object-fit="cover" style="image-rendering: optimizeQuality;" />
+            <n-flex class="h50">
+              <n-image lazy class="wh-full border-rd-sm" :src="item.url" object-fit="cover" style="image-rendering: optimizeQuality;">
+                <template #placeholder>
+                  <n-skeleton height="100%" />
+                </template>
+              </n-image>
             </n-flex>
             <template #footer>
               <n-flex justify="center">
