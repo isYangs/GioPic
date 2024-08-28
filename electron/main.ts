@@ -17,12 +17,15 @@ import { fixElectronCors, initSystem, setupIpcMain } from './utils/app'
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
-// 设置环境变量
-process.env.DIST = path.join(__dirname, '../dist')
-process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
-
 let win: BrowserWindow | null
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
+
+// 设置环境变量
+process.env.APP_ROOT = path.join(__dirname, '../')
+process.env.DIST = path.join(__dirname, '../dist')
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
+  ? path.join(process.env.APP_ROOT, 'public')
+  : process.env.DIST
 
 // 创建窗口
 function createWindow() {
@@ -38,6 +41,8 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
     },
   })
+
+  console.log(path.join(process.env.VITE_PUBLIC, 'favicon.png'))
 
   // 设置应用程序名称
   app.setAppUserModelId(app.getName())
