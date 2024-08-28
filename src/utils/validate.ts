@@ -1,7 +1,7 @@
 import type { FormItemRule } from 'naive-ui'
 
 const urlPattern = /^https?:\/\/.*/
-const tokenPattern = /^\d+\|[A-Za-z0-9]{40}$/
+const tokenPattern = /^\d+\|[A-Z0-9]{40}$/i
 
 export function createFormRule(validator: (value: any) => boolean | Error): FormItemRule {
   return {

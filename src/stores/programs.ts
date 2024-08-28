@@ -2,22 +2,25 @@ import { defineStore } from 'pinia'
 import requestData from '~/api'
 import type { ProgramsName } from '~/types'
 
+type Storage = typeof initialPrograms
+
 interface State {
   programs: {
     [id: string]: Storage
   }
 }
 
-interface Storage {
-  api: string
-  token: string
-  strategies: []
-  strategiesVal: number | null
-}
-
 interface StrategiesData {
   name: string
   id: number
+}
+
+// 同时定义 State 类型和初始值
+const initialPrograms = {
+  api: '' as string,
+  token: '' as string,
+  strategies: [] as [],
+  strategiesVal: null as (number | null),
 }
 
 export const useProgramsStore = defineStore(
@@ -26,16 +29,10 @@ export const useProgramsStore = defineStore(
     const state: State = reactive({
       programs: {
         lskyPro: {
-          api: '',
-          token: '',
-          strategies: [],
-          strategiesVal: null,
+          ...initialPrograms,
         },
         lsky: {
-          api: '',
-          token: '',
-          strategies: [],
-          strategiesVal: null,
+          ...initialPrograms,
         },
       },
     })

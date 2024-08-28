@@ -45,7 +45,6 @@ function themeChange(key: string) {
         <n-avatar
           size="medium"
           :src="Logo"
-          hover="transform scale-120 transition-transform duration-500"
           style="--n-color: transparent"
         />
       </div>

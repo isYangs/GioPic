@@ -3,7 +3,7 @@ import type { FormInst } from 'naive-ui'
 import type { TabOption } from '~/types'
 
 export interface SetItem {
-  formValidation: (onSuccess: () => void, onError: () => void) => void
+  formValidation: typeof formValidation
 }
 
 defineProps<TabOption>()
@@ -24,11 +24,10 @@ function setWidth(width: boolean | number | undefined) {
 }
 
 // 表单验证的异步函数
-function formValidation(onSuccess: () => void, onError: () => void) {
+function formValidation(onSuccess: () => void) {
   setFormRef.value?.validate((errors) => {
     if (!errors)
       onSuccess()
-    else onError()
   })
 }
 
