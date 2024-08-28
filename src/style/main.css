@@ -7,6 +7,11 @@ body,
   user-select: none;
 }
 
+a, img {
+  -webkit-user-drag: none;
+}
+
+/* 禁用3D渲染 */
 img {
   transform: translate3d(0, 0, 0);
 }
