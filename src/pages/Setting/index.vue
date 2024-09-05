@@ -20,6 +20,22 @@ const osThemeRef = useOsTheme()
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
 
+const appVersion = ref()
+// 获取当前版本
+async function getAppVersion() {
+  try {
+    const version = await window.ipcRenderer.invoke('app-version')
+    appVersion.value = version
+  }
+  catch (error) {
+    console.error('Failed to get app version:', error)
+  }
+}
+
+const displayedAppVersion = computed(() => {
+  return appVersion.value ? `当前版本：${appVersion.value}` : '当前版本：获取中...'
+})
+
 const tabsOptions: TabOption[] = [
   {
     title: '常规',
@@ -96,6 +112,14 @@ const tabsOptions: TabOption[] = [
           onUpdateValue: (val: boolean) => autoUpdate.value = val,
         }),
       },
+      {
+        name: displayedAppVersion.value,
+        component: () => h(NButton, {
+          strong: true,
+          secondary: true,
+          onClick: () => window.ipcRenderer.send('check-for-update'),
+        }, () => '检测更新'),
+      },
     ],
   },
   {
@@ -167,6 +191,7 @@ onMounted(() => {
       })
     }
   })
+  getAppVersion()
 })
 </script>
 
