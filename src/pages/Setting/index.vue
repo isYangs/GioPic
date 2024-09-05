@@ -171,11 +171,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div wh-full>
-    <div select-none text-4xl font-600>
+  <div class="wh-full">
+    <div class="select-none text-4xl font-600">
       程序设置
     </div>
-    <div select-none pt10>
+    <div class="select-none pt10">
       <n-tabs
         v-model:value="setTabsVal"
         type="segment"

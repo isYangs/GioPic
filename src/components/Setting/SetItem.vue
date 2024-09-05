@@ -35,16 +35,16 @@ defineExpose({ formValidation })
 </script>
 
 <template>
-  <div pt7.5 class="set-type">
+  <div class="set-type pt7.5">
     <n-h3 prefix="bar">
       {{ title }}
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">
-      <n-card v-for="(item, index) in items" :key="index" class="set-item" mb3 wh-full rounded-2 :content-style="{ padding: '0 20px' }">
-        <div flex="~ col 1" pr font-500 text="3.8" tracking-wider>
-          <div flex="~" items="center">
+      <n-card v-for="(item, index) in items" :key="index" class="set-item mb3 wh-full rounded-2" :content-style="{ padding: '0 20px' }">
+        <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
+          <div class="flex items-center">
             {{ item.name }}
-            <n-tag v-if="item.isDev" :bordered="false" round size="small" type="warning" ml1>
+            <n-tag v-if="item.isDev" :bordered="false" round size="small" type="warning" class="ml1">
               开发中
               <template #icon>
                 <div i-ph-code-bold />
@@ -52,7 +52,7 @@ defineExpose({ formValidation })
             </n-tag>
           </div>
 
-          <n-text v-if="item.tip" text-xs op80>
+          <n-text v-if="item.tip" class="text-xs op80">
             {{ item.tip }}
           </n-text>
         </div>

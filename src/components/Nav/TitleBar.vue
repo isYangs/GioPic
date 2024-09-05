@@ -67,18 +67,18 @@ function closeTip(type: string) {
 </script>
 
 <template>
-  <div w37 flex="~ center">
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="minimizeApp">
+  <div class="w37 flex flex-center">
+    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="minimizeApp">
       <template #icon>
         <div i-ic-round-minus />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="toggleMaximizeOrRestoreApp">
+    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="toggleMaximizeOrRestoreApp">
       <template #icon>
         <div :class="defaultWindowState ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary mr2 h8 w8 rounded-1.5 @click="openCloseTipModal">
+    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="openCloseTipModal">
       <template #icon>
         <div i-ic-round-close />
       </template>
@@ -95,7 +95,7 @@ function closeTip(type: string) {
     title="关闭程序"
     transform-origin="center"
   >
-    <div mb2 text-4>
+    <div class="mb2 text-4">
       确认关闭软件吗？
     </div>
     <n-checkbox v-model:checked="closeTipCheckbox">
