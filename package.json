@@ -19,22 +19,22 @@
   },
   "dependencies": {
     "@electron-toolkit/utils": "^3.0.0",
-    "@vueuse/core": "^10.11.0",
+    "@vueuse/core": "^10.11.1",
     "animate.css": "^4.1.1",
-    "axios": "^1.7.3",
+    "axios": "^1.7.7",
     "better-sqlite3": "^9.6.0",
-    "dayjs": "^1.11.12",
+    "dayjs": "^1.11.13",
     "electron-log": "^5.1.7",
-    "electron-updater": "^6.2.1",
+    "electron-updater": "^6.3.4",
     "p-limit": "^5.0.0",
-    "pinia": "^2.2.0",
-    "pinia-plugin-persistedstate": "^3.2.1",
-    "vue": "^3.4.35",
-    "vue-router": "^4.4.2"
+    "pinia": "^2.2.2",
+    "pinia-plugin-persistedstate": "^3.2.3",
+    "vue": "^3.5.1",
+    "vue-router": "^4.4.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.24.1",
-    "@iconify/json": "^2.2.234",
+    "@antfu/eslint-config": "^2.27.3",
+    "@iconify/json": "^2.2.244",
     "@types/better-sqlite3": "^7.6.11",
     "@unocss/eslint-config": "^0.58.9",
     "@unocss/eslint-plugin": "^0.58.9",
@@ -58,6 +58,6 @@
     "vite": "^4.5.3",
     "vite-plugin-electron": "^0.14.1",
     "vite-plugin-electron-renderer": "^0.14.5",
-    "vue-tsc": "^2.0.29"
+    "vue-tsc": "^2.1.6"
   }
 }
