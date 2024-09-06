@@ -13,6 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
+    env:
+      GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
     steps:
       - name: Check out git repository
@@ -57,5 +59,3 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: 'dist/**'
-        env:
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
