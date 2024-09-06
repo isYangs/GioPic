@@ -67,7 +67,7 @@ function closeTip(type: string) {
 </script>
 
 <template>
-  <div class="w37 flex flex-center">
+  <div class="w37 flex-center">
     <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="minimizeApp">
       <template #icon>
         <div i-ic-round-minus />
