@@ -1,14 +1,15 @@
 import path from 'node:path'
+import { execSync } from 'node:child_process'
 import { platform } from '@electron-toolkit/utils'
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
-import { Menu, Tray, app, dialog, globalShortcut, nativeImage } from 'electron'
+import { Menu, Tray, app, dialog, globalShortcut, nativeImage, nativeTheme } from 'electron'
 import pkg from '../../package.json'
 import logger from '../utils/logger'
 
 export * from './cors'
 export * from './ipc'
 
-let tray = null
+let tray: Tray | null = null
 
 // 初始化系统
 export function initSystem(win: BrowserWindow) {
@@ -16,12 +17,15 @@ export function initSystem(win: BrowserWindow) {
   createMenu(win)
   createSystemTray(win)
 
-  win.on('focus', () => {
-    regGlobalShortcut(win)
-  })
+  win.on('focus', () => regGlobalShortcut(win))
+  win.on('blur', unGlobalShortcut)
 
-  win.on('blur', () => {
-    unGlobalShortcut()
+  nativeTheme.on('updated', () => {
+    if (!tray)
+      return
+    const newIconPath = getTrayIconPath()
+    const newIcon = nativeImage.createFromPath(newIconPath)
+    tray.setImage(newIcon)
   })
 
   logger.info('[system] System initialized.')
@@ -29,12 +33,35 @@ export function initSystem(win: BrowserWindow) {
 
 // 创建系统托盘
 function createSystemTray(win: BrowserWindow) {
-  const iconPath = path.join(process.env.VITE_PUBLIC, 'favicon.png')
-  const icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
+  const iconPath = getTrayIconPath()
+  const icon = nativeImage.createFromPath(iconPath)
+
   tray = new Tray(icon)
   tray.setToolTip('GioPic')
   tray.setContextMenu(createTrayMenu(win))
-  logger.info('[tray] System tray created.')
+
+  logger.info('[tray] System tray created with icon:', iconPath)
+}
+
+function isWindowsLightMode() {
+  try {
+    const stdout = execSync('reg query "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v SystemUsesLightTheme')
+    return stdout.toString().includes('0x1')
+  }
+  catch (error) {
+    logger.error('Error fetching Windows mode:', error)
+    return false
+  }
+}
+
+// 根据系统模式获取托盘图标路径
+function getTrayIconPath() {
+  const isLightMode = platform.isWindows && isWindowsLightMode()
+  const iconName = isLightMode ? 'tray-black.png' : 'tray.png'
+  const iconPath = path.join(process.env.VITE_PUBLIC, iconName)
+
+  logger.info(`[tray] ${isLightMode ? 'Light' : 'Dark'} mode detected, using icon:`, iconName)
+  return iconPath
 }
 
 // 创建系统托盘菜单

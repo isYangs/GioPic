@@ -25,7 +25,8 @@
         "arch": ["x64"]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+    "icon": "public/icon.png"
   },
   "nsis": {
     "oneClick": false,

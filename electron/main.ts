@@ -35,14 +35,14 @@ function createWindow() {
     minWidth: 1050,
     minHeight: 680,
     frame: false,
-    icon: nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'favicon.png')),
+    icon: nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png')),
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   })
 
-  console.log(path.join(process.env.VITE_PUBLIC, 'favicon.png'))
+  console.log(path.join(process.env.VITE_PUBLIC, 'icon.png'))
 
   // 设置应用程序名称
   app.setAppUserModelId(app.getName())

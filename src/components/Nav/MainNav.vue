@@ -52,13 +52,13 @@ function themeChange(key: string) {
         GioPic
       </h1>
     </div>
-    <div class="flex items-center" style="-webkit-app-region: no-drag">
-      <n-button :focusable="false" quaternary clas="mr2 h8 w8 rounded-1.5" @click="router.go(-1)">
+    <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
+      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(-1)">
         <template #icon>
           <div i-ph-caret-left-bold />
         </template>
       </n-button>
-      <n-button :focusable="false" quaternary class="h8 w8" @click="router.go(1)">
+      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(1)">
         <template #icon>
           <div i-ph-caret-right-bold />
         </template>
