@@ -44,7 +44,8 @@ function createWindow() {
   })
 
   // 设置应用程序名称
-  app.setAppUserModelId(app.getName())
+  app.setName(app.getName())
+  app.dock?.setIcon(icon)
 
   // 测试向渲染进程发送激活的推送消息
   win.webContents.on('did-finish-load', () => {
@@ -101,10 +102,6 @@ app.on('activate', () => {
 // 等待应用程序准备就绪后创建窗口
 app.whenReady().then(async () => {
   await Promise.all(installExtensions())
-  if (process.platform === 'darwin') {
-    app.dock.setIcon(icon)
-    app.dock.setBadge('GioPic')
-  }
   createWindow()
   if (win)
     initSystem(win)
