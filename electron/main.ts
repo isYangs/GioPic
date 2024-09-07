@@ -27,6 +27,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, 'public')
   : process.env.DIST
 
+const icon = nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png'))
 // 创建窗口
 function createWindow() {
   win = new BrowserWindow({
@@ -35,14 +36,12 @@ function createWindow() {
     minWidth: 1050,
     minHeight: 680,
     frame: false,
-    icon: nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png')),
+    icon,
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   })
-
-  console.log(path.join(process.env.VITE_PUBLIC, 'icon.png'))
 
   // 设置应用程序名称
   app.setAppUserModelId(app.getName())
@@ -102,6 +101,10 @@ app.on('activate', () => {
 // 等待应用程序准备就绪后创建窗口
 app.whenReady().then(async () => {
   await Promise.all(installExtensions())
+  if (process.platform === 'darwin') {
+    app.dock.setIcon(icon)
+    app.dock.setBadge('GioPic')
+  }
   createWindow()
   if (win)
     initSystem(win)

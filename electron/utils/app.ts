@@ -52,7 +52,7 @@ function isWindowsLightMode() {
 // 根据系统模式获取托盘图标
 function getTrayIcon() {
   const isLightMode = platform.isWindows && isWindowsLightMode()
-  const iconName = isLightMode ? 'tray-black.png' : 'tray.png'
+  const iconName = isLightMode ? 'trayTemplate.png' : 'tray.png'
   const iconPath = path.join(process.env.VITE_PUBLIC, iconName)
   return nativeImage.createFromPath(iconPath)
 }
