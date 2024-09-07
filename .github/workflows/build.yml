@@ -23,7 +23,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install Dependencies
         run: |
@@ -41,21 +41,21 @@ jobs:
       - name: Cleanup Artifacts for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          npx rimraf "dist/!(*.exe|*.zip|*.yml)"
+          npx rimraf "release/*/!(*.exe|*.zip|*.yml)"
 
       - name: Cleanup Artifacts for MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          npx rimraf "dist/!(*.dmg|*.zip|latest*.yml)"
+          npx rimraf "release/*/!(*.dmg|*.zip|latest*.yml)"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: dist
+          path: release
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: 'dist/**'
+          files: 'release/**'
