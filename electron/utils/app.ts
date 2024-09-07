@@ -23,9 +23,7 @@ export function initSystem(win: BrowserWindow) {
   nativeTheme.on('updated', () => {
     if (!tray)
       return
-    const newIconPath = getTrayIconPath()
-    const newIcon = nativeImage.createFromPath(newIconPath).resize({ width: 18, height: 18 })
-    tray.setImage(newIcon)
+    tray.setImage(getTrayIcon())
   })
 
   logger.info('[system] System initialized.')
@@ -33,14 +31,11 @@ export function initSystem(win: BrowserWindow) {
 
 // 创建系统托盘
 function createSystemTray(win: BrowserWindow) {
-  const iconPath = getTrayIconPath()
-  const icon = nativeImage.createFromPath(iconPath).resize({ width: 18, height: 18 })
-
-  tray = new Tray(icon)
+  tray = new Tray(getTrayIcon())
   tray.setToolTip('GioPic')
   tray.setContextMenu(createTrayMenu(win))
 
-  logger.info('[tray] System tray created with icon:', iconPath)
+  logger.info('[tray] System tray created.')
 }
 
 function isWindowsLightMode() {
@@ -54,14 +49,12 @@ function isWindowsLightMode() {
   }
 }
 
-// 根据系统模式获取托盘图标路径
-function getTrayIconPath() {
+// 根据系统模式获取托盘图标
+function getTrayIcon() {
   const isLightMode = platform.isWindows && isWindowsLightMode()
   const iconName = isLightMode ? 'tray-black.png' : 'tray.png'
   const iconPath = path.join(process.env.VITE_PUBLIC, iconName)
-
-  logger.info(`[tray] ${isLightMode ? 'Light' : 'Dark'} mode detected, using icon:`, iconName)
-  return iconPath
+  return nativeImage.createFromPath(iconPath)
 }
 
 // 创建系统托盘菜单
