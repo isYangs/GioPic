@@ -24,7 +24,7 @@ export function initSystem(win: BrowserWindow) {
     if (!tray)
       return
     const newIconPath = getTrayIconPath()
-    const newIcon = nativeImage.createFromPath(newIconPath)
+    const newIcon = nativeImage.createFromPath(newIconPath).resize({ width: 18, height: 18 })
     tray.setImage(newIcon)
   })
 
@@ -34,7 +34,7 @@ export function initSystem(win: BrowserWindow) {
 // 创建系统托盘
 function createSystemTray(win: BrowserWindow) {
   const iconPath = getTrayIconPath()
-  const icon = nativeImage.createFromPath(iconPath)
+  const icon = nativeImage.createFromPath(iconPath).resize({ width: 18, height: 18 })
 
   tray = new Tray(icon)
   tray.setToolTip('GioPic')
