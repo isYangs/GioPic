@@ -18,6 +18,11 @@ const themeOptions = computed(() => [
     key: 'setting',
     icon: renderIcon('i-ph-gear-six-bold'),
   },
+  {
+    label: '关于',
+    key: 'about',
+    icon: renderIcon('i-ph-info-bold'),
+  },
 ])
 
 function themeChange(key: string) {
@@ -30,6 +35,10 @@ function themeChange(key: string) {
     }
     case 'setting': {
       router.push('/Setting')
+      break
+    }
+    case 'about': {
+      router.push('/About')
       break
     }
     default:

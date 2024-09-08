@@ -10,7 +10,7 @@ if (is.dev) {
       return true
     },
   })
-  autoUpdater.updateConfigPath = resolve(__dirname, '../../dev-app-update.yml')
+  autoUpdater.updateConfigPath = resolve(__dirname, '../dev-app-update.yml')
 }
 
 // 关闭自动下载

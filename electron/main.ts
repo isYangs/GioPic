@@ -4,6 +4,7 @@ import { is, platform } from '@electron-toolkit/utils'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from './db'
 import { fixElectronCors, initSystem, setupIpcMain } from './utils/app'
+import update from './utils/update'
 
 // The built directory structure
 //
@@ -103,6 +104,7 @@ app.on('activate', () => {
 app.whenReady().then(async () => {
   await Promise.all(installExtensions())
   createWindow()
+  update()
   if (win)
     initSystem(win)
 })
