@@ -1,8 +1,10 @@
 <script setup lang="ts">
-const infoItems = [
+const appVersion = ref('0.0.0')
+
+const infoItems = ref([
   {
     label: '版本',
-    value: '0.0.1',
+    value: appVersion,
     link: 'https://github.com/isYangs/GioPic/releases',
   },
   {
@@ -20,7 +22,16 @@ const infoItems = [
     value: 'AGPL-3.0',
     link: 'https://github.com/isYangs/GioPic/blob/main/LICENSE',
   },
-]
+])
+
+async function getAppVersion() {
+  const version = await window.ipcRenderer.invoke('app-version')
+  return version
+}
+
+onMounted(async () => {
+  appVersion.value = await getAppVersion()
+})
 </script>
 
 <template>
