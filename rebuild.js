@@ -1,9 +1,12 @@
-const path = require('node:path')
-const child = require('node:child_process')
+import path from 'node:path'
+import child from 'node:child_process'
+import { createRequire } from 'node:module'
 
 // If you prefer electron-rebuild:
 // 👉 https://github.com/WiseLibs/better-sqlite3/blob/v8.5.2/docs/troubleshooting.md#electron
 // 👉 https://stackoverflow.com/questions/46384591/node-was-compiled-against-a-different-node-js-version-using-node-module-versio/52796884#52796884
+
+const require = createRequire(import.meta.url)
 
 const better_sqlite3 = require.resolve('better-sqlite3')
 const better_sqlite3_root = path.posix.join(better_sqlite3.slice(0, better_sqlite3.lastIndexOf('node_modules')), 'node_modules/better-sqlite3')

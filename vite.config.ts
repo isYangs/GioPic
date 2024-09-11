@@ -1,5 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 import { type Plugin, defineConfig, normalizePath } from 'vite'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
@@ -9,62 +11,85 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import UnoCSS from 'unocss/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
+import pkg from './package.json'
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      '~/': `${path.resolve(__dirname, 'src')}/`,
+const require = createRequire(import.meta.url)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig(({ command }) => {
+  fs.rmSync('dist-electron', { recursive: true, force: true })
+
+  const isServe = command === 'serve'
+  const isBuild = command === 'build'
+
+  return {
+    resolve: {
+      alias: {
+        '~/': `${path.resolve(__dirname, 'src')}/`,
+      },
     },
-  },
-  plugins: [
-    VueRouter({
-      routesFolder: 'src/pages',
-      exclude: ['**/components/*.vue'],
-      dts: 'src/typings/typed-router.d.ts',
-      extensions: ['.vue'],
-    }),
-    vue(),
-    UnoCSS(),
-    Components({
-      dirs: ['src/components'],
-      extensions: ['vue'],
-      dts: 'src/typings/components.d.ts',
-      resolvers: [NaiveUiResolver()],
-    }),
-    AutoImport({
-      dts: 'src/typings/auto-imports.d.ts',
-      include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
-      imports: [
-        'vue',
-        '@vueuse/core',
-        VueRouterAutoImports,
-        {
-          'vue-router/auto': ['useLink'],
-        },
-        'pinia',
-        {
-          'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
-        },
-      ],
-    }),
-    electron({
-      main: {
-        entry: 'electron/main.ts',
-        vite: {
-          build: {
-            minify: false,
-            commonjsOptions: {
-              ignoreDynamicRequires: true,
+    plugins: [
+      VueRouter({
+        routesFolder: 'src/pages',
+        exclude: ['**/components/*.vue'],
+        dts: 'src/typings/typed-router.d.ts',
+        extensions: ['.vue'],
+      }),
+      vue(),
+      UnoCSS(),
+      Components({
+        dirs: ['src/components'],
+        extensions: ['vue'],
+        dts: 'src/typings/components.d.ts',
+        resolvers: [NaiveUiResolver()],
+      }),
+      AutoImport({
+        dts: 'src/typings/auto-imports.d.ts',
+        include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
+        imports: [
+          'vue',
+          '@vueuse/core',
+          VueRouterAutoImports,
+          'pinia',
+          {
+            'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
+          },
+        ],
+      }),
+      electron({
+        main: {
+          entry: 'electron/main/index.ts',
+          vite: {
+            build: {
+              sourcemap: isServe,
+              minify: isBuild,
+              outDir: 'dist-electron/main',
+              rollupOptions: {
+                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              },
             },
           },
         },
-      },
-      preload: {
-        input: path.join(__dirname, 'electron/preload.ts'),
-      },
-    }),
-    bindingSqlite3(),
-  ],
+        preload: {
+          input: 'electron/preload/index.ts',
+          vite: {
+            build: {
+              sourcemap: isServe ? 'inline' : undefined, // #332
+              minify: isBuild,
+              outDir: 'dist-electron/preload',
+              commonjsOptions: {
+                ignoreDynamicRequires: true,
+              },
+              rollupOptions: {
+                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              },
+            },
+          },
+        },
+      }),
+      bindingSqlite3(),
+    ],
+  }
 })
 
 // https://github.com/WiseLibs/better-sqlite3/blob/v8.5.2/lib/database.js#L36

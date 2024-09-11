@@ -3,7 +3,7 @@ import { execSync } from 'node:child_process'
 import { platform } from '@electron-toolkit/utils'
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import { Menu, Tray, app, globalShortcut, nativeImage, nativeTheme } from 'electron'
-import logger from '../utils/logger'
+import logger from './logger'
 
 export * from './cors'
 export * from './ipc'

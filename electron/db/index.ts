@@ -1,12 +1,15 @@
-import * as fs from 'node:fs'
-import * as path from 'node:path'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { platform } from '@electron-toolkit/utils'
 import logger from '../utils/logger'
 import tables from './tables'
 
-const root = path.join(__dirname, '..')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const root = path.join(__dirname, '../..')
 let db: Database.Database
 
 // 定义数据库文件路径，针对macOS系统进行适配

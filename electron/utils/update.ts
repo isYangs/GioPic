@@ -1,24 +1,29 @@
-import { resolve } from 'node:path'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { app, dialog, ipcMain } from 'electron'
-import { autoUpdater } from 'electron-updater'
+import pkg from 'electron-updater'
 import logger from './logger'
 
-if (is.dev) {
-  Object.defineProperty(app, 'isPackaged', {
-    get() {
-      return true
-    },
-  })
-  autoUpdater.updateConfigPath = resolve(__dirname, '../dev-app-update.yml')
-}
+const { autoUpdater } = pkg
 
-// 关闭自动下载
-autoUpdater.autoDownload = false
-// 关闭自动安装
-autoUpdater.autoInstallOnAppQuit = false
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export default () => {
+function setupUpdater() {
+  if (is.dev) {
+    Object.defineProperty(app, 'isPackaged', {
+      get() {
+        return true
+      },
+    })
+    autoUpdater.updateConfigPath = path.resolve(__dirname, '../dev-app-update.yml')
+  }
+
+  // 关闭自动下载
+  autoUpdater.autoDownload = false
+  // 关闭自动安装
+  autoUpdater.autoInstallOnAppQuit = false
+
   ipcMain.on('check-for-update', async () => {
     logger.info('[update] Checking for updates...')
     console.log('check-for-update')
@@ -104,3 +109,5 @@ export default () => {
       })
   })
 }
+
+export default setupUpdater

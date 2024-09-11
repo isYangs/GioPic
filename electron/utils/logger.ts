@@ -5,7 +5,7 @@
  * on Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\{date}.log
  * @see https://www.npmjs.com/package/electron-log
  */
-import * as path from 'node:path'
+import path from 'node:path'
 import { app, ipcMain } from 'electron'
 import logger from 'electron-log'
 
