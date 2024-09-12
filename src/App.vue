@@ -2,9 +2,10 @@
 import { useAppStore } from './stores'
 import { routerPush } from './utils'
 
-const appStroe = useAppStore()
+const appStore = useAppStore()
 const router = useRouter()
-const { isMenuCollapsed, isDevToolsOpen } = storeToRefs(appStroe)
+const route = useRoute()
+const { isMenuCollapsed, isDevToolsOpen } = storeToRefs(appStore)
 
 // router.beforeEach((to, from, next) => {
 

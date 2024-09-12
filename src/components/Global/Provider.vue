@@ -4,8 +4,8 @@ import { createTextVNode } from 'vue'
 import type { GlobalThemeOverrides } from 'naive-ui'
 import { useAppStore } from '~/stores'
 
-const appStroe = useAppStore()
-const { themeType, themeAuto } = storeToRefs(appStroe)
+const appStore = useAppStore()
+const { themeType, themeAuto } = storeToRefs(appStore)
 const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
 const lightThemeOverrides: GlobalThemeOverrides = {

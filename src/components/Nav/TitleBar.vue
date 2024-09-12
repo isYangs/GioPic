@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useAppStore } from '~/stores'
 
-const appStroe = useAppStore()
-const { appCloseTip, appCloseType } = storeToRefs(appStroe)
+const appStore = useAppStore()
+const { appCloseTip, appCloseType } = storeToRefs(appStore)
 const defaultWindowState = ref(false)
 const closeTipModal = ref(false)
 const closeTipCheckbox = ref(false)

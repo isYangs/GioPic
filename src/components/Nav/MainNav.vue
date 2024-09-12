@@ -3,8 +3,8 @@ import Logo from '~/assets/logo.svg'
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
-const appStroe = useAppStore()
-const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStroe)
+const appStore = useAppStore()
+const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStore)
 const router = useRouter()
 
 const themeOptions = computed(() => [
@@ -38,6 +38,7 @@ function themeChange(key: string) {
       break
     }
     case 'about': {
+      // window.ipcRenderer.invoke('opne-about')
       router.push('/About')
       break
     }
