@@ -21,6 +21,7 @@ export default defineConfig(({ command }) => {
 
   const isServe = command === 'serve'
   const isBuild = command === 'build'
+  const sourcemap = isServe || !!process.env.VSCODE_DEBUG
 
   return {
     resolve: {
@@ -59,9 +60,17 @@ export default defineConfig(({ command }) => {
       electron({
         main: {
           entry: 'electron/main/index.ts',
+          onstart({ startup }) {
+            if (process.env.VSCODE_DEBUG) {
+              console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
+            }
+            else {
+              startup()
+            }
+          },
           vite: {
             build: {
-              sourcemap: isServe,
+              sourcemap,
               minify: isBuild,
               outDir: 'dist-electron/main',
               rollupOptions: {
@@ -74,7 +83,7 @@ export default defineConfig(({ command }) => {
           input: 'electron/preload/index.ts',
           vite: {
             build: {
-              sourcemap: isServe ? 'inline' : undefined, // #332
+              sourcemap: sourcemap ? 'inline' : undefined, // #332
               minify: isBuild,
               outDir: 'dist-electron/preload',
               commonjsOptions: {
@@ -89,6 +98,14 @@ export default defineConfig(({ command }) => {
       }),
       bindingSqlite3(),
     ],
+    server: process.env.VSCODE_DEBUG && (() => {
+      const url = new URL(pkg.debug.env.VITE_DEV_SERVER_URL)
+      return {
+        host: url.hostname,
+        port: +url.port,
+      }
+    })(),
+    clearScreen: false,
   }
 })
 
@@ -125,8 +142,6 @@ function bindingSqlite3(options: {
       /** `dist-native/better_sqlite3.node` */
       const BETTER_SQLITE3_BINDING = better_sqlite3_copy.replace(resolvedRoot + path.sep, '')
       fs.writeFileSync(path.join(resolvedRoot, '.env'), `VITE_BETTER_SQLITE3_BINDING=${BETTER_SQLITE3_BINDING}`)
-
-      console.log(TAG, `binding to ${BETTER_SQLITE3_BINDING}`)
     },
   }
 }

@@ -47,6 +47,7 @@ if (!app.requestSingleInstanceLock()) {
 let win: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
+
 const icon = nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png'))
 
 async function createWindow() {
@@ -59,13 +60,13 @@ async function createWindow() {
     icon,
     webPreferences: {
       preload,
-      nodeIntegration: true,
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   })
 
   if (VITE_DEV_SERVER_URL) { // #298
     win.loadURL(VITE_DEV_SERVER_URL)
-    win.webContents.openDevTools({ mode: ('detach') })
   }
   else {
     win.loadFile(indexHtml)
@@ -116,23 +117,5 @@ app.on('activate', () => {
   }
   else {
     createWindow()
-  }
-})
-
-// New window example arg: new windows url
-ipcMain.handle('open-win', (_, arg) => {
-  const childWindow = new BrowserWindow({
-    webPreferences: {
-      preload,
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  })
-
-  if (VITE_DEV_SERVER_URL) {
-    childWindow.loadURL(`${VITE_DEV_SERVER_URL}${arg}`)
-  }
-  else {
-    childWindow.loadFile(indexHtml, { hash: arg })
   }
 })

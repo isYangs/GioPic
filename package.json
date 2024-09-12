@@ -7,6 +7,11 @@
   "license": "AGPL-3.0",
   "license-file": "LICENSE",
   "main": "dist-electron/main/index.js",
+  "debug": {
+    "env": {
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
@@ -49,7 +54,6 @@
     "eslint": "^9.10.0",
     "eslint-plugin-format": "^0.1.2",
     "naive-ui": "^2.39.0",
-    "prettier": "^3.3.3",
     "typescript": "^5.6.2",
     "unocss": "^0.62.3",
     "unplugin-auto-import": "^0.18.2",
