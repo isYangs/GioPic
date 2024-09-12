@@ -1,6 +1,6 @@
-import path from 'node:path'
 import child from 'node:child_process'
 import { createRequire } from 'node:module'
+import path from 'node:path'
 
 // If you prefer electron-rebuild:
 // 👉 https://github.com/WiseLibs/better-sqlite3/blob/v8.5.2/docs/troubleshooting.md#electron

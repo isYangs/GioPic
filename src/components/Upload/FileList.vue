@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-import { generateLink, getLinkTypeOptions, selectProgramsOptions } from '~/utils'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
-import type { ProgramsName } from '~/types'
 import { useAppStore, useProgramsStore, useUploadDataStore } from '~/stores'
+import type { ProgramsName } from '~/types'
+import { generateLink, getLinkTypeOptions, selectProgramsOptions } from '~/utils'
 import debounce from '~/utils/debounce'
 
 const appStore = useAppStore()
@@ -77,8 +77,6 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
       uploadDataStore.setData({ uploadFailed: true }, index)
       return
     }
-
-    console.log(responseData.data)
 
     const { key, name, size, mimetype, links, origin_name } = responseData.data
 
@@ -283,7 +281,6 @@ const debouncedAllUploadImage = debounce(async () => {
 }, 1000)
 
 window.ipcRenderer.on('upload-shortcut', () => {
-  console.log('快捷键触发了')
   debouncedAllUploadImage()
 })
 </script>

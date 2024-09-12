@@ -13,7 +13,7 @@ const setFormRef = ref<FormInst | null>(null)
 // 通过组件判断是否为需要设置宽度的组件
 function checkComponentType(item: any) {
   const componentType = item.component().type.name
-  return componentType === 'Select' && item.component().props?.multiple !== false || componentType === 'InputGroup'
+  return (componentType === 'Select' && item.component().props?.multiple !== false) || componentType === 'InputGroup'
 }
 
 // 设置宽度

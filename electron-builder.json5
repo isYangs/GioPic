@@ -55,6 +55,6 @@
   "publish": {
     "provider": "github",
     "owner": "isYangs",
-    "repo": "GioPic",
+    "repo": "GioPic"
   }
 }

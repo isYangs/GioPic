@@ -26,7 +26,6 @@ function setupUpdater() {
 
   ipcMain.on('check-for-update', async () => {
     logger.info('[update] Checking for updates...')
-    console.log('check-for-update')
     try {
       await autoUpdater.checkForUpdates()
     }

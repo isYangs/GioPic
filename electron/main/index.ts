@@ -1,12 +1,13 @@
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { BrowserWindow, app, ipcMain, nativeImage, shell } from 'electron'
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { platform } from '@electron-toolkit/utils'
-import { fixElectronCors, initSystem, setupIpcMain } from '../utils/app'
-import setupUpdater from '../utils/update'
+import { app, BrowserWindow, ipcMain, nativeImage, shell } from 'electron'
+import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from '../db'
+import { fixElectronCors, initSystem, setupIpcMain } from '../utils/app'
+import logger from '../utils/logger'
+import setupUpdater from '../utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -93,8 +94,8 @@ function installExtensions() {
   ].map(extension => installExtension(extension, {
     loadExtensionOptions: { allowFileAccess: true },
   })
-    .then(name => console.log('Added Extension:', name))
-    .catch(err => console.log('An error occurred:', err)))
+    .then(name => logger.info(`[devtools] Added Extension: ${name}.`))
+    .catch(err => logger.error(`[devtools] An error occurred: ${err}.`)))
 }
 
 app.whenReady().then(async () => {

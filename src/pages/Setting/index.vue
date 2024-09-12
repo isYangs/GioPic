@@ -2,7 +2,7 @@
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
-import debounce from '~/utils/debounce.ts'
+import debounce from '~/utils/debounce'
 
 const appStore = useAppStore()
 const {
@@ -190,7 +190,6 @@ onMounted(async () => {
       </n-tabs>
 
       <n-scrollbar
-        ref="setScrollRef"
         :style="{
           height: `calc(100vh - 228px)`,
         }"

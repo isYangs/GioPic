@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { platform } from '@electron-toolkit/utils'
 import Database from 'better-sqlite3'
 import { app } from 'electron'
-import { platform } from '@electron-toolkit/utils'
 import logger from '../utils/logger'
 import tables from './tables'
 
