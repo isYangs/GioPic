@@ -57,17 +57,7 @@ export const useAppStore = defineStore(
   {
     persist: {
       key: '__giopic_app_store__',
-      paths: [
-        'appCloseType',
-        'appCloseTip',
-        'autoStart',
-        'isDevToolsOpen',
-        'themeType',
-        'themeAuto',
-        'autoUpdate',
-        'defaultPrograms',
-        'lastCallTimes',
-      ],
+      omit: ['isMenuCollapsed','isImgListDelDialog', 'isUploadRecordDelDialog'],
     },
   },
 )

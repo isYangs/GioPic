@@ -81,7 +81,7 @@ export const useProgramsStore = defineStore(
   {
     persist: {
       key: '__giopic_programs_store__',
-      paths: ['programs'],
+      pick: ['programs'],
     },
   },
 )
