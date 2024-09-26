@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import Keycut from '~/components/Partial/Keycut.vue'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
 import debounce from '~/utils/debounce'
@@ -103,7 +104,7 @@ const tabsOptions = ref<TabOption[]>([
     items: [
       {
         name: '开发者工具',
-        tip: '开启后可使用 Cmd或Ctrl + Shift + I 打开开发者工具',
+        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, 'I'), '打开开发者工具']),
         component: () => h(NSwitch, {
           value: isDevToolsOpen.value,
           round: false,

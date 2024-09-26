@@ -5,7 +5,7 @@ export interface TabOption {
     name: string
     isDev?: boolean
     path?: string
-    tip?: string
+    tip?: string | (() => import('vue').VNode)
     width?: boolean | number
     component: () => import('vue').VNode
   }[]

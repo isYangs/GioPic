@@ -52,8 +52,11 @@ defineExpose({ formValidation })
             </n-tag>
           </div>
 
-          <n-text v-if="item.tip" class="text-xs op80">
-            {{ item.tip }}
+          <n-text class="text-xs op80">
+            <template v-if="typeof item.tip === 'string'">
+              {{ item.tip }}
+            </template>
+            <component :is="item.tip" v-else />
           </n-text>
         </div>
         <div
