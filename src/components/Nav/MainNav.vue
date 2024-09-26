@@ -5,7 +5,15 @@ import { renderIcon } from '~/utils'
 
 const appStore = useAppStore()
 const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStore)
+const route = useRoute()
 const router = useRouter()
+
+const canGoBack = ref(false)
+const canGoForward = ref(false)
+watch(() => route.fullPath, () => {
+  canGoBack.value = !!window.history.state.back
+  canGoForward.value = !!window.history.state.forward
+})
 
 const themeOptions = computed(() => [
   {
@@ -63,12 +71,12 @@ function themeChange(key: string) {
       </h1>
     </div>
     <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
-      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(-1)">
+      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
         <template #icon>
           <div i-ph-caret-left-bold />
         </template>
       </n-button>
-      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(1)">
+      <n-button v-if="canGoForward" :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(1)">
         <template #icon>
           <div i-ph-caret-right-bold />
         </template>
