@@ -2,17 +2,16 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  ctrl: boolean
-  shift: boolean
-  alt: boolean
-  meta: boolean
-  noMetaMap: boolean
-  macStyle: boolean
+  ctrl?: boolean
+  shift?: boolean
+  alt?: boolean
+  meta?: boolean
+  noMetaMap?: boolean
 }>()
 
 const slots = defineSlots()
 
-const isMac = computed(() => props.macStyle ?? navigator.userAgent.includes('Mac OS'))
+const isMac = computed(() => navigator.userAgent.includes('Mac OS'))
 const delimiter = computed(() => isMac.value ? ' ' : '+')
 
 const modifierMap = computed(() => ({
@@ -39,7 +38,7 @@ const display = computed(() => {
 </script>
 
 <template>
-  <div class="keycut mx.5 inline-block border-rd p.5 text-[.9em] line-height-none tracking-tight font-mono">
+  <div class="keycut mx.5 inline-block border-rd px1 py.5 text-[.9em] line-height-none tracking-tight">
     {{ display }}<slot />
   </div>
 </template>

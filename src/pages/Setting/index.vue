@@ -104,7 +104,7 @@ const tabsOptions = ref<TabOption[]>([
     items: [
       {
         name: '开发者工具',
-        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, 'I'), '打开开发者工具']),
+        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, 'D'), '打开开发者工具']),
         component: () => h(NSwitch, {
           value: isDevToolsOpen.value,
           round: false,

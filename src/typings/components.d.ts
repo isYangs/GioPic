@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     FileList: typeof import('./../components/Upload/FileList.vue')['default']
+    Keycut: typeof import('./../components/Partial/Keycut.vue')['default']
     MainNav: typeof import('./../components/Nav/MainNav.vue')['default']
     Menu: typeof import('./../components/Global/Menu.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']

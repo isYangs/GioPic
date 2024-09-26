@@ -63,14 +63,11 @@ export function setupIpcMain(win: BrowserWindow) {
     }
   })
 
-  ipcMain.handle('devtools', (_event, val) => {
+  ipcMain.handle('devtools', (_e, val) => {
     if (val) {
-      globalShortcut.register('CommandOrControl+Shift+I', () => {
+      globalShortcut.register('CommandOrControl+Shift+D', () => {
         win?.webContents.openDevTools({ mode: ('detach') })
       })
-    }
-    else {
-      globalShortcut.unregister('CommandOrControl+Shift+I')
     }
   })
 
