@@ -14,7 +14,7 @@ export default antfu(
       'node/prefer-global/process': 'off',
       'vue/no-unused-refs': 'off',
     },
-    ignorePatterns: [
+    ignores: [
       'dist/',
       'rebuild.js',
       'vite.config.ts',

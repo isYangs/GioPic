@@ -11,7 +11,7 @@ const themeOptions = computed(() => [
   {
     label: themeType.value === 'light' ? '深色模式' : '浅色模式',
     key: 'lightTodark',
-    icon: renderIcon(themeType.value === 'light' ? 'i-ph-sun-bold' : 'i-ph-moon-stars-bold'),
+    icon: renderIcon(themeType.value === 'light' ? 'i-ph-moon-stars-bold' : 'i-ph-sun-bold'),
   },
   {
     label: '程序设置',
