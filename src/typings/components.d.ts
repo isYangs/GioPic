@@ -39,9 +39,11 @@ declare module 'vue' {
     NModal: typeof import('naive-ui')['NModal']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NP: typeof import('naive-ui')['NP']
+    NProgress: typeof import('naive-ui')['NProgress']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
     NSkeleton: typeof import('naive-ui')['NSkeleton']
+    NSpace: typeof import('naive-ui')['NSpace']
     NSpin: typeof import('naive-ui')['NSpin']
     NTab: typeof import('naive-ui')['NTab']
     NTabs: typeof import('naive-ui')['NTabs']
@@ -54,6 +56,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SetItem: typeof import('./../components/Setting/SetItem.vue')['default']
     TitleBar: typeof import('./../components/Nav/TitleBar.vue')['default']
+    UpdateProgress: typeof import('./../components/Global/UpdateProgress.vue')['default']
     Upload: typeof import('./../components/Upload/index.vue')['default']
   }
 }

@@ -1,7 +1,7 @@
 import { app, globalShortcut, ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
-import { autoStart, createAboutWindow } from './app'
+import { autoStart } from './app'
 import logger from './logger'
 
 export function setupIpcMain(win: BrowserWindow) {
@@ -25,6 +25,10 @@ export function setupIpcMain(win: BrowserWindow) {
   ipcMain.handle('window-close', () => {
     app.quit()
     win.close()
+  })
+
+  ipcMain.handle('window-show', () => {
+    win.show()
   })
 
   ipcMain.handle('auto-start', (_event, val) => {

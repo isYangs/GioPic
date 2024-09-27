@@ -7,7 +7,7 @@ import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from '../db'
 import { fixElectronCors, initSystem, setupIpcMain } from '../utils/app'
 import logger from '../utils/logger'
-import setupUpdater from '../utils/update'
+import initUpdater from '../utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -44,14 +44,14 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
-let win: BrowserWindow | null = null
+let mainWindow: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 const icon = nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png'))
 
-async function createWindow() {
-  win = new BrowserWindow({
+async function createMainWindow() {
+  mainWindow = new BrowserWindow({
     width: 1080,
     height: 680,
     minWidth: 1050,
@@ -66,27 +66,27 @@ async function createWindow() {
   })
 
   if (VITE_DEV_SERVER_URL) { // #298
-    win.loadURL(VITE_DEV_SERVER_URL)
+    mainWindow.loadURL(VITE_DEV_SERVER_URL)
   }
   else {
-    win.loadFile(indexHtml)
+    mainWindow.loadFile(indexHtml)
   }
 
-  win.webContents.setWindowOpenHandler(({ url }) => {
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:'))
       shell.openExternal(url)
     return { action: 'deny' }
   })
 
   // 设置应用程序名称
-  app.setName(app.getName())
+  // app.setName(app.getName())
   app.dock?.setIcon(icon)
 
-  fixElectronCors(win)
+  fixElectronCors(mainWindow)
   initDB()
-  setupIpcMain(win)
-  initSystem(win)
-  setupUpdater()
+  setupIpcMain(mainWindow)
+  initSystem(mainWindow)
+  initUpdater(mainWindow)
 }
 
 function installExtensions() {
@@ -101,11 +101,11 @@ function installExtensions() {
 
 app.whenReady().then(async () => {
   await Promise.all(installExtensions())
-  createWindow()
+  createMainWindow()
 })
 
 app.on('window-all-closed', () => {
-  win = null
+  mainWindow = null
   if (!platform.isMacOS)
     app.quit()
 })
@@ -116,6 +116,6 @@ app.on('activate', () => {
     allWindows[0].focus()
   }
   else {
-    createWindow()
+    createMainWindow()
   }
 })

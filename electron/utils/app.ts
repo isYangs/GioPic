@@ -1,9 +1,10 @@
-import path from 'node:path'
 import { execSync } from 'node:child_process'
+import path from 'node:path'
 import { platform } from '@electron-toolkit/utils'
 import { app, globalShortcut, Menu, nativeImage, nativeTheme, Tray } from 'electron'
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import logger from './logger'
+import { checkForUpdates } from './update'
 
 export * from './cors'
 export * from './ipc'
@@ -75,6 +76,13 @@ function createTrayMenu(win: BrowserWindow) {
       },
     },
     { type: 'separator' },
+    {
+      label: '检查更新',
+      click: () => {
+        logger.info('[tray] Check for updates clicked.')
+        checkForUpdates()
+      },
+    },
     {
       label: '重启应用',
       click: () => {

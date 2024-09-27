@@ -90,7 +90,7 @@ const tabsOptions = ref<TabOption[]>([
       {
         name: '自动检测更新',
         isDev: true,
-        tip: '开启后软件会检测是否有新版本',
+        tip: '在启动时检测是否有新版本',
         component: () => h(NSwitch, {
           value: autoUpdate.value,
           round: false,
@@ -104,7 +104,7 @@ const tabsOptions = ref<TabOption[]>([
     items: [
       {
         name: '开发者工具',
-        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, 'D'), '打开开发者工具']),
+        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, () => 'D'), '打开开发者工具']),
         component: () => h(NSwitch, {
           value: isDevToolsOpen.value,
           round: false,

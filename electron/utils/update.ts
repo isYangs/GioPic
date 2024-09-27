@@ -3,20 +3,31 @@ import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { app, dialog, ipcMain } from 'electron'
 import pkg from 'electron-updater'
+import type { BrowserWindow } from 'electron'
 import logger from './logger'
 
 const { autoUpdater } = pkg
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-function setupUpdater() {
+export async function checkForUpdates() {
+  logger.info('[update] Checking for updates...')
+  try {
+    await autoUpdater.checkForUpdates()
+  }
+  catch (e: any) {
+    logger.error(`[update] Error checking for updates: ${e}`)
+  }
+}
+
+export default function initUpdater(win: BrowserWindow) {
   if (is.dev) {
     Object.defineProperty(app, 'isPackaged', {
       get() {
         return true
       },
     })
-    autoUpdater.updateConfigPath = path.resolve(__dirname, '../dev-app-update.yml')
+    autoUpdater.updateConfigPath = path.resolve(__dirname, '../../dev-app-update.yml')
   }
 
   // 关闭自动下载
@@ -24,15 +35,7 @@ function setupUpdater() {
   // 关闭自动安装
   autoUpdater.autoInstallOnAppQuit = false
 
-  ipcMain.on('check-for-update', async () => {
-    logger.info('[update] Checking for updates...')
-    try {
-      await autoUpdater.checkForUpdates()
-    }
-    catch (e: any) {
-      logger.error(`[update] Error checking for updates: ${e}`)
-    }
-  })
+  ipcMain.on('check-for-update', checkForUpdates)
 
   autoUpdater.on('error', (e) => {
     logger.error(`[update] AutoUpdater error: ${e}`)
@@ -41,6 +44,7 @@ function setupUpdater() {
   // 检测是否需要更新
   autoUpdater.on('checking-for-update', () => {
     logger.info('[update] Checking for updates...')
+    win.webContents.send('update', 'show-toast', '正在检查更新')
   })
 
   // 检测到可以更新时
@@ -65,13 +69,15 @@ function setupUpdater() {
     dialog
       .showMessageBox({
         type: 'info',
-        title: '应用有新的更新',
+        title: '',
         detail: releaseContent,
-        message: '发现新版本，是否现在更新？',
-        buttons: ['否', '是'],
+        message: '检测到可用更新，是否下载？',
+        noLink: true,
+        buttons: ['确定', '取消'],
       })
       .then(({ response }) => {
-        if (response === 1) {
+        if (response === 0) {
+          win.webContents.send('update', 'show-update-progress')
           logger.info('[update] User accepted the update. Downloading...')
           // 下载更新
           autoUpdater.downloadUpdate()
@@ -91,6 +97,7 @@ function setupUpdater() {
   autoUpdater.on('download-progress', (progress) => {
     const percent = Math.trunc(progress.percent)
     logger.info(`[update] Download progress: ${percent}%`)
+    win.webContents.send('update', 'update-update-progress', percent)
   })
 
   // 当需要更新的内容下载完成后
@@ -108,5 +115,3 @@ function setupUpdater() {
       })
   })
 }
-
-export default setupUpdater
