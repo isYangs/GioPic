@@ -2,10 +2,10 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
-import { app, BrowserWindow, ipcMain, nativeImage, shell } from 'electron'
+import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from '../db'
-import { fixElectronCors, initSystem, setupIpcMain } from '../utils/app'
+import { fixElectronCors, setupIpcMain as initIpcMain, initStore, initSystem } from '../utils/app'
 import logger from '../utils/logger'
 import initUpdater from '../utils/update'
 
@@ -83,8 +83,9 @@ async function createMainWindow() {
   app.dock?.setIcon(icon)
 
   fixElectronCors(mainWindow)
+  initIpcMain(mainWindow)
   initDB()
-  setupIpcMain(mainWindow)
+  initStore()
   initSystem(mainWindow)
   initUpdater(mainWindow)
 }

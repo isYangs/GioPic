@@ -30,7 +30,7 @@ logger.transports.file.resolvePathFn = () => {
 logger.info(`[logger] log module initialized; path: ${logger.transports.file.getFile().path}`)
 
 // 处理来自渲染进程的日志请求
-ipcMain.handle('logger', (_, level, message) => {
+ipcMain.handle('logger', (_e, level, message) => {
   switch (level) {
     case 'info':
       logger.info(message)

@@ -8,6 +8,7 @@ import { checkForUpdates } from './update'
 
 export * from './cors'
 export * from './ipc'
+export * from './store'
 
 let tray: Tray | null = null
 

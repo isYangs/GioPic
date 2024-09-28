@@ -11,10 +11,6 @@ function close() {
   dialogShow.value = false
   showDialogUpdateProgress.value = false
 }
-
-onBeforeUnmount(() => {
-  console.log('我要死了')
-})
 </script>
 
 <template>
