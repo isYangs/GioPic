@@ -78,4 +78,8 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     delData,
     getUploadData,
   }
+}, {
+  persistedState: {
+    persist: false,
+  },
 })

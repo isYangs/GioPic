@@ -1,16 +1,25 @@
 import { createPinia } from 'pinia'
-import { createPersistedState } from 'pinia-plugin-persistedstate'
+import { createPersistedStatePlugin } from 'pinia-plugin-persistedstate-2'
+import electronStore from './electron-store'
 
 export * from './app'
 export * from './programs'
 export * from './record'
 
 const store = createPinia()
+
 store.use(
-  createPersistedState({
-    serializer: {
-      deserialize: JSON.parse,
-      serialize: JSON.stringify,
+  createPersistedStatePlugin({
+    storage: {
+      setItem(key, value) {
+        return electronStore.setStr(key, value)
+      },
+      getItem(key) {
+        return electronStore.getStr(key)
+      },
+      removeItem(key) {
+        return electronStore.delete(key)
+      },
     },
   }),
 )

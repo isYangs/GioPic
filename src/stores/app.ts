@@ -42,9 +42,9 @@ export const useAppStore = defineStore(
     }
   },
   {
-    persist: {
+    persistedState: {
       key: '__giopic_app_store__',
-      omit: ['isMenuCollapsed', 'isImgListDelDialog', 'isUploadRecordDelDialog'],
+      excludePaths: ['isMenuCollapsed', 'isImgListDelDialog', 'isUploadRecordDelDialog'],
     },
   },
 )

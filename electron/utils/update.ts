@@ -15,7 +15,7 @@ export async function checkForUpdates() {
   try {
     await autoUpdater.checkForUpdates()
   }
-  catch (e: any) {
+  catch (e) {
     logger.error(`[update] Error checking for updates: ${e}`)
   }
 }
