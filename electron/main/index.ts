@@ -48,7 +48,8 @@ let mainWindow: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
-const icon = nativeImage.createFromPath(path.join(process.env.VITE_PUBLIC, 'icon.png'))
+const iconPath = path.join(process.env.VITE_PUBLIC, platform.isMacOS ? 'icon-mac.png' : 'icon.png')
+const icon = nativeImage.createFromPath(iconPath)
 
 async function createMainWindow() {
   mainWindow = new BrowserWindow({

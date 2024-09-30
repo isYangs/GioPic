@@ -16,7 +16,7 @@
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "dmg": {
-    "icon": "public/favicon.png",
+    "icon": "public/icon-mac.png",
     "iconSize": 100,
     "contents": [
       {
