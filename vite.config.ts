@@ -129,23 +129,31 @@ function bindingSqlite3(options: {
     name: 'vite-plugin-binding-sqlite3',
     config(config) {
       // https://github.com/vitejs/vite/blob/v4.4.9/packages/vite/src/node/config.ts#L496-L499
-      const path$1 = process.platform === 'win32' ? path.win32 : path.posix
-      const resolvedRoot = config.root ? path$1.resolve(config.root) : process.cwd()
-      const output = path.posix.resolve(resolvedRoot, options.output || 'dist-native')
-      const better_sqlite3 = require.resolve('better-sqlite3')
-      const better_sqlite3_root = path.posix.join(better_sqlite3.slice(0, better_sqlite3.lastIndexOf('node_modules')), 'node_modules/better-sqlite3')
-      const better_sqlite3_node = path.posix.join(better_sqlite3_root, 'build/Release', options.better_sqlite3_node || 'better_sqlite3.node')
-      const better_sqlite3_copy = path.posix.join(output, options.better_sqlite3_node || 'better_sqlite3.node')
-      if (!fs.existsSync(better_sqlite3_node))
-        throw new Error(`${TAG} Can not found "${better_sqlite3_node}".`)
+      const pathUtils = process.platform === 'win32' ? path.win32 : path.posix
+      const rootDir = pathUtils.resolve(config.root || process.cwd())
+      const outputDir = pathUtils.join(rootDir, options.output || 'dist-native')
 
-      if (!fs.existsSync(output))
-        fs.mkdirSync(output, { recursive: true })
+      const bs3NodePath = path.posix.join(
+        require.resolve('better-sqlite3').replace(/node_modules.*/, 'node_modules/better-sqlite3'),
+        'build/Release',
+        options.better_sqlite3_node || 'better_sqlite3.node',
+      )
 
-      fs.copyFileSync(better_sqlite3_node, better_sqlite3_copy)
-      /** `dist-native/better-sqlite3.node` */
-      const BETTER_SQLITE3_BINDING = better_sqlite3_copy.replace(resolvedRoot + path.sep, '')
-      fs.writeFileSync(path.join(resolvedRoot, '.env'), `VITE_BETTER_SQLITE3_BINDING=${BETTER_SQLITE3_BINDING}`)
+      if (!fs.existsSync(bs3NodePath)) {
+        throw new Error(`${TAG} Cannot find "${bs3NodePath}".`)
+      }
+
+      const bs3OutputPath = pathUtils.join(outputDir, options.better_sqlite3_node || 'better_sqlite3.node')
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true })
+      }
+
+      fs.copyFileSync(bs3NodePath, bs3OutputPath)
+
+      fs.writeFileSync(
+        pathUtils.join(rootDir, '.env'),
+        `VITE_BETTER_SQLITE3_BINDING=${bs3OutputPath.replace(`${rootDir}${pathUtils.sep}`, '')}`,
+      )
     },
   }
 }
