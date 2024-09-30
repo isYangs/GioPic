@@ -1,5 +1,5 @@
-import type { UploadFileInfo } from 'naive-ui'
 import { defineStore } from 'pinia'
+import type { UploadFileInfo } from 'naive-ui'
 
 interface State {
   data: UploadData[]
@@ -78,4 +78,8 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     delData,
     getUploadData,
   }
+}, {
+  persistedState: {
+    persist: false,
+  },
 })

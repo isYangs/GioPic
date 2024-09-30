@@ -1,14 +1,16 @@
+import { execSync } from 'node:child_process'
 import path from 'node:path'
 import { platform } from '@electron-toolkit/utils'
+import { app, globalShortcut, Menu, nativeImage, nativeTheme, Tray } from 'electron'
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
-import { Menu, Tray, app, dialog, globalShortcut, nativeImage } from 'electron'
-import pkg from '../../package.json'
-import logger from '../utils/logger'
+import logger from './logger'
+import { checkForUpdates } from './update'
 
 export * from './cors'
 export * from './ipc'
+export * from './store'
 
-let tray = null
+let tray: Tray | null = null
 
 // 初始化系统
 export function initSystem(win: BrowserWindow) {
@@ -16,12 +18,13 @@ export function initSystem(win: BrowserWindow) {
   createMenu(win)
   createSystemTray(win)
 
-  win.on('focus', () => {
-    regGlobalShortcut(win)
-  })
+  win.on('focus', () => regGlobalShortcut(win))
+  win.on('blur', unGlobalShortcut)
 
-  win.on('blur', () => {
-    unGlobalShortcut()
+  nativeTheme.on('updated', () => {
+    if (!tray)
+      return
+    tray.setImage(getTrayIcon())
   })
 
   logger.info('[system] System initialized.')
@@ -29,12 +32,30 @@ export function initSystem(win: BrowserWindow) {
 
 // 创建系统托盘
 function createSystemTray(win: BrowserWindow) {
-  const iconPath = path.join(process.env.VITE_PUBLIC, 'favicon.png')
-  const icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
-  tray = new Tray(icon)
+  tray = new Tray(getTrayIcon())
   tray.setToolTip('GioPic')
   tray.setContextMenu(createTrayMenu(win))
+
   logger.info('[tray] System tray created.')
+}
+
+function isWindowsLightMode() {
+  try {
+    const stdout = execSync('reg query "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v SystemUsesLightTheme')
+    return stdout.toString().includes('0x1')
+  }
+  catch (error) {
+    logger.error('Error fetching Windows mode:', error)
+    return false
+  }
+}
+
+// 根据系统模式获取托盘图标
+function getTrayIcon() {
+  const isLightMode = platform.isWindows && isWindowsLightMode()
+  const iconName = isLightMode ? 'trayTemplate.png' : 'tray.png'
+  const iconPath = path.join(process.env.VITE_PUBLIC, iconName)
+  return nativeImage.createFromPath(iconPath)
 }
 
 // 创建系统托盘菜单
@@ -56,6 +77,13 @@ function createTrayMenu(win: BrowserWindow) {
       },
     },
     { type: 'separator' },
+    {
+      label: '检查更新',
+      click: () => {
+        logger.info('[tray] Check for updates clicked.')
+        checkForUpdates()
+      },
+    },
     {
       label: '重启应用',
       click: () => {
@@ -92,12 +120,9 @@ function openSetting(win: BrowserWindow) {
 }
 
 // 打开关于窗口
-function openAbout() {
-  dialog.showMessageBox({
-    title: 'PicGo',
-    message: 'PicGo',
-    detail: `Version: ${pkg.version}\nAuthor: isYangs\nGithub: github.com/isYangs/GioPic`,
-  })
+function openAbout(win: BrowserWindow) {
+  win?.webContents.send('open-about')
+  win?.show()
 }
 
 // 开机自启
@@ -127,7 +152,7 @@ function createMenu(win: BrowserWindow) {
       {
         label: 'GioPic',
         submenu: [
-          { label: '关于', accelerator: 'Command+I', click: openAbout },
+          { label: '关于', accelerator: 'Command+I', click: () => openAbout(win) },
           { label: '设置', accelerator: 'CommandOrControl+,', click: () => openSetting(win) },
           { type: 'separator' },
           { label: '隐藏', role: 'hide' },

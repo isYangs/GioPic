@@ -13,7 +13,7 @@ const setFormRef = ref<FormInst | null>(null)
 // 通过组件判断是否为需要设置宽度的组件
 function checkComponentType(item: any) {
   const componentType = item.component().type.name
-  return componentType === 'Select' && item.component().props?.multiple !== false || componentType === 'InputGroup'
+  return (componentType === 'Select' && item.component().props?.multiple !== false) || componentType === 'InputGroup'
 }
 
 // 设置宽度
@@ -52,8 +52,11 @@ defineExpose({ formValidation })
             </n-tag>
           </div>
 
-          <n-text v-if="item.tip" class="text-xs op80">
-            {{ item.tip }}
+          <n-text class="text-xs op80">
+            <template v-if="typeof item.tip === 'string'">
+              {{ item.tip }}
+            </template>
+            <component :is="item.tip" v-else />
           </n-text>
         </div>
         <div

@@ -1,5 +1,5 @@
-import type { BrowserWindow } from 'electron'
 import { app, globalShortcut, ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 import logger from './logger'
@@ -25,6 +25,10 @@ export function setupIpcMain(win: BrowserWindow) {
   ipcMain.handle('window-close', () => {
     app.quit()
     win.close()
+  })
+
+  ipcMain.handle('window-show', () => {
+    win.show()
   })
 
   ipcMain.handle('auto-start', (_event, val) => {
@@ -63,14 +67,11 @@ export function setupIpcMain(win: BrowserWindow) {
     }
   })
 
-  ipcMain.handle('devtools', (_event, val) => {
+  ipcMain.handle('devtools', (_e, val) => {
     if (val) {
-      globalShortcut.register('CommandOrControl+Shift+I', () => {
+      globalShortcut.register('CommandOrControl+Shift+D', () => {
         win?.webContents.openDevTools({ mode: ('detach') })
       })
-    }
-    else {
-      globalShortcut.unregister('CommandOrControl+Shift+I')
     }
   })
 

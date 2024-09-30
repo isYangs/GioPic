@@ -1,44 +1,31 @@
 import { defineStore } from 'pinia'
 import type { ProgramsName } from '~/types'
 
-interface State {
-  appCloseType: 'close' | 'hide'
-  appCloseTip: boolean
-  autoStart: boolean
-  autoUpdate: boolean
-  isDevToolsOpen: boolean
-  defaultPrograms: ProgramsName
-  isMenuCollapsed: boolean
+const initialState = {
+  // 基础
+  appCloseType: 'hide' as 'close' | 'hide', // 关闭类型 'close' | 'hide'
+  appCloseTip: false, // 是否显示关闭应用对话框
+  autoStart: false, // 是否开机自启动
+  autoUpdate: false, // 是否自动更新
+  isDevToolsOpen: true, // 是否打开开发者工具
+  defaultPrograms: 'lskyPro' as ProgramsName, // 默认上传存储程序
+  isMenuCollapsed: false, // 是否折叠菜单
 
-  themeAuto: boolean
-  themeType: 'light' | 'dark' | null
+  // 主题
+  themeType: 'light' as 'light' | 'dark' | null, // 主题类型 'light' | 'dark' | null
+  themeAuto: false, // 是否自动切换主题
 
-  isImgListDelDialog: boolean
-  isUploadRecordDelDialog: boolean
-  lastCallTimes: { [key: string]: number }
+  isImgListDelDialog: false, // 是否显示图片列表删除对话框
+  isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框
+  lastCallTimes: {} as { [key: string]: number }, // 上次调用时间，用于限制函数调用频率
 }
+
+type State = typeof initialState
 
 export const useAppStore = defineStore(
   'appStore',
   () => {
-    const state: State = reactive({
-      // 基础
-      appCloseType: 'hide', // 关闭类型 'close' | 'hide'
-      appCloseTip: false, // 是否显示关闭应用对话框
-      autoStart: false, // 是否开机自启动
-      autoUpdate: false, // 是否自动更新
-      isDevToolsOpen: true, // 是否打开开发者工具
-      defaultPrograms: 'lskyPro', // 默认上传存储程序
-      isMenuCollapsed: false, // 是否折叠菜单
-
-      // 主题
-      themeType: 'light', // 主题类型 'light' | 'dark'
-      themeAuto: false, // 是否自动切换主题
-
-      isImgListDelDialog: false, // 是否显示图片列表删除对话框
-      isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框
-      lastCallTimes: {}, // 上次调用时间，用于限制函数调用频率
-    })
+    const state: State = reactive(initialState)
 
     /**
      * 设置状态对象的值
@@ -55,19 +42,9 @@ export const useAppStore = defineStore(
     }
   },
   {
-    persist: {
+    persistedState: {
       key: '__giopic_app_store__',
-      paths: [
-        'appCloseType',
-        'appCloseTip',
-        'autoStart',
-        'isDevToolsOpen',
-        'themeType',
-        'themeAuto',
-        'autoUpdate',
-        'defaultPrograms',
-        'lastCallTimes',
-      ],
+      excludePaths: ['isMenuCollapsed', 'isImgListDelDialog', 'isUploadRecordDelDialog'],
     },
   },
 )

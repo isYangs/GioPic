@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    name: build and release electron app
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    env:
+      GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: |
+          npm i -g pnpm
+          pnpm install
+
+      - name: Build Electron App for Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm run build:win
+
+      - name: Build Electron App for MacOS
+        if: matrix.os == 'macos-latest'
+        run: pnpm run build:mac
+
+      - name: Cleanup Artifacts for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          npx rimraf "release/*/!(*.exe|*.zip|*.yml)"
+
+      - name: Cleanup Artifacts for MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          npx rimraf "release/*/!(*.dmg|*.zip|latest*.yml)"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: release
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: 'release/**'

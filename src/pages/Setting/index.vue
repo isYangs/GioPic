@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import Keycut from '~/components/Partial/Keycut.vue'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
-import debounce from '~/utils/debounce.ts'
+import debounce from '~/utils/debounce'
 
 const appStore = useAppStore()
 const {
@@ -20,7 +21,7 @@ const osThemeRef = useOsTheme()
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
 
-const tabsOptions: TabOption[] = [
+const tabsOptions = ref<TabOption[]>([
   {
     title: '常规',
     items: [
@@ -89,7 +90,7 @@ const tabsOptions: TabOption[] = [
       {
         name: '自动检测更新',
         isDev: true,
-        tip: '开启后软件会检测是否有新版本',
+        tip: '在启动时检测是否有新版本',
         component: () => h(NSwitch, {
           value: autoUpdate.value,
           round: false,
@@ -103,7 +104,7 @@ const tabsOptions: TabOption[] = [
     items: [
       {
         name: '开发者工具',
-        tip: '开启后可使用 Cmd或Ctrl + Shift + I 打开开发者工具',
+        tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, () => 'D'), '打开开发者工具']),
         component: () => h(NSwitch, {
           value: isDevToolsOpen.value,
           round: false,
@@ -124,7 +125,7 @@ const tabsOptions: TabOption[] = [
       },
     ],
   },
-]
+])
 
 // 切换Tab
 function setTabChange(name: string) {
@@ -156,7 +157,7 @@ const allSetScroll = debounce((e) => {
   })
 }, 100)
 
-onMounted(() => {
+onMounted(async () => {
   // 默认选中第一个Tab并滚动到第一个Tab区域
   nextTick(() => {
     setTabsVal.value = 'setTab1'
@@ -190,7 +191,6 @@ onMounted(() => {
       </n-tabs>
 
       <n-scrollbar
-        ref="setScrollRef"
         :style="{
           height: `calc(100vh - 228px)`,
         }"

@@ -1,20 +1,24 @@
-import * as fs from 'node:fs'
-import * as path from 'node:path'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { platform } from '@electron-toolkit/utils'
 import Database from 'better-sqlite3'
 import { app } from 'electron'
-import { platform } from '@electron-toolkit/utils'
+import type { Database as BetterSqliteDatabase } from 'better-sqlite3'
 import logger from '../utils/logger'
 import tables from './tables'
 
-const root = path.join(__dirname, '..')
-let db: Database.Database
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const root = path.join(__dirname, '../..')
+let db: BetterSqliteDatabase
 
 // 定义数据库文件路径，针对macOS系统进行适配
 const DB_PATH = platform.isMacOS
   ? path.join(app.getPath('userData'), '/GPData.db') // 对于macOS，将数据库存放在用户数据目录下
   : path.join(path.dirname(app.getPath('exe')), '/GPData.db') // 对于其他平台，将数据库存放在应用程序目录下
 
-const initTables = (db: Database.Database) => db.exec(`${Array.from(tables.values()).join('\n')}`)
+const initTables = (db: BetterSqliteDatabase) => db.exec(`${Array.from(tables.values()).join('\n')}`)
 
 // 打开、初始化数据库
 export function init(): boolean | null {
@@ -54,4 +58,4 @@ export function init(): boolean | null {
 }
 
 // 获取数据库实例
-export const getDB = (): Database.Database => db
+export const getDB = (): BetterSqliteDatabase => db

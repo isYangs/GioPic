@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import { convertFileSize, generateLink, getLinkTypeOptions } from '~/utils'
 
 const uploadData = ref<GP.DB.UploadData[]>([])

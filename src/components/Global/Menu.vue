@@ -4,8 +4,8 @@ import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
 const router = useRouter()
-const appStroe = useAppStore()
-const { isMenuCollapsed } = storeToRefs(appStroe)
+const appStore = useAppStore()
+const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 
 const menuOptions = computed(() => [

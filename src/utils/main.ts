@@ -75,4 +75,8 @@ export function routerPush(router: Router) {
     if (router)
       router.push('/Setting')
   })
+  window.ipcRenderer.on('open-about', () => {
+    if (router)
+      router.push('/About')
+  })
 }

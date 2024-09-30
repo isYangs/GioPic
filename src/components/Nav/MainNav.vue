@@ -3,20 +3,33 @@ import Logo from '~/assets/logo.svg'
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
-const appStroe = useAppStore()
-const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStroe)
+const appStore = useAppStore()
+const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStore)
+const route = useRoute()
 const router = useRouter()
+
+const canGoBack = ref(false)
+const canGoForward = ref(false)
+watch(() => route.fullPath, () => {
+  canGoBack.value = !!window.history.state.back
+  canGoForward.value = !!window.history.state.forward
+})
 
 const themeOptions = computed(() => [
   {
     label: themeType.value === 'light' ? '深色模式' : '浅色模式',
     key: 'lightTodark',
-    icon: renderIcon(themeType.value === 'light' ? 'i-ph-sun-bold' : 'i-ph-moon-stars-bold'),
+    icon: renderIcon(themeType.value === 'light' ? 'i-ph-moon-stars-bold' : 'i-ph-sun-bold'),
   },
   {
     label: '程序设置',
     key: 'setting',
     icon: renderIcon('i-ph-gear-six-bold'),
+  },
+  {
+    label: '关于',
+    key: 'about',
+    icon: renderIcon('i-ph-info-bold'),
   },
 ])
 
@@ -30,6 +43,11 @@ function themeChange(key: string) {
     }
     case 'setting': {
       router.push('/Setting')
+      break
+    }
+    case 'about': {
+      // window.ipcRenderer.invoke('opne-about')
+      router.push('/About')
       break
     }
     default:
@@ -52,13 +70,13 @@ function themeChange(key: string) {
         GioPic
       </h1>
     </div>
-    <div class="flex items-center" style="-webkit-app-region: no-drag">
-      <n-button :focusable="false" quaternary clas="mr2 h8 w8 rounded-1.5" @click="router.go(-1)">
+    <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
+      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
         <template #icon>
           <div i-ph-caret-left-bold />
         </template>
       </n-button>
-      <n-button :focusable="false" quaternary class="h8 w8" @click="router.go(1)">
+      <n-button v-if="canGoForward" :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(1)">
         <template #icon>
           <div i-ph-caret-right-bold />
         </template>

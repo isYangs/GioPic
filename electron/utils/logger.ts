@@ -5,7 +5,7 @@
  * on Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\{date}.log
  * @see https://www.npmjs.com/package/electron-log
  */
-import * as path from 'node:path'
+import path from 'node:path'
 import { app, ipcMain } from 'electron'
 import logger from 'electron-log'
 
@@ -30,7 +30,7 @@ logger.transports.file.resolvePathFn = () => {
 logger.info(`[logger] log module initialized; path: ${logger.transports.file.getFile().path}`)
 
 // 处理来自渲染进程的日志请求
-ipcMain.handle('logger', (_, level, message) => {
+ipcMain.handle('logger', (_e, level, message) => {
   switch (level) {
     case 'info':
       logger.info(message)
