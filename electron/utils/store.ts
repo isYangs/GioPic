@@ -15,5 +15,6 @@ export function initStore() {
   ipcMain.handle('delete-store', (_event, key) => {
     store.delete(key)
   })
+
   return store
 }
