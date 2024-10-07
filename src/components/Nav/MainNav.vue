@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Logo from '~/assets/logo.svg'
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
@@ -46,7 +45,6 @@ function themeChange(key: string) {
       break
     }
     case 'about': {
-      // window.ipcRenderer.invoke('opne-about')
       router.push('/About')
       break
     }
@@ -57,43 +55,39 @@ function themeChange(key: string) {
 </script>
 
 <template>
-  <nav class="h15 wfull flex select-none items-center" style="-webkit-app-region: drag;">
-    <div class="flex cursor-pointer items-center" :class="isMenuCollapsed ? null : 'w60'" @click="router.push('/')">
-      <div class="hfull w16 flex flex-center" style="-webkit-app-region: no-drag">
-        <n-avatar
-          size="medium"
-          :src="Logo"
-          style="--n-color: transparent"
-        />
+  <nav class="h9 wfull flex select-none items-center" style="-webkit-app-region: drag;">
+    <div class="flex cursor-pointer items-center" :class="isMenuCollapsed ? 'w16' : 'w60'">
+      <div class="mx4 hfull flex-center gap-1.5" style="-webkit-app-region: no-drag" @click="router.push('/')">
+        <Logo class="w5" />
+        <h1 v-if="!isMenuCollapsed" class="font-type text-lg">
+          GioPic
+        </h1>
       </div>
-      <h1 v-if="!isMenuCollapsed" class="text-2xl font-600" style="-webkit-app-region: no-drag">
-        GioPic
-      </h1>
     </div>
-    <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
-      <n-button :focusable="false" quaternary class="h8 w8 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
-        <template #icon>
-          <div i-ph-caret-left-bold />
-        </template>
-      </n-button>
-      <n-button v-if="canGoForward" :focusable="false" quaternary class="h8 w8 rounded-1.5" @click="router.go(1)">
-        <template #icon>
-          <div i-ph-caret-right-bold />
-        </template>
-      </n-button>
-    </div>
+    <div class="flex flex-1 justify-between">
+      <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
+        <n-button :focusable="false" quaternary class="h6 w6 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
+          <template #icon>
+            <div i-ph-caret-left-bold />
+          </template>
+        </n-button>
+        <n-button v-if="canGoForward" :focusable="false" quaternary class="h6 w6 rounded-1.5" @click="router.go(1)">
+          <template #icon>
+            <div i-ph-caret-right-bold />
+          </template>
+        </n-button>
+      </div>
 
-    <div class="mla flex" style="-webkit-app-region: no-drag">
-      <div>
+      <div style="-webkit-app-region: no-drag" class="flex-center">
         <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
-          <n-button :focusable="false" quaternary class="h8 w8">
+          <n-button :focusable="false" quaternary class="h6 w6">
             <template #icon>
               <div i-ph-gear-six-bold />
             </template>
           </n-button>
         </n-dropdown>
+        <TitleBar />
       </div>
-      <TitleBar />
     </div>
   </nav>
 </template>

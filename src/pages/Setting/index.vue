@@ -155,6 +155,12 @@ const allSetScroll = debounce((e) => {
     if (distance >= el.offsetTop)
       setTabsVal.value = `setTab${i + 1}`
   })
+
+  const isReachEnd = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 30
+
+  if (isReachEnd) {
+    setTabsVal.value = `setTab${allSetDom.length}`
+  }
 }, 100)
 
 onMounted(async () => {
@@ -172,33 +178,28 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="wh-full">
+  <div class="wh-full flex flex-col gap6">
     <div class="select-none text-4xl font-600">
       程序设置
     </div>
-    <div class="select-none pt10">
-      <n-tabs
-        v-model:value="setTabsVal"
-        type="segment"
-        @update:value="setTabChange"
-      >
-        <n-tab
-          v-for="(tab, index) in tabsOptions"
-          :key="tab.title"
-          :name="`setTab${index + 1}`"
-          :tab="tab.title"
-        />
-      </n-tabs>
+    <n-tabs
+      v-model:value="setTabsVal"
+      type="segment"
+      @update:value="setTabChange"
+    >
+      <n-tab
+        v-for="(tab, index) in tabsOptions"
+        :key="tab.title"
+        :name="`setTab${index + 1}`"
+        :tab="tab.title"
+      />
+    </n-tabs>
 
-      <n-scrollbar
-        :style="{
-          height: `calc(100vh - 228px)`,
-        }"
-        class="all-set"
-        @scroll="allSetScroll"
-      >
-        <SetItem v-for="tab in tabsOptions" :key="tab.title" :title="tab.title" :items="tab.items" />
-      </n-scrollbar>
-    </div>
+    <n-scrollbar
+      class="all-set"
+      @scroll="allSetScroll"
+    >
+      <SetItem v-for="tab in tabsOptions" :key="tab.title" :title="tab.title" :items="tab.items" />
+    </n-scrollbar>
   </div>
 </template>

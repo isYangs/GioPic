@@ -66,18 +66,18 @@ function closeTip(type: string) {
 </script>
 
 <template>
-  <div class="w37 flex-center">
-    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="minimizeApp">
+  <div class="ml2 h9 flex-center">
+    <n-button :focusable="false" quaternary class="hfull w10" @click="minimizeApp">
       <template #icon>
         <div i-ic-round-minus />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="toggleMaximizeOrRestoreApp">
+    <n-button :focusable="false" quaternary class="hfull w10" @click="toggleMaximizeOrRestoreApp">
       <template #icon>
         <div :class="defaultWindowState ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
       </template>
     </n-button>
-    <n-button :focusable="false" quaternary class="mr2 h8 w8 rounded-1.5" @click="openCloseTipModal">
+    <n-button :focusable="false" quaternary class="hfull w10 !hover:bg-red-5 !hover:text-light" @click="openCloseTipModal">
       <template #icon>
         <div i-ic-round-close />
       </template>
