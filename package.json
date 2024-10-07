@@ -19,7 +19,8 @@
     "build:win": "vue-tsc && vite build && electron-builder --win",
     "build:mac": "vue-tsc && vite build && electron-builder --mac",
     "rebuild": "electron rebuild.js",
-    "postinstall": "npm run rebuild",
+    "postinstall": "pnpm run rebuild",
+    "devtools": "pnpm vue-devtools",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -52,7 +53,6 @@
     "@vitejs/plugin-vue": "^5.1.3",
     "electron": "^31.5.0",
     "electron-builder": "^25.0.5",
-    "electron-devtools-installer": "^3.2.0",
     "eslint": "^9.10.0",
     "eslint-plugin-format": "^0.1.2",
     "naive-ui": "^2.39.0",
@@ -65,6 +65,7 @@
     "vite": "^5.4.4",
     "vite-plugin-electron": "^0.28.7",
     "vite-plugin-electron-renderer": "^0.14.5",
+    "vite-plugin-vue-devtools": "^7.4.6",
     "vue-tsc": "^2.1.6"
   }
 }

@@ -12,6 +12,7 @@ import { VueRouterAutoImports } from 'unplugin-vue-router'
 import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig, type Plugin } from 'vite'
 import electron from 'vite-plugin-electron/simple'
+import VueDevTools from 'vite-plugin-vue-devtools'
 import pkg from './package.json'
 
 const require = createRequire(import.meta.url)
@@ -39,6 +40,7 @@ export default defineConfig(({ command }) => {
       }),
       vue(),
       UnoCSS(),
+      VueDevTools(),
       Components({
         dirs: ['src/components'],
         extensions: ['vue'],
@@ -63,7 +65,6 @@ export default defineConfig(({ command }) => {
           entry: 'electron/main/index.ts',
           onstart({ startup }) {
             if (process.env.VSCODE_DEBUG) {
-              // eslint-disable-next-line no-console
               console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
             }
             else {

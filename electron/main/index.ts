@@ -3,7 +3,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { init as initDB } from '../db'
 import { fixElectronCors, setupIpcMain as initIpcMain, initStore, initSystem } from '../utils/app'
 import logger from '../utils/logger'
@@ -91,18 +90,7 @@ async function createMainWindow() {
   initUpdater(mainWindow)
 }
 
-function installExtensions() {
-  return [
-    VUEJS3_DEVTOOLS,
-  ].map(extension => installExtension(extension, {
-    loadExtensionOptions: { allowFileAccess: true },
-  })
-    .then(name => logger.info(`[devtools] Added Extension: ${name}.`))
-    .catch(err => logger.error(`[devtools] An error occurred: ${err}.`)))
-}
-
-app.whenReady().then(async () => {
-  await Promise.all(installExtensions())
+app.whenReady().then(() => {
   createMainWindow()
 })
 
