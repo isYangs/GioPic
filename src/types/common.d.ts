@@ -1,5 +1,4 @@
 export interface TabOption {
-  [key: string]: any
   title: string
   items: {
     name: string
