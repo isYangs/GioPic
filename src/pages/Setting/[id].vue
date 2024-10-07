@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NButton, NInput, NSelect } from 'naive-ui'
 import type { FormRules } from 'naive-ui'
+import { NButton, NInput, NSelect } from 'naive-ui'
 import type { SetItem } from '~/components/Setting/SetItem.vue'
 import { useProgramsStore } from '~/stores'
 import type { ProgramsName } from '~/types'

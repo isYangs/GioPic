@@ -17,6 +17,16 @@ img {
   transform: translate3d(0, 0, 0);
 }
 
+@font-face {
+  font-family: "GioPic";
+  src: url("/fonts/GioPic.ttf")
+}
+
+.font-type {
+  font-family: "GioPic";
+  font-weight: 700;
+}
+
 /*
 -------------------------
     NaiveUI 组件样式处理

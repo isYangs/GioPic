@@ -39,14 +39,13 @@ onMounted(() => {
 <template>
   <Provider>
     <UpdateProgress v-if="showDialogUpdateProgress" v-model="showDialogUpdateProgress" :percentage="updateProgress" />
-    <n-layout position="absolute">
+    <n-layout class="wh-full" content-class="flex flex-col">
       <n-layout-header bordered>
         <MainNav />
       </n-layout-header>
       <n-layout
         has-sider
-        position="absolute"
-        style="top:61px; bottom:0; overflow: auto;"
+        class="flex-1"
       >
         <n-layout-sider
           bordered
@@ -61,11 +60,11 @@ onMounted(() => {
         >
           <Menu />
         </n-layout-sider>
-        <n-layout content-style="padding: 24px;" :native-scrollbar="false">
+        <n-layout content-class="wh-full" :native-scrollbar="false">
           <router-view v-slot="{ Component }">
             <keep-alive>
               <Transition name="router" mode="out-in">
-                <component :is="Component" />
+                <component :is="Component" class="p6" />
               </Transition>
             </keep-alive>
           </router-view>
