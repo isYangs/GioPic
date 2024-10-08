@@ -38,28 +38,34 @@ onMounted(() => {
 
 <template>
   <Provider>
-    <UpdateProgress v-if="showDialogUpdateProgress" v-model="showDialogUpdateProgress" :percentage="updateProgress" />
-    <n-layout class="wh-full" content-class="flex flex-col">
-      <n-layout-header bordered>
-        <MainNav />
-      </n-layout-header>
-      <n-layout
-        has-sider
-        class="flex-1"
+    <UpdateProgress
+      v-if="showDialogUpdateProgress"
+      v-model="showDialogUpdateProgress"
+      :percentage="updateProgress"
+    />
+
+    <n-layout has-sider class="wh-full">
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
+        show-trigger="bar"
+        :native-scrollbar="false"
+        :collapsed-width="64"
+        :width="180"
+        :collapsed="isMenuCollapsed"
+        content-class="flex flex-col hfull draggable"
+        @collapse="isMenuCollapsed = true"
+        @expand="isMenuCollapsed = false"
       >
-        <n-layout-sider
-          bordered
-          collapse-mode="width"
-          show-trigger="bar"
-          :native-scrollbar="false"
-          :collapsed-width="64"
-          :width="240"
-          :collapsed="isMenuCollapsed"
-          @collapse="isMenuCollapsed = true"
-          @expand="isMenuCollapsed = false"
-        >
-          <Menu />
-        </n-layout-sider>
+        <n-layout-header bordered>
+          <Logo class="draggable" />
+        </n-layout-header>
+        <Menu class="no-draggable" />
+      </n-layout-sider>
+      <n-layout content-class="flex flex-col">
+        <n-layout-header bordered>
+          <MainNav />
+        </n-layout-header>
         <n-layout content-class="wh-full" :native-scrollbar="false">
           <router-view v-slot="{ Component }">
             <keep-alive>

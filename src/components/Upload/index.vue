@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5'
 import type { UploadCustomRequestOptions } from 'naive-ui'
+import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5'
 import { useUploadDataStore } from '~/stores'
 
 const uploadDataStore = useUploadDataStore()

@@ -66,22 +66,16 @@ function closeTip(type: string) {
 </script>
 
 <template>
-  <div class="ml2 h9 flex-center">
-    <n-button :focusable="false" quaternary class="hfull w10" @click="minimizeApp">
-      <template #icon>
-        <div i-ic-round-minus />
-      </template>
-    </n-button>
-    <n-button :focusable="false" quaternary class="hfull w10" @click="toggleMaximizeOrRestoreApp">
-      <template #icon>
-        <div :class="defaultWindowState ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
-      </template>
-    </n-button>
-    <n-button :focusable="false" quaternary class="hfull w10 !hover:bg-red-5 !hover:text-light" @click="openCloseTipModal">
-      <template #icon>
-        <div i-ic-round-close />
-      </template>
-    </n-button>
+  <div class="window-title-bar ml2 h9 flex">
+    <div @click="minimizeApp">
+      <div i-ic-round-minus />
+    </div>
+    <div @click="toggleMaximizeOrRestoreApp">
+      <div :class="defaultWindowState ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
+    </div>
+    <div class="!hover:bg-red-5 !hover:text-light" @click="openCloseTipModal">
+      <div i-ic-round-close />
+    </div>
   </div>
   <n-modal
     v-model:show="closeTipModal"
@@ -117,3 +111,16 @@ function closeTip(type: string) {
     </template>
   </n-modal>
 </template>
+
+<style>
+.window-title-bar > div {
+  --uno: hfull w10 flex-center;
+  transition:
+    all 0.3s,
+    color 0.1s;
+}
+
+.window-title-bar > div:hover {
+  background-color: var(--n-border-color);
+}
+</style>

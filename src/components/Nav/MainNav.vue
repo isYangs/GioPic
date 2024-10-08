@@ -3,7 +3,7 @@ import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils'
 
 const appStore = useAppStore()
-const { isMenuCollapsed, themeAuto, themeType } = storeToRefs(appStore)
+const { themeAuto, themeType } = storeToRefs(appStore)
 const route = useRoute()
 const router = useRouter()
 
@@ -56,14 +56,6 @@ function themeChange(key: string) {
 
 <template>
   <nav class="h9 wfull flex select-none items-center" style="-webkit-app-region: drag;">
-    <div class="flex cursor-pointer items-center" :class="isMenuCollapsed ? 'w16' : 'w60'">
-      <div class="mx4 hfull flex-center gap-1.5" style="-webkit-app-region: no-drag" @click="router.push('/')">
-        <Logo class="w5" />
-        <h1 v-if="!isMenuCollapsed" class="font-type text-lg">
-          GioPic
-        </h1>
-      </div>
-    </div>
     <div class="flex flex-1 justify-between">
       <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
         <n-button :focusable="false" quaternary class="h6 w6 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">

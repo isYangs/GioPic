@@ -18,13 +18,21 @@ img {
 }
 
 @font-face {
-  font-family: "GioPic";
-  src: url("/fonts/GioPic.ttf")
+  font-family: 'GioPic';
+  src: url('/fonts/GioPic.ttf');
 }
 
 .font-type {
-  font-family: "GioPic";
+  font-family: 'GioPic';
   font-weight: 700;
+}
+
+.draggable {
+  -webkit-app-region: drag;
+}
+
+.no-draggable {
+  -webkit-app-region: no-drag;
 }
 
 /*
@@ -82,6 +90,10 @@ img {
 .n-scrollbar > .n-scrollbar-rail {
   right: 0 !important;
   z-index: 20;
+}
+
+.n-menu-item-content {
+  padding-left: 22px !important;
 }
 /*
 -------------------------

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { GlobalThemeOverrides } from 'naive-ui'
 import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
 import { createTextVNode } from 'vue'
-import type { GlobalThemeOverrides } from 'naive-ui'
 import { useAppStore } from '~/stores'
 
 const appStore = useAppStore()
