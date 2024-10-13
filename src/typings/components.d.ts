@@ -8,11 +8,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     FileList: typeof import('./../components/Upload/FileList.vue')['default']
-    Keycut: typeof import('./../components/Partial/Keycut.vue')['default']
+    Header: typeof import('./../components/Layout/Header.vue')['default']
+    Keycut: typeof import('./../components/Common/Keycut.vue')['default']
     Logo: typeof import('./../components/Global/Logo.vue')['default']
-    MainNav: typeof import('./../components/Nav/MainNav.vue')['default']
-    Menu: typeof import('./../components/Global/Menu.vue')['default']
-    NAvatar: typeof import('naive-ui')['NAvatar']
+    Menu: typeof import('./../components/Layout/Menu.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
     NCheckbox: typeof import('naive-ui')['NCheckbox']
@@ -55,9 +54,9 @@ declare module 'vue' {
     Provider: typeof import('./../components/Global/Provider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SetItem: typeof import('./../components/Setting/SetItem.vue')['default']
-    TitleBar: typeof import('./../components/Nav/TitleBar.vue')['default']
-    UpdateProgress: typeof import('./../components/Global/UpdateProgress.vue')['default']
+    SettingSection: typeof import('./../components/Setting/SettingSection.vue')['default']
+    UpdateCheckModal: typeof import('./../components/Update/UpdateCheckModal.vue')['default']
+    UpdateProgress: typeof import('./../components/Update/UpdateProgress.vue')['default']
     Upload: typeof import('./../components/Upload/index.vue')['default']
   }
 }

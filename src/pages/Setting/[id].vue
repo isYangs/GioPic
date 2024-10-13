@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import { NButton, NInput, NSelect } from 'naive-ui'
-import type { SetItem } from '~/components/Setting/SetItem.vue'
 import { useProgramsStore } from '~/stores'
 import type { ProgramsName } from '~/types'
 import {
@@ -21,7 +20,7 @@ const strategiesVal = ref<number | null>(null)
 
 const settings = computed(() => programsStore.getPrograms(id.value))
 
-const setItemRef = ref<SetItem | null>(null)
+const setItem = useTemplateRef('setItemRef')
 
 const rules: FormRules = {
   apiUrl: createFormRule(() => validateUrl(api.value)),
@@ -41,13 +40,7 @@ const settingOptions = computed(() => [
         onUpdateValue: (val: string) => {
           api.value = val
         },
-        onChange: () => {
-          setItemRef.value?.formValidation(() => {
-            settings.value.strategiesVal = null
-            settings.value.strategies = []
-            saveSetting()
-          })
-        },
+        onChange: formValidation,
       })
     },
   },
@@ -63,13 +56,7 @@ const settingOptions = computed(() => [
         onUpdateValue: (val: string) => {
           token.value = val
         },
-        onChange: () => {
-          setItemRef.value?.formValidation(() => {
-            settings.value.strategiesVal = null
-            settings.value.strategies = []
-            saveSetting()
-          })
-        },
+        onChange: formValidation,
       })
     },
   },
@@ -97,6 +84,14 @@ const settingOptions = computed(() => [
   },
 ])
 
+function formValidation() {
+  setItem.value?.formValidation(() => {
+    settings.value.strategiesVal = null
+    settings.value.strategies = []
+    saveSetting()
+  })
+}
+
 async function syncStrategies() {
   const loading = window.$message.loading('正在同步线上策略列表...')
   if (!await programsStore.getStrategies(id.value))
@@ -115,7 +110,6 @@ async function saveSetting() {
 
 watchEffect(() => {
   id.value = route.params.id as ProgramsName
-
   api.value = settings.value.api
   token.value = settings.value.token
   strategiesVal.value = settings.value.strategiesVal
@@ -124,6 +118,6 @@ watchEffect(() => {
 
 <template>
   <div wh-full>
-    <SetItem ref="setItemRef" class="pt0" :title="getProgramsName(id)" :items="settingOptions" :rules />
+    <SettingSection ref="setItemRef" class="pt0" :title="getProgramsName(id)" :items="settingOptions" :rules />
   </div>
 </template>

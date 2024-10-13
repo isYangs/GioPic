@@ -1,31 +1,24 @@
 <script setup lang="ts">
-import type { FormInst } from 'naive-ui'
 import type { TabOption } from '~/types'
-
-export interface SetItem {
-  formValidation: typeof formValidation
-}
 
 defineProps<TabOption>()
 
-const setFormRef = ref<FormInst | null>(null)
+const setForm = useTemplateRef('setFormRef')
 
-// 通过组件判断是否为需要设置宽度的组件
+// 检查组件类型是否需要设置宽度
 function checkComponentType(item: any) {
-  const componentType = item.component().type.name
-  return (componentType === 'Select' && item.component().props?.multiple !== false) || componentType === 'InputGroup'
+  const { type, props } = item.component()
+  return (type.name === 'Select' && props?.multiple !== false) || type.name === 'InputGroup'
 }
 
 // 设置宽度
 function setWidth(width: boolean | number | undefined) {
-  if (width === undefined || typeof width === 'boolean')
-    return '200px'
-  return `${width}px`
+  return width === undefined || typeof width === 'boolean' ? '200px' : `${width}px`
 }
 
 // 表单验证的异步函数
 function formValidation(onSuccess: () => void) {
-  setFormRef.value?.validate((errors) => {
+  setForm.value?.validate((errors) => {
     if (!errors)
       onSuccess()
   })
@@ -40,28 +33,38 @@ defineExpose({ formValidation })
       {{ title }}
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">
-      <n-card v-for="(item, index) in items" :key="index" class="set-item mb3 wh-full rounded-2" :content-style="{ padding: '0 20px' }">
+      <n-card
+        v-for="(item, index) in items"
+        :key="index"
+        class="set-item mb3 wh-full rounded-2"
+        :content-style="{ padding: '0 20px' }"
+      >
         <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
           <div class="flex items-center">
             {{ item.name }}
-            <n-tag v-if="item.isDev" :bordered="false" round size="small" type="warning" class="ml1">
+            <n-tag
+              v-if="item.isDev"
+              :bordered="false"
+              round
+              size="small"
+              type="warning"
+              class="ml1"
+            >
               开发中
               <template #icon>
                 <div i-ph-code-bold />
               </template>
             </n-tag>
           </div>
-
           <n-text class="text-xs op80">
-            <template v-if="typeof item.tip === 'string'">
-              {{ item.tip }}
-            </template>
-            <component :is="item.tip" v-else />
+            <component :is="typeof item.tip === 'string' ? 'span' : item.tip">
+              {{ typeof item.tip === 'string' ? item.tip : '' }}
+            </component>
           </n-text>
         </div>
         <div
-          :class="checkComponentType(item) || item.width ? 'set-item-other' : null"
-          :style="`--w:${setWidth(item.width)}`"
+          :class="{ 'set-item-other': checkComponentType(item) || item.width }"
+          :style="{ '--w': setWidth(item.width) }"
         >
           <n-form-item :path="item.path">
             <component :is="item.component" />

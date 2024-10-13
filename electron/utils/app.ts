@@ -1,8 +1,8 @@
+import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import { execSync } from 'node:child_process'
 import path from 'node:path'
 import { platform } from '@electron-toolkit/utils'
 import { app, globalShortcut, Menu, nativeImage, nativeTheme, Tray } from 'electron'
-import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import logger from './logger'
 import { checkForUpdates } from './update'
 

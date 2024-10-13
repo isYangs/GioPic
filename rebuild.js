@@ -1,6 +1,7 @@
 import child from 'node:child_process'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import process from 'node:process'
 
 const require = createRequire(import.meta.url)
 
@@ -24,8 +25,10 @@ const cp = child.spawn(
 
 cp.on('exit', (code) => {
   if (code === 0) {
+    // eslint-disable-next-line no-console
     console.log('Rebuild better-sqlite3 success.')
-  } else {
+  }
+  else {
     console.error('Failed to rebuild better-sqlite3. Exit code:', code)
   }
   process.exit(code)

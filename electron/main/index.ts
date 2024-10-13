@@ -5,7 +5,6 @@ import { platform } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from '../db'
 import { fixElectronCors, setupIpcMain as initIpcMain, initStore, initSystem } from '../utils/app'
-import logger from '../utils/logger'
 import initUpdater from '../utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

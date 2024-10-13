@@ -64,7 +64,7 @@ onMounted(() => {
       </n-layout-sider>
       <n-layout content-class="flex flex-col">
         <n-layout-header bordered>
-          <MainNav />
+          <Header />
         </n-layout-header>
         <n-layout content-class="wh-full" :native-scrollbar="false">
           <router-view v-slot="{ Component }">

@@ -1,9 +1,9 @@
+import type { BrowserWindow } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { app, dialog, ipcMain } from 'electron'
 import pkg from 'electron-updater'
-import type { BrowserWindow } from 'electron'
 import logger from './logger'
 
 const { autoUpdater } = pkg

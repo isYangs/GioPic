@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
-import Keycut from '~/components/Partial/Keycut.vue'
+import Keycut from '~/components/Common/Keycut.vue'
 import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
 import debounce from '~/utils/debounce'
@@ -199,7 +199,7 @@ onMounted(async () => {
       class="all-set"
       @scroll="allSetScroll"
     >
-      <SetItem v-for="tab in tabsOptions" :key="tab.title" :title="tab.title" :items="tab.items" />
+      <SettingSection v-for="tab in tabsOptions" :key="tab.title" :title="tab.title" :items="tab.items" />
     </n-scrollbar>
   </div>
 </template>

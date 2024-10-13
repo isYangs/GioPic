@@ -1,5 +1,5 @@
-import { app, globalShortcut, ipcMain } from 'electron'
 import type { BrowserWindow } from 'electron'
+import { app, globalShortcut, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart } from './app'
 import logger from './logger'
