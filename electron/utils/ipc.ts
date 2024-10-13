@@ -1,7 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { app, globalShortcut, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
-import { autoStart } from './app'
+import { autoStart, regDevToolsShortcut } from './app'
 import logger from './logger'
 
 export function setupIpcMain(win: BrowserWindow) {
@@ -35,6 +35,10 @@ export function setupIpcMain(win: BrowserWindow) {
     autoStart(val)
   })
 
+  ipcMain.handle('reg-dev-tools', (_event, val) => {
+    regDevToolsShortcut(win, val)
+  })
+
   ipcMain.handle('insert-upload-data', (_event, dataString) => {
     try {
       const data = JSON.parse(dataString)
@@ -64,14 +68,6 @@ export function setupIpcMain(win: BrowserWindow) {
     }
     catch (e) {
       logger.error(`[upload] Error deleting upload data from the database: ${e}`)
-    }
-  })
-
-  ipcMain.handle('devtools', (_e, val) => {
-    if (val) {
-      globalShortcut.register('CommandOrControl+Shift+D', () => {
-        win?.webContents.openDevTools({ mode: ('detach') })
-      })
     }
   })
 

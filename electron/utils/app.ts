@@ -4,6 +4,7 @@ import path from 'node:path'
 import { platform } from '@electron-toolkit/utils'
 import { app, globalShortcut, Menu, nativeImage, nativeTheme, Tray } from 'electron'
 import logger from './logger'
+import { getStore } from './store'
 import { checkForUpdates } from './update'
 
 export * from './cors'
@@ -18,7 +19,10 @@ export function initSystem(win: BrowserWindow) {
   createMenu(win)
   createSystemTray(win)
 
-  win.on('focus', () => regGlobalShortcut(win))
+  win.on('focus', () => {
+    regDevToolsShortcut(win, getStore('isDevToolsEnabled'))
+    regGlobalShortcut(win)
+  })
   win.on('blur', unGlobalShortcut)
 
   nativeTheme.on('updated', () => {
@@ -94,6 +98,18 @@ function createTrayMenu(win: BrowserWindow) {
     },
     { label: '退出', accelerator: 'CommandOrControl+Q', role: 'quit' },
   ])
+}
+
+// 注册开发者工具快捷键
+export function regDevToolsShortcut(win: BrowserWindow, val: boolean) {
+  if (val) {
+    globalShortcut.register('CommandOrControl+Shift+D', () => {
+      win?.webContents.openDevTools({ mode: ('detach') })
+    })
+  }
+  else {
+    globalShortcut.unregister('CommandOrControl+Shift+D')
+  }
 }
 
 // 注册全局快捷键
