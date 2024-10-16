@@ -20,6 +20,7 @@ img {
 @font-face {
   font-family: 'GioPic';
   src: url('/fonts/GioPic.ttf');
+  font-display: swap;
 }
 
 .font-type {

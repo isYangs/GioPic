@@ -7,7 +7,7 @@ const initialState = {
   appCloseTip: false, // 是否显示关闭应用对话框
   autoStart: false, // 是否开机自启动
   autoUpdate: false, // 是否自动更新
-  isDevToolsOpen: true, // 是否打开开发者工具
+  isDevToolsEnabled: true, // 是否打开开发者工具
   defaultPrograms: 'lskyPro' as ProgramsName, // 默认上传存储程序
   isMenuCollapsed: false, // 是否折叠菜单
 

@@ -37,7 +37,7 @@ onMounted(async () => {
 <template>
   <div class="mt20 flex-center flex-col gap-10">
     <img src="/icon.png" class="h40 w40">
-    <div class="text-center text-2xl fw600">
+    <div class="font-type text-center text-2xl fw700">
       GioPic
     </div>
     <div class="m10 flex-center gap-10">
