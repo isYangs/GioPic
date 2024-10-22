@@ -11,7 +11,7 @@ const {
   appCloseType,
   autoStart,
   autoUpdate,
-  isDevToolsOpen,
+  isDevToolsEnabled,
   themeType,
   themeAuto,
 } = storeToRefs(appStore)
@@ -106,11 +106,11 @@ const tabsOptions = ref<TabOption[]>([
         name: '开发者工具',
         tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, () => 'D'), '打开开发者工具']),
         component: () => h(NSwitch, {
-          value: isDevToolsOpen.value,
+          value: isDevToolsEnabled.value,
           round: false,
           onUpdateValue: (val: boolean) => {
-            isDevToolsOpen.value = val
-            window.ipcRenderer.invoke('devtools', val)
+            isDevToolsEnabled.value = val
+            window.ipcRenderer.invoke('reg-dev-tools', val)
           },
         }),
       },

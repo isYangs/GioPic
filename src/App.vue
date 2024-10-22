@@ -5,13 +5,11 @@ import { routerPush } from './utils'
 const appStore = useAppStore()
 const router = useRouter()
 const route = useRoute()
-const { isMenuCollapsed, isDevToolsOpen } = storeToRefs(appStore)
+const { isMenuCollapsed } = storeToRefs(appStore)
 
 // router.beforeEach((to, from, next) => {
 
 // })
-
-window.ipcRenderer.invoke('devtools', isDevToolsOpen.value)
 
 const showDialogUpdateProgress = ref(false)
 const updateProgress = ref(0)
