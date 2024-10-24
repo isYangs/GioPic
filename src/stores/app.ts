@@ -10,6 +10,8 @@ const initialState = {
   isDevToolsEnabled: true, // 是否打开开发者工具
   defaultPrograms: 'lskyPro' as ProgramsName, // 默认上传存储程序
   isMenuCollapsed: false, // 是否折叠菜单
+  ignoreVersion: '', // 忽略更新的版本号
+  updateAtNext: false, // 是否在下次启动时更新
 
   // 主题
   themeType: 'light' as 'light' | 'dark' | null, // 主题类型 'light' | 'dark' | null

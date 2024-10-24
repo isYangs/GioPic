@@ -11,24 +11,6 @@ const { isMenuCollapsed } = storeToRefs(appStore)
 
 // })
 
-const showDialogUpdateProgress = ref(false)
-const updateProgress = ref(0)
-
-window.ipcRenderer.on('update', (_e, type, ...args) => {
-  switch (type) {
-    case 'show-toast':
-      window.ipcRenderer.invoke('window-show')
-      window.$message.info(args[0])
-      break
-    case 'show-update-progress':
-      showDialogUpdateProgress.value = true
-      break
-    case 'update-update-progress':
-      updateProgress.value = args[0]
-      break
-  }
-})
-
 onMounted(() => {
   routerPush(router)
 })
@@ -36,12 +18,6 @@ onMounted(() => {
 
 <template>
   <Provider>
-    <UpdateProgress
-      v-if="showDialogUpdateProgress"
-      v-model="showDialogUpdateProgress"
-      :percentage="updateProgress"
-    />
-
     <n-layout has-sider class="wh-full">
       <n-layout-sider
         bordered

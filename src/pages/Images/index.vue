@@ -49,11 +49,11 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
               <n-ellipsis class="max-w55 text-4 font-400">
                 {{ item.name }}
               </n-ellipsis>
-              <n-button quaternary class="absolute right-.5 h5 w5" @click="delImage(item.key)">
-                <template #icon>
-                  <div i-ic-round-close class="h5 w5 text-dark-50" />
-                </template>
-              </n-button>
+              <div
+                class="absolute right-.5 top-.5 size-5 cursor-pointer text-dark-50 transition hover:text-red"
+                i-ic-round-close
+                @click="delImage(item.key)"
+              />
             </template>
             <n-flex class="h50">
               <n-image lazy class="wh-full border-rd-sm" :src="item.url" object-fit="cover" style="image-rendering: optimizeQuality;">
@@ -80,7 +80,7 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
     </n-image-group>
     <n-empty v-if="uploadData.length === 0" class="mt40" size="large" description="还没有图片，快去上传图片吧">
       <template #icon>
-        <div i-ph-image-broken-bold class="h11 w11" />
+        <div i-ph-image-broken class="h11 w11" />
       </template>
     </n-empty>
     <n-modal

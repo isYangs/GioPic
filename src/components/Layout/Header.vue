@@ -82,7 +82,8 @@ function onCloseClick() {
   rememberChoice.value = false
 }
 
-function onCloseTipAction(action: 'cancel' | 'close' | 'hide') {
+/** 执行关闭主窗口操作 */
+function onConfirmCloseTipModal(action: 'cancel' | 'close' | 'hide') {
   const actions = {
     close: () => {
       if (rememberChoice.value) {
@@ -109,24 +110,24 @@ function onCloseTipAction(action: 'cancel' | 'close' | 'hide') {
 </script>
 
 <template>
-  <nav class="h9 wfull flex select-none items-center" style="-webkit-app-region: drag;">
+  <nav class="draggable h9 wfull flex select-none items-center">
     <div class="flex flex-1 justify-between">
-      <div class="flex items-center gap1" style="-webkit-app-region: no-drag">
-        <n-button :focusable="false" quaternary class="h6 w6 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
+      <div class="no-draggable flex items-center gap1 p1">
+        <n-button :focusable="false" quaternary size="small" class="h6 w6 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
           <template #icon>
             <div i-ph-caret-left-bold />
           </template>
         </n-button>
-        <n-button v-if="canGoForward" :focusable="false" quaternary class="h6 w6 rounded-1.5" @click="router.go(1)">
+        <n-button v-if="canGoForward" :focusable="false" size="small" quaternary class="h6 w6 rounded-1.5" @click="router.go(1)">
           <template #icon>
             <div i-ph-caret-right-bold />
           </template>
         </n-button>
       </div>
 
-      <div style="-webkit-app-region: no-drag" class="flex-center">
+      <div class="no-draggable flex-center">
         <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
-          <n-button :focusable="false" quaternary class="h6 w6">
+          <n-button :focusable="false" quaternary size="small" class="h6 w6">
             <template #icon>
               <div i-ph-gear-six-bold />
             </template>
@@ -165,14 +166,14 @@ function onCloseTipAction(action: 'cancel' | 'close' | 'hide') {
     </n-checkbox>
     <template #footer>
       <n-flex justify="space-between">
-        <n-button strong secondary :focusable="false" @click="onCloseTipAction('cancel')">
+        <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('cancel')">
           取消
         </n-button>
         <n-flex>
-          <n-button strong secondary :focusable="false" @click="onCloseTipAction('close')">
+          <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('close')">
             退出
           </n-button>
-          <n-button type="primary" :focusable="false" strong secondary @click="onCloseTipAction('hide')">
+          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmCloseTipModal('hide')">
             最小化
           </n-button>
         </n-flex>

@@ -40,6 +40,10 @@ function createSystemTray(win: BrowserWindow) {
   tray.setToolTip('GioPic')
   tray.setContextMenu(createTrayMenu(win))
 
+  tray.on('double-click', () => {
+    win?.show()
+  })
+
   logger.info('[tray] System tray created.')
 }
 

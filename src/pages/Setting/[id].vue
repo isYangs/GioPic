@@ -30,7 +30,7 @@ const rules: FormRules = {
 const settingOptions = computed(() => [
   {
     name: 'API 地址',
-    tip: '须包含 http(s)://',
+    tip: 'http(s)://域名，不含尾随斜杠',
     width: 300,
     path: 'apiUrl',
     component: () => {
@@ -63,7 +63,7 @@ const settingOptions = computed(() => [
   {
     name: '存储策略',
     component: () => {
-      return h('div', { class: 'flex' }, {
+      return h('div', { class: 'flex gap-1' }, {
         default: () => [
           h(NSelect, {
             value: strategiesVal.value,

@@ -5,49 +5,25 @@ import { createTextVNode } from 'vue'
 import { useAppStore } from '~/stores'
 
 const appStore = useAppStore()
-const { themeType, themeAuto } = storeToRefs(appStore)
+const {
+  ignoreVersion,
+  updateAtNext,
+  themeType,
+  themeAuto,
+} = storeToRefs(appStore)
+
 const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
-const lightThemeOverrides: GlobalThemeOverrides = {
-  common: {
-    primaryColor: 'rgb(51,54,57)',
-    primaryColorHover: 'rgb(51,54,57)',
-    primaryColorSuppl: 'rgb(51,54,57)',
-    primaryColorPressed: 'rgb(149,158,168)',
-    modalColor: 'rgb(250,250,252)',
-  },
-  Menu: {
-    itemColorActive: 'rgb(221,221,221)',
-    itemColorActiveHover: 'rgb(221,221,221)',
-    itemColorActiveCollapsed: 'rgb(221,221,221)',
-    itemIconColorActive: 'var(--n-item-icon-color)',
-    itemIconColorActiveHover: 'var(--n-item-icon-color)',
-    itemTextColorActive: 'var(--n-item-text-color)',
-    itemTextColorActiveHover: 'var(--n-item-text-color)',
-    arrowColorActive: 'rgb(221,221,221)',
-    arrowColorActiveHover: 'rgb(221,221,221)',
-    arrowColorActiveCollapsed: 'rgb(221,221,221)',
-  },
-}
 
-const darkThemeOverrides: GlobalThemeOverrides = {
-  common: {
-    primaryColor: 'rgba(255,255,255,.82)',
-    primaryColorHover: 'rgba(255,255,255,.82)',
-    primaryColorSuppl: 'rgba(255,255,255,.82)',
-    primaryColorPressed: 'rgba(255,255,255,.26)',
-  },
-  Menu: {
-    itemColorActive: 'rgb(31,40,50)',
-    itemColorActiveHover: 'rgb(31,40,50)',
-    itemColorActiveCollapsed: 'rgb(31,40,50)',
-    itemIconColorActive: 'var(--n-item-icon-color)',
-    itemIconColorActiveHover: 'var(--n-item-icon-color)',
-    itemTextColorActive: 'var(--n-item-text-color)',
-    itemTextColorActiveHover: 'var(--n-item-text-color)',
-    arrowColorActive: 'rgb(31,40,50)',
-    arrowColorActiveHover: 'rgb(31,40,50)',
-    arrowColorActiveCollapsed: 'rgb(31,40,50)',
+const showReleaseModal = ref(false)
+const releaseVersion = ref('')
+const releaseContent = ref('')
+const showUpdateRestart = ref(false)
+const forceUpdate = ref(false)
+
+const themeOverrides: GlobalThemeOverrides = {
+  Typography: {
+    headerBarColor: 'currentColor',
   },
 }
 
@@ -82,17 +58,58 @@ watch(osThemeRef, (val) => {
   if (themeAuto)
     themeType.value = val
 })
+
+// 监听更新事件
+const updateHandlers: Record<string, (...args: any[]) => void> = {
+  'show-toast': (...args) => {
+    window.ipcRenderer.invoke('window-show')
+    window.$message.info(args[0])
+  },
+  'show-release': (...args) => {
+    ignoreVersion.value = ''
+    updateAtNext.value = false
+    releaseVersion.value = args[0]
+    releaseContent.value = args[1]
+    showReleaseModal.value = true
+  },
+  // 'show-update-progress': (_) => {
+  //   showDialogUpdateProgress.value = true
+  // },
+  // 'update-update-progress': (...args) => {
+  //   updateProgress.value = args[0]
+  // },
+  'show-update-restart': (...args) => {
+    forceUpdate.value = args[0]
+    showUpdateRestart.value = true
+  },
+}
+
+window.ipcRenderer.on('update', (_e, type, ...args) => {
+  const handler = updateHandlers[type]
+  if (handler) {
+    handler(...args)
+  }
+})
 </script>
 
 <template>
   <n-config-provider
     :locale="zhCN"
     :date-locale="dateZhCN"
-    :theme="theme"
-    :theme-overrides="theme === null ? lightThemeOverrides : darkThemeOverrides"
+    :theme
+    :theme-overrides
     abstract
     inline-theme-disabled
   >
+    <UpdateAvailable
+      v-model="showReleaseModal"
+      :release-version
+      :release-content
+    />
+    <UpdateRestart
+      v-model="showUpdateRestart"
+      :force-update
+    />
     <n-loading-bar-provider>
       <n-dialog-provider>
         <n-notification-provider :max="1" container-style="margin-top:3.5rem">

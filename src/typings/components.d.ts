@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     FileList: typeof import('./../components/Upload/FileList.vue')['default']
     Header: typeof import('./../components/Layout/Header.vue')['default']
+    IconSVG: typeof import('./../components/Global/IconSVG.vue')['default']
     Keycut: typeof import('./../components/Common/Keycut.vue')['default']
     Logo: typeof import('./../components/Global/Logo.vue')['default']
     Menu: typeof import('./../components/Layout/Menu.vue')['default']
@@ -39,11 +40,9 @@ declare module 'vue' {
     NModal: typeof import('naive-ui')['NModal']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NP: typeof import('naive-ui')['NP']
-    NProgress: typeof import('naive-ui')['NProgress']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
     NSkeleton: typeof import('naive-ui')['NSkeleton']
-    NSpace: typeof import('naive-ui')['NSpace']
     NSpin: typeof import('naive-ui')['NSpin']
     NTab: typeof import('naive-ui')['NTab']
     NTabs: typeof import('naive-ui')['NTabs']
@@ -55,8 +54,8 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SettingSection: typeof import('./../components/Setting/SettingSection.vue')['default']
-    UpdateCheckModal: typeof import('./../components/Update/UpdateCheckModal.vue')['default']
-    UpdateProgress: typeof import('./../components/Update/UpdateProgress.vue')['default']
+    UpdateAvailable: typeof import('./../components/Update/UpdateAvailable.vue')['default']
+    UpdateRestart: typeof import('./../components/Update/UpdateRestart.vue')['default']
     Upload: typeof import('./../components/Upload/index.vue')['default']
   }
 }
