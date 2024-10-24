@@ -294,7 +294,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
       <NButton type="error" secondary @click="allClear">
         清空列表
       </NButton>
-      <NButton type="info" secondary :disabled="false" @click="copyAllUrl">
+      <NButton secondary :disabled="false" @click="copyAllUrl">
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
@@ -305,14 +305,14 @@ window.ipcRenderer.on('upload-shortcut', () => {
         <n-grid-item v-for="(file, index) in data" :key="index">
           <n-card class="relative not-last:mb2">
             <template #header>
-              <n-ellipsis class="max-w55 text-4 font-400">
+              <n-ellipsis class="max-w55 pr2 text-4 font-400">
                 {{ file.fileInfo?.name }}
               </n-ellipsis>
-              <NButton quaternary class="absolute right-.5 h5 w5" @click="delImage(index)">
-                <template #icon>
-                  <div i-ic-round-close class="h5 w5 text-dark-50" />
-                </template>
-              </NButton>
+              <div
+                class="absolute right-.5 top-.5 size-5 cursor-pointer text-dark-50 transition hover:text-red"
+                i-ic-round-close
+                @click="delImage(index)"
+              />
             </template>
             <n-spin :show="file.isLoading">
               <n-flex justify="center" class="h50">

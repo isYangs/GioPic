@@ -1,5 +1,5 @@
 import type { BrowserWindow } from 'electron'
-import { app, globalShortcut, ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
 import { autoStart, regDevToolsShortcut } from './app'
 import logger from './logger'

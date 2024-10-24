@@ -26,3 +26,14 @@ export function getStore(key: string, storeKey: string = defaultStoreKey) {
     return key
   }
 }
+
+export function setStore(key: string, value: any, storeKey: string = defaultStoreKey) {
+  try {
+    const data = JSON.parse(store.get(storeKey))
+    data[key] = value
+    store.set(storeKey, JSON.stringify(data))
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
