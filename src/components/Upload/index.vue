@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { UploadCustomRequestOptions } from 'naive-ui'
-import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5'
 import { useUploadDataStore } from '~/stores'
 
 const uploadDataStore = useUploadDataStore()
@@ -36,7 +35,7 @@ async function upload({ file, onFinish }: UploadCustomRequestOptions) {
     <n-upload-dragger class="rounded-3">
       <div class="mb-3">
         <n-icon size="48" :depth="3">
-          <ArchiveIcon />
+          <IconSVG />
         </n-icon>
       </div>
       <n-text class="text-4">

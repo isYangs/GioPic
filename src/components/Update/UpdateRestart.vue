@@ -42,11 +42,11 @@ function onConfirmUpdate(action: 'update' | 'cancel') {
     <template #footer>
       <n-flex align="center" justify="end">
         <n-flex>
-          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmUpdate('update')">
-            立即重启
-          </n-button>
           <n-button v-if="!forceUpdate" strong secondary :focusable="false" @click="onConfirmUpdate('cancel')">
             稍后重启
+          </n-button>
+          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmUpdate('update')">
+            立即重启
           </n-button>
         </n-flex>
       </n-flex>

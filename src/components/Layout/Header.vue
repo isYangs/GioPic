@@ -16,7 +16,7 @@ watch(() => route.fullPath, () => {
 })
 
 const isMaximized = ref(false)
-const showClosingTipModal = ref(false)
+const showCloseTipModal = ref(false)
 const rememberChoice = ref(false)
 
 const themeOptions = computed(() => [
@@ -64,11 +64,11 @@ const windowActions = {
     isMaximized.value = await window.ipcRenderer.invoke('window-maxOrRestore')
   },
   close: () => {
-    showClosingTipModal.value = false
+    showCloseTipModal.value = false
     window.ipcRenderer.invoke('window-close')
   },
   hide: () => {
-    showClosingTipModal.value = false
+    showCloseTipModal.value = false
     window.ipcRenderer.invoke('window-hide')
   },
 }
@@ -78,12 +78,12 @@ function onCloseClick() {
     appCloseType.value === 'close' ? windowActions.close() : windowActions.hide()
     return
   }
-  showClosingTipModal.value = true
+  showCloseTipModal.value = true
   rememberChoice.value = false
 }
 
 /** 执行关闭主窗口操作 */
-function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
+function onConfirmCloseTipModal(action: 'cancel' | 'close' | 'hide') {
   const actions = {
     close: () => {
       if (rememberChoice.value) {
@@ -97,11 +97,11 @@ function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
         appCloseTip.value = false
         appCloseType.value = 'hide'
       }
-      showClosingTipModal.value = false
+      showCloseTipModal.value = false
       setTimeout(windowActions.hide, 500)
     },
     cancel: () => {
-      showClosingTipModal.value = false
+      showCloseTipModal.value = false
     },
   }
 
@@ -110,9 +110,9 @@ function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
 </script>
 
 <template>
-  <nav class="h9 wfull flex select-none items-center" style="-webkit-app-region: drag;">
+  <nav class="draggable h9 wfull flex select-none items-center">
     <div class="flex flex-1 justify-between">
-      <div class="flex items-center gap1 p1" style="-webkit-app-region: no-drag">
+      <div class="no-draggable flex items-center gap1 p1">
         <n-button :focusable="false" quaternary size="small" class="h6 w6 rounded-1.5" :disabled="!canGoBack" @click="router.go(-1)">
           <template #icon>
             <div i-ph-caret-left-bold />
@@ -125,7 +125,7 @@ function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
         </n-button>
       </div>
 
-      <div style="-webkit-app-region: no-drag" class="flex-center">
+      <div class="no-draggable flex-center">
         <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
           <n-button :focusable="false" quaternary size="small" class="h6 w6">
             <template #icon>
@@ -148,7 +148,7 @@ function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
     </div>
   </nav>
   <n-modal
-    v-model:show="showClosingTipModal"
+    v-model:show="showCloseTipModal"
     :auto-focus="false"
     :mask-closable="false"
     :bordered="false"
@@ -166,14 +166,14 @@ function onConfirmClosingTipModal(action: 'cancel' | 'close' | 'hide') {
     </n-checkbox>
     <template #footer>
       <n-flex justify="space-between">
-        <n-button strong secondary :focusable="false" @click="onConfirmClosingTipModal('cancel')">
+        <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('cancel')">
           取消
         </n-button>
         <n-flex>
-          <n-button strong secondary :focusable="false" @click="onConfirmClosingTipModal('close')">
+          <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('close')">
             退出
           </n-button>
-          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmClosingTipModal('hide')">
+          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmCloseTipModal('hide')">
             最小化
           </n-button>
         </n-flex>

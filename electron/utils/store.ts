@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import Store from 'electron-store'
 
-const store: Record<string, any> = new Store()
+const store = new Store()
 const defaultStoreKey = '__giopic_app_store__'
 export function initStore() {
   ipcMain.handle('get-store', (_event, key) => {
@@ -19,7 +19,7 @@ export function initStore() {
 
 export function getStore(key: string, storeKey: string = defaultStoreKey) {
   try {
-    return JSON.parse(store.get(storeKey))[key]
+    return JSON.parse(store.get(storeKey) as string)[key]
   }
   catch (e) {
     console.error(e)
@@ -29,11 +29,15 @@ export function getStore(key: string, storeKey: string = defaultStoreKey) {
 
 export function setStore(key: string, value: any, storeKey: string = defaultStoreKey) {
   try {
-    const data = JSON.parse(store.get(storeKey))
+    const data = JSON.parse(store.get(storeKey) as string)
     data[key] = value
     store.set(storeKey, JSON.stringify(data))
   }
   catch (e) {
     console.error(e)
   }
+}
+
+export function clearStore() {
+  store.clear()
 }

@@ -63,7 +63,7 @@ const settingOptions = computed(() => [
   {
     name: '存储策略',
     component: () => {
-      return h('div', { class: 'flex' }, {
+      return h('div', { class: 'flex gap-1' }, {
         default: () => [
           h(NSelect, {
             value: strategiesVal.value,

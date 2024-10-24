@@ -121,6 +121,17 @@ const tabsOptions = ref<TabOption[]>([
           type: 'error',
           strong: true,
           secondary: true,
+          onClick: () => {
+            window.$dialog.warning({
+              title: '重置',
+              content: '重置所有设置，是否继续？',
+              positiveText: '确定并重启',
+              negativeText: '取消',
+              onPositiveClick: () => {
+                window.ipcRenderer.invoke('reset-settings')
+              },
+            })
+          },
         }, () => '重置'),
       },
     ],

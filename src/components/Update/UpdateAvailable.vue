@@ -50,11 +50,11 @@ function onConfirmUpdate(action: 'update' | 'ignore') {
           记住且不再询问
         </n-checkbox>
         <n-flex>
-          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmUpdate('update')">
-            下载更新
-          </n-button>
           <n-button strong secondary :focusable="false" @click="onConfirmUpdate('ignore')">
             暂不更新
+          </n-button>
+          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmUpdate('update')">
+            下载更新
           </n-button>
         </n-flex>
       </n-flex>
