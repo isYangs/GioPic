@@ -24,7 +24,17 @@ function formValidation(onSuccess: () => void) {
   })
 }
 
-defineExpose({ formValidation })
+// 添加 resetValidation 方法
+function resetValidation() {
+  if (setForm.value)
+    setForm.value.restoreValidation()
+}
+
+// 暴露方法给父组件
+defineExpose({
+  formValidation,
+  resetValidation,
+})
 </script>
 
 <template>

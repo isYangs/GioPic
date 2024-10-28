@@ -108,6 +108,12 @@ async function saveSetting() {
   window.$message.success('保存成功')
 }
 
+watch(() => route.params.id, () => {
+  nextTick(() => {
+    setItem.value?.resetValidation()
+  })
+})
+
 watchEffect(() => {
   id.value = route.params.id as ProgramsName
   api.value = settings.value.api

@@ -89,7 +89,6 @@ const tabsOptions = ref<TabOption[]>([
       },
       {
         name: '自动检测更新',
-        isDev: true,
         tip: '在启动时检测是否有新版本',
         component: () => h(NSwitch, {
           value: autoUpdate.value,

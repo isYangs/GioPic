@@ -47,7 +47,7 @@ function onConfirmUpdate(action: 'update' | 'ignore') {
     <template #footer>
       <n-flex align="center" justify="space-between">
         <n-checkbox v-model:checked="ignoreThisVersion">
-          记住且不再询问
+          忽略此版本
         </n-checkbox>
         <n-flex>
           <n-button strong secondary :focusable="false" @click="onConfirmUpdate('ignore')">
