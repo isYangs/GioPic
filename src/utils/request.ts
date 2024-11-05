@@ -39,7 +39,7 @@ function errorHandler(status: number, other: DataView) {
 }
 
 const service = axios.create({
-  timeout: 10000 * 12,
+  timeout: 1000 * 120,
   headers: {
     Accept: 'application/json',
   },

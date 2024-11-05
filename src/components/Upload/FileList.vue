@@ -187,45 +187,33 @@ function delImage(index: number) {
     autoFocus: false,
     action: () => {
       return h('div', { class: 'wh-full flex-center justify-between' }, [
-        h(
-          NCheckbox,
-          {
-            'class': 'text-3',
-            'checked': isImgListDelDialog.value,
-            'onUpdate:checked': (newValue: boolean) => {
-              appStore.setState({ isImgListDelDialog: newValue })
-            },
+        h(NCheckbox, {
+          'class': 'text-3',
+          'checked': isImgListDelDialog.value,
+          'onUpdate:checked': (newValue: boolean) => {
+            appStore.setState({ isImgListDelDialog: newValue })
           },
-          () => '不再显示此对话框',
-        ),
+        }, () => '不再显示此对话框'),
         h('div', {}, [
-          h(
-            NButton,
-            {
-              size: 'small',
-              class: 'mr4',
-              onClick: () => {
-                n.destroy()
-              },
+          h(NButton, {
+            size: 'small',
+            class: 'mr4',
+            onClick: () => {
+              n.destroy()
             },
-            {
-              default: () => '取消',
+          }, {
+            default: () => '取消',
+          }),
+          h(NButton, {
+            type: 'warning',
+            size: 'small',
+            onClick: () => {
+              uploadDataStore.delData(index)
+              n.destroy()
             },
-          ),
-          h(
-            NButton,
-            {
-              type: 'warning',
-              size: 'small',
-              onClick: () => {
-                uploadDataStore.delData(index)
-                n.destroy()
-              },
-            },
-            {
-              default: () => '确定',
-            },
-          ),
+          }, {
+            default: () => '确定',
+          }),
         ]),
       ])
     },
@@ -313,9 +301,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
               />
             </template>
             <n-spin :show="file.isLoading">
-              <n-flex justify="center" class="h50">
-                <n-image class="border-rd-sm" :src="file.fileUrl" object-fit="cover" style="image-rendering: optimizeQuality;" />
-              </n-flex>
+              <n-image class="h50 wfull border-rd-sm" :src="file.fileUrl" object-fit="cover" style="image-rendering: optimizeQuality;" />
             </n-spin>
             <template #description>
               正在上传，请耐心等待...
@@ -334,7 +320,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
                     tertiary class="wfull"
                     :disabled="file.isLoading"
                     type="primary"
-                    @click="file.fileInfo && file.fileInfo.file && uploadImage(index, file.fileInfo.file)"
+                    @click="file.fileInfo?.file && uploadImage(index, file.fileInfo.file)"
                   >
                     上传
                   </NButton>
