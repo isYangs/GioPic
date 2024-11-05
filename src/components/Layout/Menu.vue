@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router/auto'
-import { useAppStore } from '~/stores'
-import { renderIcon } from '~/utils'
 
 const router = useRouter()
 const appStore = useAppStore()

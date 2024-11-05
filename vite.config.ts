@@ -56,8 +56,18 @@ export default defineConfig(({ command }) => {
           VueRouterAutoImports,
           'pinia',
           {
-            'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
+            'naive-ui': [
+              'useDialog',
+              'useMessage',
+              'useNotification',
+              'useLoadingBar',
+              'useModal',
+            ],
           },
+        ],
+        dirs: [
+          'src/stores',
+          'src/utils',
         ],
       }),
       electron({

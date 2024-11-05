@@ -1,5 +1,4 @@
 import type { UploadFileInfo } from 'naive-ui'
-import { defineStore } from 'pinia'
 
 interface State {
   data: UploadData[]

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import Keycut from '~/components/Common/Keycut.vue'
-import { useAppStore } from '~/stores'
 import type { TabOption } from '~/types'
-import debounce from '~/utils/debounce'
 
 const appStore = useAppStore()
 const {
@@ -124,10 +122,12 @@ const tabsOptions = ref<TabOption[]>([
             window.$dialog.warning({
               title: '重置',
               content: '重置所有设置，是否继续？',
-              positiveText: '确定并重启',
+              positiveText: '确定',
               negativeText: '取消',
-              onPositiveClick: () => {
-                window.ipcRenderer.invoke('reset-settings')
+              onPositiveClick: async () => {
+                await appStore.resetState()
+                // 显示重置成功提示
+                window.$message.success('重置成功，部分设置在重启后生效')
               },
             })
           },

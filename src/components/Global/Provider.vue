@@ -2,7 +2,6 @@
 import type { GlobalThemeOverrides } from 'naive-ui'
 import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
 import { createTextVNode } from 'vue'
-import { useAppStore } from '~/stores'
 
 const appStore = useAppStore()
 const {
@@ -36,6 +35,8 @@ function setupNaiveTools() {
   window.$notification = useNotification()
   // 加载条
   window.$loadingBar = useLoadingBar()
+  // 模态框
+  window.$modal = useModal()
 }
 
 const NaiveProviderContext = defineComponent({

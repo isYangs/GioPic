@@ -1,4 +1,3 @@
-import { defineStore } from 'pinia'
 import type { ProgramsName } from '~/types'
 
 const initialState = {
@@ -38,9 +37,16 @@ export const useAppStore = defineStore(
       Object.assign(state, newState)
     }
 
+    /** 重置所有状态到初始值 */
+    function resetState() {
+      const copiedState = { ...initialState }
+      Object.assign(state, copiedState)
+    }
+
     return {
       ...toRefs(state),
       setState,
+      resetState,
     }
   },
   {

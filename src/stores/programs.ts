@@ -1,4 +1,3 @@
-import { defineStore } from 'pinia'
 import requestData from '~/api'
 import type { ProgramsName } from '~/types'
 

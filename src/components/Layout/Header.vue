@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useAppStore } from '~/stores'
-import { renderIcon } from '~/utils'
-
 const appStore = useAppStore()
 const { themeAuto, themeType, appCloseTip, appCloseType } = storeToRefs(appStore)
 const route = useRoute()

@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import { NButton, NInput, NSelect } from 'naive-ui'
-import { useProgramsStore } from '~/stores'
 import type { ProgramsName } from '~/types'
-import {
-  createFormRule,
-  getProgramsName,
-  renderIcon,
-  validateLskyToken,
-  validateUrl,
-} from '~/utils'
+import { getProgramsName } from '~/utils'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as ProgramsName)

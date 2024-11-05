@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { useAppStore } from './stores'
-import { routerPush } from './utils'
-
 const appStore = useAppStore()
 const router = useRouter()
-const route = useRoute()
 const { isMenuCollapsed } = storeToRefs(appStore)
 
 // router.beforeEach((to, from, next) => {
