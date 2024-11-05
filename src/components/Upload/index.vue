@@ -20,6 +20,37 @@ async function upload({ file, onFinish }: UploadCustomRequestOptions) {
 
   onFinish()
 }
+
+// 监听粘贴事件，将粘贴的图片文件存储到store中
+useEventListener('paste', async (e) => {
+  const items = e.clipboardData?.items
+  if (!items)
+    return
+
+  let file: File | null = null
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.startsWith('image/')) {
+      file = items[i].getAsFile()
+      break
+    }
+  }
+  if (!file)
+    return
+
+  const blob = new Blob([file], { type: file.type })
+  const fileUrl = URL.createObjectURL(blob)
+
+  uploadDataStore.setData({
+    fileInfo: {
+      file,
+      id: file.name,
+      name: file.name,
+      status: 'pending',
+    },
+    fileUrl,
+    isLoading: false,
+  })
+})
 </script>
 
 <template>

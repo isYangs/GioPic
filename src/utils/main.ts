@@ -10,10 +10,13 @@ export function renderIcon(icon: string) {
 
 // 将文件大小从字节或千字节转换为 KB、MB 或 GB
 export function convertFileSize(size: number, isKb: boolean = false) {
-  const units = isKb ? ['KB', 'MB', 'GB'] : ['Bytes', 'KB', 'MB', 'GB']
+  const units = ['Bytes', 'kiB', 'MiB', 'GiB']
+  if (isKb)
+    size *= 1024
+  if (size < 1024)
+    return `${size} ${units[0]}`
   const unitIndex = Math.floor(Math.log(size) / Math.log(1024))
-
-  return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
+  return `${size.toFixed(2)} ${units[unitIndex]}`
 }
 
 const linkTypeMap: LinkTypeMap = {
