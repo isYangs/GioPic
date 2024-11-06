@@ -7,6 +7,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CodeInput: typeof import('./../components/Common/CodeInput.vue')['default']
+    ConfigLsky: typeof import('./../components/Setting/ConfigLsky.vue')['default']
+    ConfigS3: typeof import('./../components/Setting/ConfigS3.vue')['default']
+    ConfigS32: typeof import('./../components/Setting/ConfigS32.vue')['default']
     FileList: typeof import('./../components/Upload/FileList.vue')['default']
     Header: typeof import('./../components/Layout/Header.vue')['default']
     IconSVG: typeof import('./../components/Global/IconSVG.vue')['default']
@@ -31,6 +35,7 @@ declare module 'vue' {
     NIcon: typeof import('naive-ui')['NIcon']
     NImage: typeof import('naive-ui')['NImage']
     NImageGroup: typeof import('naive-ui')['NImageGroup']
+    NInput: typeof import('naive-ui')['NInput']
     NLayout: typeof import('naive-ui')['NLayout']
     NLayoutHeader: typeof import('naive-ui')['NLayoutHeader']
     NLayoutSider: typeof import('naive-ui')['NLayoutSider']

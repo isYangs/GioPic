@@ -54,8 +54,14 @@ export function generateLink(type: string, url: string, name: string): string {
   }
 }
 
-// 选择存储程序选项
-export const selectProgramsOptions = [
+interface ProgramType {
+  label: string
+  value: string
+  icon?: string
+}
+
+// 选择存储程序选项，需与 ~/types/common 对应
+export const selectProgramsOptions: ProgramType[] = [
   {
     label: '兰空企业版',
     value: 'lskyPro',
@@ -63,6 +69,10 @@ export const selectProgramsOptions = [
   {
     label: '兰空社区版',
     value: 'lsky',
+  },
+  {
+    label: 'Amazon S3',
+    value: 's3',
   },
 ]
 

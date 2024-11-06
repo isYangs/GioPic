@@ -1,3 +1,7 @@
+:root {
+  --font-mono: SFMono-Regular, Fira Code, JetBrains Mono, Menlo, Monaco, Consolas, 'monospace', system-ui, monospace;
+}
+
 html,
 body,
 #app {

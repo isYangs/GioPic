@@ -16,31 +16,23 @@ const menuOptions = computed(() => [
   },
   {
     label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            name: 'Home',
-          },
+      h(RouterLink, {
+        to: {
+          name: 'Home',
         },
-        { default: () => '上传图片' },
-      ),
+      }, { default: () => '上传图片' }),
     key: '/',
-    icon: renderIcon('i-ph-upload-simple-bold !w20px !h20px'),
+    icon: renderIcon('i-ph-upload-simple-bold w20px h20px'),
   },
   {
     label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            name: '/Images/',
-          },
+      h(RouterLink, {
+        to: {
+          name: '/Images/',
         },
-        { default: () => '图片列表' },
-      ),
+      }, { default: () => '图片列表' }),
     key: '/Images',
-    icon: renderIcon('i-ph-list-bullets-bold !w20px !h20px'),
+    icon: renderIcon('i-ph-list-bullets-bold w20px h20px'),
   },
   {
     key: 'divider-1',
@@ -53,36 +45,18 @@ const menuOptions = computed(() => [
       ]),
     key: 'user-storage',
     show: !isMenuCollapsed.value,
-    children: [
-      {
+    children: selectProgramsOptions.map((item) => {
+      return {
         label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                path: `/Setting/lskyPro`,
-              },
+          h(RouterLink, {
+            to: {
+              path: `/Setting/${item.value}`,
             },
-            { default: () => '兰空企业版' },
-          ),
-        key: `/Setting/lskyPro`,
-        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                path: `/Setting/lsky`,
-              },
-            },
-            { default: () => '兰空社区版' },
-          ),
-        key: `/Setting/lsky`,
-        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
-      },
-    ],
+          }, { default: () => item.label }),
+        key: `/Setting/${item.value}`,
+        icon: renderIcon(item?.icon || 'i-ph-hard-drives-bold w18px h18px'),
+      }
+    }),
   },
 ])
 
