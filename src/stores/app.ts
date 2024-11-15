@@ -1,4 +1,4 @@
-import type { ProgramType } from '~/types'
+import type { ProgramType } from '~/stores'
 
 const initialState = {
   // 基础

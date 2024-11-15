@@ -2,17 +2,15 @@
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
-import type { ProgramType } from '~/types'
-import { getProgramsName } from '~/utils'
 
 const route = useRoute('/Setting/[id]')
-const id = ref(route.params.id as ProgramType)
-const programsStore = useProgramsStore()
+const id = ref(Number.parseInt(route.params.id))
+const programStore = useProgramsStore()
 const api = ref('')
 const token = ref('')
 const strategiesVal = ref<number | null>(null)
 
-const settings = computed(() => programsStore.getPrograms(id.value))
+const settings = computed(() => programStore.getProgram(id.value))
 
 const setItem = useTemplateRef('setItemRef')
 
@@ -89,17 +87,17 @@ function formValidation() {
 
 async function syncStrategies() {
   const loading = window.$message.loading('正在同步线上策略列表...')
-  if (!await programsStore.getStrategies(id.value))
+  if (!await programStore.getLskyStrategies(id.value))
     window.$message.error('同步策略列表失败，请检查设置是否填写有误')
   loading.destroy()
 }
 
 async function saveSetting() {
-  programsStore.setPrograms(id.value, 'api', api.value)
-  programsStore.setPrograms(id.value, 'token', token.value)
+  programStore.setProgram(id.value, 'api', api.value)
+  programStore.setProgram(id.value, 'token', token.value)
   if (settings.value.strategiesVal === null)
     await syncStrategies()
-  programsStore.setPrograms(id.value, 'strategiesVal', strategiesVal.value)
+  programStore.setProgram(id.value, 'strategiesVal', strategiesVal.value)
   window.$message.success('保存成功')
 }
 
@@ -118,6 +116,6 @@ watchEffect(() => {
 
 <template>
   <div wh-full>
-    <SettingSection ref="setItemRef" class="pt0" :title="getProgramsName(id)" :items="settingOptions" :rules />
+    <SettingSection ref="setItemRef" class="pt0" :title="programStore.getProgramName(id)" :items="settingOptions" :rules />
   </div>
 </template>

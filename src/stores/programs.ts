@@ -1,15 +1,15 @@
 import requestData from '~/api'
-import type { ProgramType } from '~/types'
 
-type StorageType = typeof initialProgramMap
+export type ProgramType = keyof typeof initialProgramMap
 
-interface State {
-  programs: {
-    [id: string]: Storage
-  }
+interface Program {
+  type: ProgramType
+  name: string
+  datail: typeof initialProgramMap[ProgramType]
+  isOk?: boolean
 }
 
-interface StrategiesData {
+interface LskyStrategiesData {
   name: string
   id: number
 }
@@ -17,63 +17,104 @@ interface StrategiesData {
 // 同时定义 State 类型和初始值
 const initialProgramMap = {
   lsky: {
-    api: '' as string,
-    token: '' as string,
-    strategies: [] as [],
-    strategiesVal: null as (number | null),
+    api: '',
+    token: '',
+    strategies: [] as LskyStrategiesData[],
+    activeStrategy: null as (number | null),
+  },
+  lskyPro: {
+    api: '',
+    token: '',
+    strategies: [] as LskyStrategiesData[],
+    activeStrategy: null as (number | null),
+  },
+  s3: {
+    /** accessKeyID */
+    accessKeyID: '',
+    /** secretAccessKey */
+    secretAccessKey: '',
+    /** 存储桶名称 */
+    bucketName: '',
+    /** 上传路径 */
+    uploadPath: '',
+    /** 区域 */
+    region: '',
+    /** 自定义终端节点 */
+    endpoint: '',
+    /** 代理地址，仅支持http代理 */
+    proxy: '',
+    /** 自定义域名 */
+    urlPrefix: '',
+    /** 是否启用S3 Path Style */
+    pathStyleAccess: false,
+    /** 是否拒绝未经授权的SSL证书 */
+    rejectUnauthorized: false,
+    /** 权限 */
+    acl: '',
+    /** 是否禁用存储桶前缀 */
+    disableBucketPrefixToURL: false,
   },
 }
 
 export const useProgramsStore = defineStore(
-  'programsStore',
+  'programStore',
   () => {
-    const state = reactive({
-      programs: [],
-    })
+    const state = reactive<Program[]>([])
 
     function createProgram(type: ProgramType) {
-
+      state.push({
+        type,
+        name: Date.now().toLocaleString(),
+        datail: initialProgramMap[type],
+      })
     }
 
-    function setPrograms<K extends keyof Storage>(id: ProgramType, key: K, value: Storage[K]) {
-      if (state.programs[id])
-        state.programs[id][key] = value
+    function setProgram(id: number, detail: Partial<Program>) {
+      Object.assign(state[id], detail)
     }
 
-    function getPrograms(id: ProgramType) {
-      return state.programs[id] || {}
+    function getProgramName(id: number) {
+      return state[id].name
+    }
+
+    function getProgram(id: number) {
+      return state[id] || {}
     }
 
     /**
      * 获取所有的存储策略
      */
-    async function getStrategies(id: ProgramType): Promise<boolean> {
-      const program = state.programs[id]
+    async function getLskyStrategies(id: number): Promise<boolean> {
+      const programType = state[id].type
+      if (!programType.includes('lsky'))
+        return false
 
-      const requestDataFunction = id === 'lsky' ? requestData.getLskyStrategies : requestData.getLskyProStrategies
-      const { data, status } = await requestDataFunction(program.api, program.token)
+      const lskyDetail = state[id].datail as typeof initialProgramMap.lsky
+      const requestDataFunction = requestData.getLskyStrategies
+
+      const { data, status } = await requestDataFunction(lskyDetail.api, lskyDetail.token)
 
       if (status !== 200)
         return false
 
-      const strategiesData = data.data.strategies.map((item: StrategiesData) => ({
+      const strategiesData = data.data.strategies.map((item: LskyStrategiesData) => ({
         label: item.name,
         value: item.id,
       }))
 
-      program.strategies = strategiesData
-
-      if (program.strategiesVal === null && strategiesData.length > 0)
-        program.strategiesVal = strategiesData[0].value
-
+      lskyDetail.strategies = strategiesData
+      if (lskyDetail.activeStrategy === null && strategiesData.length > 0)
+        lskyDetail.activeStrategy = strategiesData[0].value
       return true
     }
 
     return {
       ...toRefs(state),
-      setPrograms,
-      getPrograms,
-      getStrategies,
+      createProgram,
+      setProgram,
+      getProgram,
+      getProgramName,
+      getLskyStrategies,
     }
   },
   {

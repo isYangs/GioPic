@@ -1,5 +1,5 @@
 import type { Router } from 'vue-router'
-import type { ProgramType } from '~/types'
+import type { ProgramType } from '~/stores'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -52,34 +52,6 @@ export function generateLink(type: string, url: string, name: string): string {
     default:
       return url
   }
-}
-
-interface ProgramType {
-  label: string
-  value: string
-  icon?: string
-}
-
-// 选择存储程序选项，需与 ~/types/common 对应
-export const selectProgramsOptions: ProgramType[] = [
-  {
-    label: '兰空企业版',
-    value: 'lskyPro',
-  },
-  {
-    label: '兰空社区版',
-    value: 'lsky',
-  },
-  {
-    label: 'Amazon S3',
-    value: 's3',
-  },
-]
-
-// 获取存储程序的名字
-export function getProgramsName(val: ProgramType) {
-  const option = selectProgramsOptions.find(item => item.value === val)
-  return option ? option.label : ''
 }
 
 // 全局路由跳转

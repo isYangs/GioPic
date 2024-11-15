@@ -2,12 +2,12 @@
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
-import type { ProgramType } from '~/types'
-import { getProgramsName } from '~/utils'
+import type { ProgramType } from '~/stores'
+import { getProgramName } from '~/utils'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as ProgramType)
-const programsStore = useProgramsStore()
+const programStore = useProgramsStore()
 
 // S3 配置项
 const accessKeyID = ref('')
@@ -91,6 +91,6 @@ const settingOptions = computed(() => [
 
 <template>
   <div wh-full>
-    <SettingSection ref="setItemRef" class="pt0" :title="getProgramsName(id)" :items="settingOptions" :rules />
+    <SettingSection ref="setItemRef" class="pt0" :title="getProgramName(id)" :items="settingOptions" :rules />
   </div>
 </template>

@@ -2,12 +2,11 @@
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestData from '~/api'
-import type { UploadData } from '~/stores'
-import type { ProgramType } from '~/types'
-import { getLinkTypeOptions, selectProgramsOptions } from '~/utils'
+import type { ProgramType, UploadData } from '~/stores'
+import { getLinkTypeOptions } from '~/utils'
 
 const appStore = useAppStore()
-const programsStore = useProgramsStore()
+const programStore = useProgramsStore()
 const uploadDataStore = useUploadDataStore()
 const { defaultPrograms, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
@@ -20,7 +19,7 @@ const isPublicOptions = [
   { label: '全部私有', value: 0 },
 ]
 
-const programs = computed(() => programsStore.getPrograms(uploadProgramsId.value))
+const programs = computed(() => programStore.getProgram(uploadProgramsId.value))
 
 function changeDefaultProgram(val: ProgramType) {
   defaultPrograms.value = val
@@ -34,18 +33,8 @@ function changeDefaultProgram(val: ProgramType) {
 }
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
-  if (!defaultPrograms.value) {
-    window.$message.error('你要上传到那个存储程序呢？🤔')
-    return
-  }
-
-  if (programs.value.api === '' || programs.value.token === '') {
-    window.$message.error('不配置存储程序，我怎么上传？🤔')
-    return
-  }
-
-  if (programs.value.strategiesVal === null) {
-    window.$message.error('我还不知道你要存在那个策略中啊！😓')
+  if (!programs.value.isOk) {
+    window.$message.error('存储程序配置有误，请检查设置。')
     return
   }
 
@@ -284,7 +273,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramsId" class="w30" :options="selectProgramsOptions" @update:value="changeDefaultProgram" />
+      <n-select v-model:value="uploadProgramsId" class="w30" :options="selectedProgramOptions" @update:value="changeDefaultProgram" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">

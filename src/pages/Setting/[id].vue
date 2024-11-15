@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramType } from '~/types'
+import type { ProgramType } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as ProgramType)

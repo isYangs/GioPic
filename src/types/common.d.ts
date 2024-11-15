@@ -10,5 +10,3 @@ export interface TabOption {
   }[]
   rules?: import('naive-ui').FormRules
 }
-
-export type ProgramType = 'lsky' | 'lskyPro' | 's3'
