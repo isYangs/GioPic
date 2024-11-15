@@ -1,10 +1,33 @@
 <script setup lang="ts">
+import type { MenuOption } from 'naive-ui'
+import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
 
 const router = useRouter()
 const appStore = useAppStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
+
+const userStorageList = ref({
+  label: () =>
+    h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
+      h('span', { class: '' }, ['创建的存储']),
+      h(NButton, {
+        class: 'w9 h5',
+        size: 'small',
+        type: 'tertiary',
+        round: true,
+        strong: true,
+        secondary: true,
+        renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
+        onClick: () => {
+          router.push('/Setting/')
+        },
+      }),
+    ]),
+  key: 'user-storage',
+  children: [] as MenuOption[],
+})
 
 const menuOptions = computed(() => [
   {
@@ -39,24 +62,8 @@ const menuOptions = computed(() => [
     type: 'divider',
   },
   {
-    label: () =>
-      h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
-        h('span', { class: '' }, ['存储程序设置']),
-      ]),
-    key: 'user-storage',
+    ...userStorageList.value,
     show: !isMenuCollapsed.value,
-    children: selectProgramsOptions.map((item) => {
-      return {
-        label: () =>
-          h(RouterLink, {
-            to: {
-              path: `/Setting/${item.value}`,
-            },
-          }, { default: () => item.label }),
-        key: `/Setting/${item.value}`,
-        icon: renderIcon(item?.icon || 'i-ph-hard-drives-bold w18px h18px'),
-      }
-    }),
   },
 ])
 

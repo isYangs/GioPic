@@ -1,5 +1,5 @@
 import type { Router } from 'vue-router'
-import type { ProgramsName } from '~/types'
+import type { ProgramType } from '~/types'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -77,7 +77,7 @@ export const selectProgramsOptions: ProgramType[] = [
 ]
 
 // 获取存储程序的名字
-export function getProgramsName(val: ProgramsName) {
+export function getProgramsName(val: ProgramType) {
   const option = selectProgramsOptions.find(item => item.value === val)
   return option ? option.label : ''
 }

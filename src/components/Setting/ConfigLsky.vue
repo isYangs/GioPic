@@ -2,11 +2,11 @@
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
-import type { ProgramsName } from '~/types'
+import type { ProgramType } from '~/types'
 import { getProgramsName } from '~/utils'
 
 const route = useRoute('/Setting/[id]')
-const id = ref(route.params.id as ProgramsName)
+const id = ref(route.params.id as ProgramType)
 const programsStore = useProgramsStore()
 const api = ref('')
 const token = ref('')

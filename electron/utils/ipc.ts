@@ -77,8 +77,5 @@ export function setupIpcMain(win: BrowserWindow) {
 
   ipcMain.handle('reset-settings', () => {
     logger.info('[settings] Reset and restarting application.')
-    clearStore()
-    app.relaunch()
-    app.exit()
   })
 }

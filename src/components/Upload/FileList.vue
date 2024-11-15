@@ -3,7 +3,7 @@ import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestData from '~/api'
 import type { UploadData } from '~/stores'
-import type { ProgramsName } from '~/types'
+import type { ProgramType } from '~/types'
 import { getLinkTypeOptions, selectProgramsOptions } from '~/utils'
 
 const appStore = useAppStore()
@@ -22,7 +22,7 @@ const isPublicOptions = [
 
 const programs = computed(() => programsStore.getPrograms(uploadProgramsId.value))
 
-function changeDefaultProgram(val: ProgramsName) {
+function changeDefaultProgram(val: ProgramType) {
   defaultPrograms.value = val
 
   // 重置失败图片的状态

@@ -1,7 +1,7 @@
 import requestData from '~/api'
-import type { ProgramsName } from '~/types'
+import type { ProgramType } from '~/types'
 
-type Storage = typeof initialPrograms
+type StorageType = typeof initialProgramMap
 
 interface State {
   programs: {
@@ -15,40 +15,39 @@ interface StrategiesData {
 }
 
 // 同时定义 State 类型和初始值
-const initialPrograms = {
-  api: '' as string,
-  token: '' as string,
-  strategies: [] as [],
-  strategiesVal: null as (number | null),
+const initialProgramMap = {
+  lsky: {
+    api: '' as string,
+    token: '' as string,
+    strategies: [] as [],
+    strategiesVal: null as (number | null),
+  },
 }
 
 export const useProgramsStore = defineStore(
   'programsStore',
   () => {
-    const state: State = reactive({
-      programs: {
-        lskyPro: {
-          ...initialPrograms,
-        },
-        lsky: {
-          ...initialPrograms,
-        },
-      },
+    const state = reactive({
+      programs: [],
     })
 
-    function setPrograms<K extends keyof Storage>(id: ProgramsName, key: K, value: Storage[K]) {
+    function createProgram(type: ProgramType) {
+
+    }
+
+    function setPrograms<K extends keyof Storage>(id: ProgramType, key: K, value: Storage[K]) {
       if (state.programs[id])
         state.programs[id][key] = value
     }
 
-    function getPrograms(id: ProgramsName) {
+    function getPrograms(id: ProgramType) {
       return state.programs[id] || {}
     }
 
     /**
      * 获取所有的存储策略
      */
-    async function getStrategies(id: ProgramsName): Promise<boolean> {
+    async function getStrategies(id: ProgramType): Promise<boolean> {
       const program = state.programs[id]
 
       const requestDataFunction = id === 'lsky' ? requestData.getLskyStrategies : requestData.getLskyProStrategies

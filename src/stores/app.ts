@@ -1,4 +1,4 @@
-import type { ProgramsName } from '~/types'
+import type { ProgramType } from '~/types'
 
 const initialState = {
   // 基础
@@ -7,7 +7,7 @@ const initialState = {
   autoStart: false, // 是否开机自启动
   autoUpdate: false, // 是否自动更新
   isDevToolsEnabled: true, // 是否打开开发者工具
-  defaultPrograms: 'lskyPro' as ProgramsName, // 默认上传存储程序
+  defaultPrograms: 'lskyPro' as ProgramType, // 默认上传存储程序
   isMenuCollapsed: false, // 是否折叠菜单
   ignoreVersion: '', // 忽略更新的版本号
   updateAtNext: false, // 是否在下次启动时更新
