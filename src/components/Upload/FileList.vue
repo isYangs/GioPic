@@ -8,21 +8,21 @@ import { getLinkTypeOptions } from '~/utils'
 const appStore = useAppStore()
 const programStore = useProgramsStore()
 const uploadDataStore = useUploadDataStore()
-const { defaultPrograms, isImgListDelDialog } = storeToRefs(appStore)
+const { defaultProgram, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
 const isAllPublic = ref(1)
 const isUpload = ref(false)
-const uploadProgramsId = ref(defaultPrograms.value)
+const uploadProgramId = ref(defaultProgram.value)
 
 const isPublicOptions = [
   { label: '全部公开', value: 1 },
   { label: '全部私有', value: 0 },
 ]
 
-const programs = computed(() => programStore.getProgram(uploadProgramsId.value))
+const programs = computed(() => programStore.getProgram(uploadProgramId.value))
 
-function changeDefaultProgram(val: ProgramType) {
-  defaultPrograms.value = val
+function changeDefaultProgram(val: number) {
+  defaultProgram.value = val
 
   // 重置失败图片的状态
   data.value.forEach((item, index) => {
@@ -47,7 +47,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data: responseData, status } = await requestData.uploadImage(uploadProgramsId.value, programs.value.api, programs.value.token, {
+    const { data: responseData, status } = await requestData.uploadImage(uploadProgramId.value, programs.value.api, programs.value.token, {
       file,
       permission: isAllPublic.value,
       strategy_id: programs.value.strategiesVal,
@@ -98,7 +98,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
 // 全部上传方法
 async function allUploadImage() {
-  if (!defaultPrograms.value) {
+  if (!defaultProgram.value) {
     window.$message.error('你要上传到那个存储程序呢？🤔')
     return
   }
@@ -273,7 +273,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramsId" class="w30" :options="selectedProgramOptions" @update:value="changeDefaultProgram" />
+      <n-select v-model:value="uploadProgramId" class="w30" :options="selectedProgramOptions" @update:value="changeDefaultProgram" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">

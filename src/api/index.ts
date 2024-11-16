@@ -1,5 +1,5 @@
-import type { AxiosRequestConfig } from 'axios'
-import type { ProgramType } from '~/stores'
+import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { Program } from '~/stores'
 import { request } from '~/utils'
 
 interface UploadData {
@@ -65,14 +65,14 @@ const requestData = {
   /**
    * 上传图片
    *
-   * @param type - 图床类型
+   * @param program - 图床类型
    * @param url - 图床API地址
    * @param token - 用于身份验证的 token
    * @param data - 接收一个对象，对象中传入上传的图片，权限，策略id，相册id，过期时间。
    * @returns 返回一个Promise对象，表示异步上传操作
    */
-  uploadImage: (type: ProgramType, url: string, token: string, data: UploadData) => {
-    switch (type) {
+  uploadImage: (program: Program, data: UploadData) => {
+    switch (program.type) {
       case 'lsky':
         return requestData._uploadLskyImage(url, token, data)
       case 'lskyPro':

@@ -1,11 +1,11 @@
 import requestData from '~/api'
 
-export type ProgramType = keyof typeof initialProgramMap
+export type ProgramType = keyof typeof programDetailTemplate
 
-interface Program {
+export interface Program {
   type: ProgramType
   name: string
-  datail: typeof initialProgramMap[ProgramType]
+  detail: typeof programDetailTemplate[ProgramType]
   isOk?: boolean
 }
 
@@ -14,8 +14,7 @@ interface LskyStrategiesData {
   id: number
 }
 
-// 同时定义 State 类型和初始值
-const initialProgramMap = {
+const programDetailTemplate = {
   lsky: {
     api: '',
     token: '',
@@ -59,13 +58,13 @@ const initialProgramMap = {
 export const useProgramsStore = defineStore(
   'programStore',
   () => {
-    const state = reactive<Program[]>([])
+    const state: Program[] = reactive([])
 
     function createProgram(type: ProgramType) {
       state.push({
         type,
         name: Date.now().toLocaleString(),
-        datail: initialProgramMap[type],
+        detail: programDetailTemplate[type],
       })
     }
 
@@ -86,26 +85,46 @@ export const useProgramsStore = defineStore(
      */
     async function getLskyStrategies(id: number): Promise<boolean> {
       const programType = state[id].type
-      if (!programType.includes('lsky'))
+      if (programType === 'lsky') {
+        const detail = state[id].detail as typeof programDetailTemplate.lsky
+        const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
+
+        if (status !== 200)
+          return false
+
+        const strategiesData = data.data.strategies.map((item: LskyStrategiesData) => ({
+          label: item.name,
+          value: item.id,
+        }))
+
+        detail.strategies = strategiesData
+
+        if (!detail.activeStrategy && strategiesData.length > 0)
+          detail.activeStrategy = strategiesData[0].value
+
+        return true
+      }
+      else if (programType === 'lskyPro') {
+        const detail = state[id].detail as typeof programDetailTemplate.lskyPro
+        const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
+
+        if (status !== 200)
+          return false
+
+        const strategiesData = data.data.strategies.map((item: LskyStrategiesData) => ({
+          label: item.name,
+          value: item.id,
+        }))
+
+        detail.strategies = strategiesData
+
+        if (!detail.activeStrategy && strategiesData.length > 0)
+          detail.activeStrategy = strategiesData[0].value
+        return true
+      }
+      else {
         return false
-
-      const lskyDetail = state[id].datail as typeof initialProgramMap.lsky
-      const requestDataFunction = requestData.getLskyStrategies
-
-      const { data, status } = await requestDataFunction(lskyDetail.api, lskyDetail.token)
-
-      if (status !== 200)
-        return false
-
-      const strategiesData = data.data.strategies.map((item: LskyStrategiesData) => ({
-        label: item.name,
-        value: item.id,
-      }))
-
-      lskyDetail.strategies = strategiesData
-      if (lskyDetail.activeStrategy === null && strategiesData.length > 0)
-        lskyDetail.activeStrategy = strategiesData[0].value
-      return true
+      }
     }
 
     return {
