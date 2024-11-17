@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { MenuOption } from 'naive-ui'
 import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
 
@@ -8,15 +7,29 @@ const appStore = useAppStore()
 const programStore = useProgramStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
+const expandedKeys = ref<string[]>(['user-storage'])
+
+function expandedKeysChange(keys: string[]) {
+  expandedKeys.value = keys
+}
 
 const storageList = ref({
   label: () =>
     h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
       h('span', ['存储配置']),
       h(NButton, {
-        text: true,
+        class: 'w9 h5',
+        size: 'small',
+        type: 'tertiary',
+        round: true,
+        strong: true,
+        secondary: true,
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
-        onClick: () => {
+        onClick: (e) => {
+          e.stopPropagation()
+          if (!expandedKeys.value.includes('user-storage')) {
+            expandedKeys.value.push('user-storage')
+          }
           const id = programStore.createProgram()
           router.push(`/Setting/${id}`)
         },
@@ -90,8 +103,9 @@ function updateValue(value: string) {
     :collapsed="isMenuCollapsed"
     :collapsed-width="64"
     :collapsed-icon-size="22"
-    :default-expanded-keys="['user-storage']"
+    :default-expand-all="true"
     :indent="22"
+    @update:expanded-keys="expandedKeysChange"
     @update:value="updateValue"
   />
 </template>
