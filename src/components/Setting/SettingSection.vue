@@ -39,7 +39,7 @@ defineExpose({
 
 <template>
   <div class="set-type pt7.5">
-    <n-h3 prefix="bar">
+    <n-h3 v-if="title" prefix="bar">
       {{ title }}
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">

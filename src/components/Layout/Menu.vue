@@ -5,35 +5,39 @@ import { RouterLink } from 'vue-router/auto'
 
 const router = useRouter()
 const appStore = useAppStore()
+const programStore = useProgramStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 
-const userStorageList = ref({
+const storageList = ref({
   label: () =>
     h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
-      h('span', { class: '' }, ['创建的存储']),
+      h('span', ['存储配置']),
       h(NButton, {
-        class: 'w9 h5',
-        size: 'small',
-        type: 'tertiary',
-        round: true,
-        strong: true,
-        secondary: true,
+        text: true,
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
         onClick: () => {
-          router.push('/Setting/')
+          const id = programStore.createProgram()
+          router.push(`/Setting/${id}`)
         },
       }),
     ]),
   key: 'user-storage',
-  children: [] as MenuOption[],
+  children: computed(() => programStore.getProgramList().map(program => ({
+    label: () => h(RouterLink, {
+      to: {
+        name: '/Setting/',
+      },
+    }, { default: () => program.name }),
+    key: `/Setting/${program.id}`,
+  }))),
 })
 
 const menuOptions = computed(() => [
   {
     type: 'group',
     label: '我的图片',
-    key: 'mian',
+    key: 'main',
     children: [],
     show: !isMenuCollapsed.value,
   },
@@ -62,7 +66,7 @@ const menuOptions = computed(() => [
     type: 'divider',
   },
   {
-    ...userStorageList.value,
+    ...storageList.value,
     show: !isMenuCollapsed.value,
   },
 ])

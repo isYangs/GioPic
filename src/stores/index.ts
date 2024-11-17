@@ -1,7 +1,7 @@
 import { createPersistedStatePlugin } from 'pinia-plugin-persistedstate-2'
 
 export * from './app'
-export * from './programs'
+export * from './program'
 export * from './record'
 
 const store = createPinia()

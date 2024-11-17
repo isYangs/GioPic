@@ -7,7 +7,7 @@ import { getProgramName } from '~/utils'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as ProgramType)
-const programStore = useProgramsStore()
+const programStore = useProgramStore()
 
 // S3 配置项
 const accessKeyID = ref('')
@@ -91,6 +91,6 @@ const settingOptions = computed(() => [
 
 <template>
   <div wh-full>
-    <SettingSection ref="setItemRef" class="pt0" :title="getProgramName(id)" :items="settingOptions" :rules />
+    <SettingSection ref="setItemRef" class="pt0" :items="settingOptions" :rules />
   </div>
 </template>

@@ -14,6 +14,12 @@ interface LskyStrategiesData {
   id: number
 }
 
+const programTypeName: Record<ProgramType, string> = {
+  lsky: '兰空图床社区版',
+  lskyPro: '兰空图床企业版V1',
+  s3: 'S3(AWS/腾讯云/阿里云)',
+}
+
 const programDetailTemplate = {
   lsky: {
     api: '',
@@ -55,15 +61,23 @@ const programDetailTemplate = {
   },
 }
 
-export const useProgramsStore = defineStore(
+export const useProgramStore = defineStore(
   'programStore',
   () => {
     const state: Program[] = reactive([])
 
-    function createProgram(type: ProgramType) {
+    function createProgram() {
       state.push({
+        type: 'lsky',
+        name: `新建存储 ${state.length + 1}`,
+        detail: programDetailTemplate.lsky,
+      })
+      return state.length - 1
+    }
+
+    function initProgram(id: number, type: ProgramType) {
+      Object.assign(state[id], {
         type,
-        name: Date.now().toLocaleString(),
         detail: programDetailTemplate[type],
       })
     }
@@ -72,12 +86,27 @@ export const useProgramsStore = defineStore(
       Object.assign(state[id], detail)
     }
 
-    function getProgramName(id: number) {
-      return state[id].name
+    function renameProgram(id: number, name: string) {
+      state[id].name = name
+    }
+
+    function getProgramTypeList() {
+      return Object.entries(programTypeName).map(([key, value]) => ({
+        label: value,
+        value: key as ProgramType,
+      }))
     }
 
     function getProgram(id: number) {
       return state[id] || {}
+    }
+
+    function getProgramList() {
+      return state.map((item, index) => ({
+        id: index,
+        name: item.name,
+        type: item.type,
+      }))
     }
 
     /**
@@ -130,9 +159,12 @@ export const useProgramsStore = defineStore(
     return {
       ...toRefs(state),
       createProgram,
+      initProgram,
       setProgram,
+      renameProgram,
+      getProgramTypeList,
+      getProgramList,
       getProgram,
-      getProgramName,
       getLskyStrategies,
     }
   },

@@ -5,7 +5,7 @@ import CodeInput from '~/components/Common/CodeInput.vue'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(Number.parseInt(route.params.id))
-const programStore = useProgramsStore()
+const programStore = useProgramStore()
 const api = ref('')
 const token = ref('')
 const strategiesVal = ref<number | null>(null)
@@ -116,6 +116,6 @@ watchEffect(() => {
 
 <template>
   <div wh-full>
-    <SettingSection ref="setItemRef" class="pt0" :title="programStore.getProgramName(id)" :items="settingOptions" :rules />
+    <SettingSection ref="setItemRef" class="pt0" :items="settingOptions" :rules />
   </div>
 </template>

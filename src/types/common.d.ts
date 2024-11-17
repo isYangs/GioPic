@@ -1,5 +1,5 @@
 export interface TabOption {
-  title: string
+  title?: string
   items: {
     name: string
     isDev?: boolean

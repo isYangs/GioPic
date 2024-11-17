@@ -6,7 +6,7 @@ import type { ProgramType, UploadData } from '~/stores'
 import { getLinkTypeOptions } from '~/utils'
 
 const appStore = useAppStore()
-const programStore = useProgramsStore()
+const programStore = useProgramStore()
 const uploadDataStore = useUploadDataStore()
 const { defaultProgram, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
