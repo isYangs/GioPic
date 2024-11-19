@@ -52,7 +52,7 @@ const compName = computed(() => {
   return programType.value[0].toUpperCase() + programType.value.slice(1)
 })
 
-const comp = ref()
+const comp = shallowRef()
 
 watchImmediate([() => route.params.id, programType], () => {
   comp.value = defineAsyncComponent(() => import(`~/components/Setting/Config${compName.value}.vue`))
