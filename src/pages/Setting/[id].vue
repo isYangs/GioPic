@@ -3,7 +3,7 @@ import { NInput, NSelect } from 'naive-ui'
 import type { ProgramType } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
-const id = ref(Number.parseInt(route.params.id))
+const id = computed(() => Number.parseInt(route.params.id))
 
 const programStore = useProgramStore()
 const programType = ref(programStore.getProgram(id.value)?.type)

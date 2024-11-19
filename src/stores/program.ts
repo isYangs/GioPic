@@ -5,6 +5,7 @@ export type ProgramType = keyof typeof programDetailTemplate
 export interface Program {
   type: ProgramType
   name: string
+  id: number
   detail: typeof programDetailTemplate[ProgramType]
   isOk?: boolean
 }
@@ -67,27 +68,29 @@ export const useProgramStore = defineStore(
     const state: Program[] = reactive([])
 
     function createProgram() {
+      const id = Date.now()
       state.push({
         type: 'lsky',
         name: `新建存储 ${state.length + 1}`,
+        id,
         detail: programDetailTemplate.lsky,
       })
-      return state.length - 1
+      return id
     }
 
     function initProgram(id: number, type: ProgramType) {
-      Object.assign(state[id], {
+      Object.assign(getProgram(id), {
         type,
         detail: programDetailTemplate[type],
       })
     }
 
     function setProgram(id: number, detail: Partial<Program>) {
-      Object.assign(state[id], detail)
+      Object.assign(getProgram(id), detail)
     }
 
     function renameProgram(id: number, name: string) {
-      state[id].name = name
+      getProgram(id).name = name
     }
 
     function getProgramTypeList() {
@@ -97,13 +100,22 @@ export const useProgramStore = defineStore(
       }))
     }
 
-    function getProgram(id: number) {
-      return state[id] || {}
+    function getProgram(id: number): Program {
+      const program = state.find(item => item.id === id)
+      if (!program) {
+        return {
+          type: 'lsky',
+          name: '未知存储',
+          id,
+          detail: programDetailTemplate.lsky,
+        }
+      }
+      return program
     }
 
     function getProgramList() {
-      return state.map((item, index) => ({
-        id: index,
+      return state.map(item => ({
+        id: item.id,
         name: item.name,
         type: item.type,
       }))
