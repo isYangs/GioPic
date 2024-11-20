@@ -172,28 +172,16 @@ const allSetScroll = debounce((e) => {
     setTabsVal.value = `setTab${allSetDom.length}`
   }
 }, 100)
-
-onMounted(async () => {
-  // 默认选中第一个Tab并滚动到第一个Tab区域
-  nextTick(() => {
-    setTabsVal.value = 'setTab1'
-    const setEl = document.querySelector('.set-type') as HTMLElement
-    if (setEl) {
-      setEl.scrollIntoView({
-        behavior: 'smooth',
-      })
-    }
-  })
-})
 </script>
 
 <template>
-  <div class="wh-full flex flex-col gap6">
+  <div @scroll="allSetScroll">
     <div class="select-none text-4xl font-600">
       程序设置
     </div>
     <n-tabs
       v-model:value="setTabsVal"
+      class="tab-bgmask sticky top-0 z-1 mt4 py4"
       type="segment"
       @update:value="setTabChange"
     >
@@ -205,11 +193,18 @@ onMounted(async () => {
       />
     </n-tabs>
 
-    <n-scrollbar
-      class="all-set"
-      @scroll="allSetScroll"
-    >
-      <SettingSection v-for="tab in tabsOptions" :key="tab.title" :title="tab.title" :items="tab.items" />
-    </n-scrollbar>
+    <SettingSection
+      v-for="tab in tabsOptions"
+      :key="tab.title"
+      class="scroll-mt-10"
+      :title="tab.title"
+      :items="tab.items"
+    />
   </div>
 </template>
+
+<style scoped>
+.tab-bgmask {
+  background-image: linear-gradient(var(--n-color) 80%, transparent);
+}
+</style>

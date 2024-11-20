@@ -36,11 +36,11 @@ onMounted(() => {
         <n-layout-header bordered>
           <Header />
         </n-layout-header>
-        <n-layout content-class="wh-full" :native-scrollbar="false">
+        <n-layout class="pr.5" content-class="p6" :native-scrollbar="false">
           <router-view v-slot="{ Component }">
             <keep-alive>
               <Transition name="router" mode="out-in">
-                <component :is="Component" class="p6" />
+                <component :is="Component" />
               </Transition>
             </keep-alive>
           </router-view>

@@ -115,7 +115,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div wh-full>
+  <div>
     <SettingSection ref="setItemRef" class="pt0" :items="settingOptions" :rules />
   </div>
 </template>

@@ -15,7 +15,10 @@ function expandedKeysChange(keys: string[]) {
 
 const storageList = ref({
   label: () =>
-    h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
+    h('div', {
+      class: 'flex justify-between items-center pr2 text-.93em',
+      style: { color: 'var(--n-arrow-color-child-active)' },
+    }, [
       h('span', ['存储配置']),
       h(NButton, {
         class: 'w9 h5',
@@ -97,21 +100,36 @@ function updateValue(value: string) {
 </script>
 
 <template>
-  <n-menu
-    v-model:value="menuActiveKey"
-    :options="menuOptions"
-    :collapsed="isMenuCollapsed"
-    :collapsed-width="64"
-    :collapsed-icon-size="22"
-    :default-expand-all="true"
-    :indent="22"
-    @update:expanded-keys="expandedKeysChange"
-    @update:value="updateValue"
-  />
+  <n-scrollbar>
+    <n-menu
+      v-model:value="menuActiveKey"
+      :options="menuOptions"
+      :collapsed="isMenuCollapsed"
+      :collapsed-width="64"
+      :default-expand-all="true"
+      :root-indent="22"
+      :indent="0"
+      @update:expanded-keys="expandedKeysChange"
+      @update:value="updateValue"
+    />
+  </n-scrollbar>
 </template>
 
 <style scoped>
-:deep(.n-menu-item-content.n-menu-item-content--selected)::before {
+.n-menu {
+  --n-item-height: 36px;
+  --n-arrow-color-child-active: var(--n-group-text-color);
+}
+
+:deep(.n-menu-item) {
+  margin-top: 4px;
+}
+
+:deep(.n-menu-item-content--collapsed) {
+  --n-arrow-color-child-active: ;
+}
+
+:deep(.n-menu-item-content--selected)::before {
   border-left: 4px solid var(--n-item-text-color-active);
 }
 </style>

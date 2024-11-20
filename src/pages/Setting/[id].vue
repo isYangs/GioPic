@@ -61,7 +61,7 @@ watchImmediate([() => route.params.id, programType], () => {
 </script>
 
 <template>
-  <div wh-full>
+  <div>
     <setting-section :items="typeSettings" />
     <component :is="comp" />
   </div>
