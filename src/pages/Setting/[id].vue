@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import { NInput, NSelect } from 'naive-ui'
+import type { Component } from 'vue'
+import { NButton, NInput, NSelect } from 'naive-ui'
 import type { ProgramType } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
+const router = useRouter()
 const id = computed(() => Number.parseInt(route.params.id))
 
 const programStore = useProgramStore()
-const programType = ref(programStore.getProgram(id.value)?.type)
+const programType = computed({
+  get: () => programStore.getProgram(id.value)?.type,
+  set: newType => programStore.setProgramType(id.value, newType),
+})
+const programName = computed({
+  get: () => programStore.getProgram(id.value)?.name,
+  set: newName => programStore.setProgramName(id.value, newName),
+})
 
-const typeSettings = computed(() => [
+const generalSettings = computed(() => [
   {
     name: '存储类型',
     tip: '切换存储类型会导致配置丢失，请谨慎操作',
@@ -22,7 +31,6 @@ const typeSettings = computed(() => [
           positiveText: '确定',
           negativeText: '取消',
           onPositiveClick: () => {
-            programStore.initProgram(id.value, newType)
             programType.value = newType
           },
         })
@@ -35,14 +43,42 @@ const typeSettings = computed(() => [
     tip: '存储名称用于区分不同的存储',
     width: 300,
     component: () => h(NInput, {
-      value: programStore.getProgram(id.value)?.name,
+      value: programName.value,
       onUpdateValue: (newName: string) => {
-        programStore.renameProgram(id.value, newName)
+        programName.value = newName
       },
     }),
   },
 ])
 
+const dangerousSettings = computed(() => [
+  // 重置
+  {
+    name: '删除存储',
+    tip: '删除存储会导致配置丢失，请谨慎操作',
+    component: () => h(NButton, {
+      type: 'error',
+      secondary: true,
+      onClick: () => {
+        window.$dialog.warning({
+          title: '提示',
+          content: '删除存储会导致配置丢失，是否继续？',
+          positiveText: '确定',
+          negativeText: '取消',
+          onPositiveClick: () => {
+            const index = programStore.indexOf(id.value)
+            programStore.removeProgram(id.value)
+            window.$message.success('删除成功')
+            const nextId = programStore.programs[Math.max(index - 1, 0)]?.id
+            router.push(`/Setting/${nextId ?? 'new'}`)
+          },
+        })
+      },
+    }, '删除存储'),
+  },
+])
+
+// 根据类型动态加载组件
 const compName = computed(() => {
   if (!programType.value)
     return 'Lsky'
@@ -52,7 +88,7 @@ const compName = computed(() => {
   return programType.value[0].toUpperCase() + programType.value.slice(1)
 })
 
-const comp = shallowRef()
+const comp = shallowRef<Component>()
 
 watchImmediate([() => route.params.id, programType], () => {
   comp.value = defineAsyncComponent(() => import(`~/components/Setting/Config${compName.value}.vue`))
@@ -62,7 +98,8 @@ watchImmediate([() => route.params.id, programType], () => {
 
 <template>
   <div>
-    <setting-section :items="typeSettings" />
+    <setting-section :items="generalSettings" />
     <component :is="comp" />
+    <setting-section :items="dangerousSettings" />
   </div>
 </template>

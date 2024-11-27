@@ -39,12 +39,12 @@ const storageList = ref({
       }),
     ]),
   key: 'user-storage',
-  children: computed(() => programStore.getProgramList().map(program => ({
+  children: computed(() => programStore.getProgramList().map((program, index) => ({
     label: () => h(RouterLink, {
       to: {
         name: '/Setting/',
       },
-    }, { default: () => program.name }),
+    }, { default: () => program.name || `新建存储 ${index + 1}` }),
     key: `/Setting/${program.id}`,
   }))),
 })

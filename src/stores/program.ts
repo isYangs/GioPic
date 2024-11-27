@@ -65,20 +65,20 @@ const programDetailTemplate = {
 export const useProgramStore = defineStore(
   'programStore',
   () => {
-    const state: Program[] = reactive([])
+    const programs = ref<Program[]>([])
 
     function createProgram() {
       const id = Date.now()
-      state.push({
+      programs.value.push({
         type: 'lsky',
-        name: `新建存储 ${state.length + 1}`,
+        name: '',
         id,
         detail: programDetailTemplate.lsky,
       })
       return id
     }
 
-    function initProgram(id: number, type: ProgramType) {
+    function setProgramType(id: number, type: ProgramType) {
       Object.assign(getProgram(id), {
         type,
         detail: programDetailTemplate[type],
@@ -89,7 +89,7 @@ export const useProgramStore = defineStore(
       Object.assign(getProgram(id), detail)
     }
 
-    function renameProgram(id: number, name: string) {
+    function setProgramName(id: number, name: string) {
       getProgram(id).name = name
     }
 
@@ -101,33 +101,39 @@ export const useProgramStore = defineStore(
     }
 
     function getProgram(id: number): Program {
-      const program = state.find(item => item.id === id)
+      const program = programs.value.find(item => item.id === id)
+      // 防止开发过程中异常路由导致程序崩溃
       if (!program) {
-        return {
-          type: 'lsky',
-          name: '未知存储',
-          id,
-          detail: programDetailTemplate.lsky,
-        }
+        return { type: 'lsky', name: '', id, detail: programDetailTemplate.lsky }
       }
       return program
     }
 
     function getProgramList() {
-      return state.map(item => ({
+      return programs.value.map(item => ({
         id: item.id,
         name: item.name,
         type: item.type,
       }))
     }
 
+    function indexOf(id: number) {
+      return programs.value.findIndex(item => item.id === id)
+    }
+
+    function removeProgram(id: number) {
+      const index = indexOf(id)
+      if (index !== -1)
+        programs.value.splice(index, 1)
+    }
+
     /**
      * 获取所有的存储策略
      */
     async function getLskyStrategies(id: number): Promise<boolean> {
-      const programType = state[id].type
+      const programType = programs.value[id].type
       if (programType === 'lsky') {
-        const detail = state[id].detail as typeof programDetailTemplate.lsky
+        const detail = programs.value[id].detail as typeof programDetailTemplate.lsky
         const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
 
         if (status !== 200)
@@ -146,7 +152,7 @@ export const useProgramStore = defineStore(
         return true
       }
       else if (programType === 'lskyPro') {
-        const detail = state[id].detail as typeof programDetailTemplate.lskyPro
+        const detail = programs.value[id].detail as typeof programDetailTemplate.lskyPro
         const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
 
         if (status !== 200)
@@ -169,20 +175,22 @@ export const useProgramStore = defineStore(
     }
 
     return {
-      ...toRefs(state),
+      programs,
       createProgram,
-      initProgram,
+      setProgramType,
       setProgram,
-      renameProgram,
+      setProgramName,
       getProgramTypeList,
       getProgramList,
+      indexOf,
       getProgram,
+      removeProgram,
       getLskyStrategies,
     }
   },
   {
     persistedState: {
-      key: '__giopic_programs_store__',
+      key: '__giopic_program_store__',
       includePaths: ['programs'],
     },
   },
