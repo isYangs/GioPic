@@ -8,43 +8,28 @@ const router = useRouter()
 const id = computed(() => Number.parseInt(route.params.id))
 
 const programStore = useProgramStore()
-const programType = computed({
-  get: () => programStore.getProgram(id.value)?.type,
-  set: newType => programStore.setProgramType(id.value, newType),
-})
+const {
+  getProgram,
+  getProgramTypeName,
+  setProgramName,
+  indexOf,
+  removeProgram,
+} = programStore
+
+const programType = computed(() => getProgram(id.value)?.type)
 const programName = computed({
-  get: () => programStore.getProgram(id.value)?.name,
-  set: newName => programStore.setProgramName(id.value, newName),
+  get: () => getProgram(id.value)?.name,
+  set: newName => setProgramName(id.value, newName),
 })
 
 const generalSettings = computed(() => [
   {
-    name: '存储类型',
-    tip: '切换存储类型会导致配置丢失，请谨慎操作',
-    width: 300,
-    component: () => h(NSelect, {
-      value: programType.value,
-      onUpdateValue: (newType: ProgramType) => {
-        window.$dialog.warning({
-          title: '提示',
-          content: '切换存储类型会导致配置丢失，是否继续？',
-          positiveText: '确定',
-          negativeText: '取消',
-          autoFocus: false,
-          onPositiveClick: () => {
-            programType.value = newType
-          },
-        })
-      },
-      options: programStore.getProgramTypeList(),
-    }),
-  },
-  {
-    name: '存储名称',
-    tip: '存储名称用于区分不同的存储',
+    name: '存储备注',
+    tip: '用于区分不同的存储',
     width: 300,
     component: () => h(NInput, {
       value: programName.value,
+      placeholder: getProgramTypeName(programType.value),
       onUpdateValue: (newName: string) => {
         programName.value = newName
       },
@@ -67,11 +52,11 @@ const dangerousSettings = computed(() => [
           negativeText: '取消',
           autoFocus: false,
           onPositiveClick: () => {
-            const index = programStore.indexOf(id.value)
-            programStore.removeProgram(id.value)
+            const index = indexOf(id.value)
+            removeProgram(id.value)
             window.$message.success('删除成功')
             const nextId = programStore.programs[Math.max(index - 1, 0)]?.id
-            router.push(`/Setting/${nextId ?? 'new'}`)
+            router.push(`/Setting/${nextId ?? ''}`)
           },
         })
       },
@@ -93,7 +78,6 @@ const comp = shallowRef<Component>()
 
 watchImmediate([() => route.params.id, programType], () => {
   comp.value = defineAsyncComponent(() => import(`~/components/Setting/Config${compName.value}.vue`))
-  programType.value = programStore.getProgram(id.value)?.type
 })
 </script>
 

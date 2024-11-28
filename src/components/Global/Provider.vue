@@ -111,6 +111,7 @@ window.ipcRenderer.on('update', (_e, type, ...args) => {
       v-model="showUpdateRestart"
       :force-update
     />
+    <!-- <SettingPanel v-model="showSettingPanel" /> -->
     <n-loading-bar-provider>
       <n-modal-provider>
         <n-dialog-provider>

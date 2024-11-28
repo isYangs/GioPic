@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
+import CreateProgram from '../Setting/CreateProgram.vue'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -8,6 +9,7 @@ const programStore = useProgramStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 const expandedKeys = ref<string[]>(['user-storage'])
+const showCreateProgram = ref(false)
 
 function expandedKeysChange(keys: string[]) {
   expandedKeys.value = keys
@@ -29,22 +31,20 @@ const storageList = ref({
         secondary: true,
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
         onClick: (e) => {
-          e.stopPropagation()
-          if (!expandedKeys.value.includes('user-storage')) {
-            expandedKeys.value.push('user-storage')
-          }
-          const id = programStore.createProgram()
-          router.push(`/Setting/${id}`)
+          if (expandedKeys.value.includes('user-storage'))
+            e.stopPropagation()
+          showCreateProgram.value = true
         },
       }),
     ]),
   key: 'user-storage',
-  children: computed(() => programStore.getProgramList().map((program, index) => ({
+  children: computed(() => programStore.getProgramList().map(program => ({
     label: () => h(RouterLink, {
       to: {
+        // BUG: 点击同页面还会跳转
         name: '/Setting/',
       },
-    }, { default: () => program.name || `新建存储 ${index + 1}` }),
+    }, { default: () => program.name || programStore.getProgramTypeName(program.type) }),
     key: `/Setting/${program.id}`,
   }))),
 })
@@ -112,6 +112,7 @@ function updateValue(value: string) {
       @update:expanded-keys="expandedKeysChange"
       @update:value="updateValue"
     />
+    <CreateProgram v-model="showCreateProgram" />
   </n-scrollbar>
 </template>
 

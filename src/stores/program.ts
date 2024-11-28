@@ -67,22 +67,15 @@ export const useProgramStore = defineStore(
   () => {
     const programs = ref<Program[]>([])
 
-    function createProgram() {
+    function createProgram(type: ProgramType = 'lsky') {
       const id = Date.now()
       programs.value.push({
-        type: 'lsky',
+        type,
         name: '',
         id,
         detail: programDetailTemplate.lsky,
       })
       return id
-    }
-
-    function setProgramType(id: number, type: ProgramType) {
-      Object.assign(getProgram(id), {
-        type,
-        detail: programDetailTemplate[type],
-      })
     }
 
     function setProgram(id: number, detail: Partial<Program>) {
@@ -91,6 +84,10 @@ export const useProgramStore = defineStore(
 
     function setProgramName(id: number, name: string) {
       getProgram(id).name = name
+    }
+
+    function getProgramTypeName(type: ProgramType) {
+      return programTypeName[type]
     }
 
     function getProgramTypeList() {
@@ -177,9 +174,9 @@ export const useProgramStore = defineStore(
     return {
       programs,
       createProgram,
-      setProgramType,
       setProgram,
       setProgramName,
+      getProgramTypeName,
       getProgramTypeList,
       getProgramList,
       indexOf,
