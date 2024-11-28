@@ -30,6 +30,7 @@ const generalSettings = computed(() => [
           content: '切换存储类型会导致配置丢失，是否继续？',
           positiveText: '确定',
           negativeText: '取消',
+          autoFocus: false,
           onPositiveClick: () => {
             programType.value = newType
           },
@@ -52,7 +53,6 @@ const generalSettings = computed(() => [
 ])
 
 const dangerousSettings = computed(() => [
-  // 重置
   {
     name: '删除存储',
     tip: '删除存储会导致配置丢失，请谨慎操作',
@@ -65,6 +65,7 @@ const dangerousSettings = computed(() => [
           content: '删除存储会导致配置丢失，是否继续？',
           positiveText: '确定',
           negativeText: '取消',
+          autoFocus: false,
           onPositiveClick: () => {
             const index = programStore.indexOf(id.value)
             programStore.removeProgram(id.value)

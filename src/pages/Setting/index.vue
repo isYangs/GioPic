@@ -124,6 +124,7 @@ const tabsOptions = ref<TabOption[]>([
               content: '重置所有设置，是否继续？',
               positiveText: '确定',
               negativeText: '取消',
+              autoFocus: false,
               onPositiveClick: async () => {
                 await appStore.resetState()
                 // 显示重置成功提示
