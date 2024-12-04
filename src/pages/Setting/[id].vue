@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
-import { NButton, NInput, NSelect } from 'naive-ui'
-import type { ProgramType } from '~/stores'
+import { NButton, NInput } from 'naive-ui'
 
 const route = useRoute('/Setting/[id]')
 const router = useRouter()

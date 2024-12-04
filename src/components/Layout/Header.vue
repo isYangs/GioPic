@@ -33,25 +33,22 @@ const themeOptions = computed(() => [
   },
 ])
 
-function themeChange(key: string) {
-  switch (key) {
-    case 'lightTodark': {
-      themeType.value = themeType.value === 'dark' ? 'light' : 'dark'
-      window.$message.info(`已切换至${themeType.value === 'light' ? '浅色' : '深色'}模式`, { showIcon: false })
-      themeAuto.value = false
-      break
-    }
-    case 'setting': {
-      router.push('/Setting')
-      break
-    }
-    case 'about': {
-      router.push('/About')
-      break
-    }
-    default:
-      break
-  }
+const dropdownOptions = {
+  lightTodark: () => {
+    themeType.value = themeType.value === 'dark' ? 'light' : 'dark'
+    window.$message.info(`已切换至${themeType.value === 'light' ? '浅色' : '深色'}模式`, { showIcon: false })
+    themeAuto.value = false
+  },
+  setting: () => {
+    createSettingPanel()
+  },
+  about: () => {
+    router.push('/About')
+  },
+}
+
+function onDropdownClick(key: keyof typeof dropdownOptions) {
+  dropdownOptions[key]()
 }
 
 const windowActions = {
@@ -59,13 +56,14 @@ const windowActions = {
   toggleMaximize: async () => {
     isMaximized.value = await window.ipcRenderer.invoke('window-maxOrRestore')
   },
-  close: () => {
+  close: async () => {
+    await window.ipcRenderer.invoke('window-close')
     showCloseTipModal.value = false
-    window.ipcRenderer.invoke('window-close')
   },
-  hide: () => {
+  hide: async () => {
+    // FIXME 先关闭弹窗，再隐藏窗口
+    await window.ipcRenderer.invoke('window-hide')
     showCloseTipModal.value = false
-    window.ipcRenderer.invoke('window-hide')
   },
 }
 
@@ -79,29 +77,25 @@ function onCloseClick() {
 }
 
 /** 执行关闭主窗口操作 */
-function onConfirmCloseTipModal(action: 'cancel' | 'close' | 'hide') {
-  const actions = {
-    close: () => {
-      if (rememberChoice.value) {
-        appCloseTip.value = false
-        appCloseType.value = 'close'
-      }
-      windowActions.close()
-    },
-    hide: () => {
-      if (rememberChoice.value) {
-        appCloseTip.value = false
-        appCloseType.value = 'hide'
-      }
-      showCloseTipModal.value = false
-      setTimeout(windowActions.hide, 500)
-    },
-    cancel: () => {
-      showCloseTipModal.value = false
-    },
-  }
-
-  actions[action]()
+const closeTipModalActions = {
+  close: () => {
+    if (rememberChoice.value) {
+      appCloseType.value = 'close'
+      appCloseTip.value = false
+    }
+    windowActions.close()
+  },
+  hide: () => {
+    if (rememberChoice.value) {
+      appCloseType.value = 'hide'
+      appCloseTip.value = false
+    }
+    showCloseTipModal.value = false
+    setTimeout(windowActions.hide, 500)
+  },
+  cancel: () => {
+    showCloseTipModal.value = false
+  },
 }
 </script>
 
@@ -122,7 +116,7 @@ function onConfirmCloseTipModal(action: 'cancel' | 'close' | 'hide') {
       </div>
 
       <div class="no-draggable flex-center">
-        <n-dropdown :options="themeOptions" trigger="click" @select="themeChange">
+        <n-dropdown :options="themeOptions" trigger="click" @select="onDropdownClick">
           <n-button :focusable="false" quaternary size="small" class="h6 w6">
             <template #icon>
               <div i-ph-gear-six-bold />
@@ -162,14 +156,14 @@ function onConfirmCloseTipModal(action: 'cancel' | 'close' | 'hide') {
     </n-checkbox>
     <template #footer>
       <n-flex justify="space-between">
-        <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('cancel')">
+        <n-button strong secondary :focusable="false" @click="closeTipModalActions.cancel()">
           取消
         </n-button>
         <n-flex>
-          <n-button strong secondary :focusable="false" @click="onConfirmCloseTipModal('close')">
+          <n-button strong secondary :focusable="false" @click="closeTipModalActions.close()">
             退出
           </n-button>
-          <n-button type="primary" :focusable="false" strong secondary @click="onConfirmCloseTipModal('hide')">
+          <n-button type="primary" :focusable="false" strong secondary @click="closeTipModalActions.hide()">
             最小化
           </n-button>
         </n-flex>

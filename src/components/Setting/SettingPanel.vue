@@ -19,7 +19,7 @@ const osThemeRef = useOsTheme()
 const setTabsVal = ref('setTab1')
 const isUserScroll = ref(false)
 
-const tabsOptions = ref<TabOption[]>([
+const settings = ref<TabOption[]>([
   {
     title: '常规',
     items: [
@@ -137,75 +137,36 @@ const tabsOptions = ref<TabOption[]>([
     ],
   },
 ])
-
-// 切换Tab
-function setTabChange(name: string) {
-  isUserScroll.value = true // 用户主动切换Tab时设置标志位
-  nextTick(() => {
-    const index = Number(name.replace('setTab', '')) - 1
-    const setEl = document.querySelectorAll('.set-type')[index] as HTMLElement
-    if (!setEl)
-      return
-    setEl.scrollIntoView({
-      behavior: 'smooth',
-    })
-  })
-}
-
-// 滚动监听
-const allSetScroll = debounce((e) => {
-  if (isUserScroll.value) {
-    isUserScroll.value = false // 重置标志位
-    return
-  }
-
-  const distance = e.target.scrollTop + 30
-  const allSetDom = document.querySelectorAll('.set-type')
-  allSetDom.forEach((v, i) => {
-    const el = v as HTMLElement
-    if (distance >= el.offsetTop)
-      setTabsVal.value = `setTab${i + 1}`
-  })
-
-  const isReachEnd = e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 30
-
-  if (isReachEnd) {
-    setTabsVal.value = `setTab${allSetDom.length}`
-  }
-}, 100)
 </script>
 
 <template>
-  <div @scroll="allSetScroll">
-    <div class="select-none text-4xl font-600">
-      程序设置
-    </div>
-    <n-tabs
-      v-model:value="setTabsVal"
-      class="tab-bgmask sticky top-0 z-1 mt4 py4"
-      type="segment"
-      @update:value="setTabChange"
-    >
-      <n-tab
-        v-for="(tab, index) in tabsOptions"
+  <div class="h-full flex">
+    <n-scrollbar class="w-40 shrink-0">
+      1
+    </n-scrollbar>
+    <n-scrollbar class="h80vh grow-1">
+      <SettingSection
+        v-for="tab in settings"
         :key="tab.title"
-        :name="`setTab${index + 1}`"
-        :tab="tab.title"
+        class="scroll-mt-10"
+        :title="tab.title"
+        :items="tab.items"
       />
-    </n-tabs>
-
-    <SettingSection
-      v-for="tab in tabsOptions"
-      :key="tab.title"
-      class="scroll-mt-10"
-      :title="tab.title"
-      :items="tab.items"
-    />
+    </n-scrollbar>
   </div>
 </template>
 
-<style scoped>
-.tab-bgmask {
-  background-image: linear-gradient(var(--n-color) 80%, transparent);
+<style>
+.setting-panel {
+  --uno: p0 w90% max-w-1024px h90vh max-h-720px;
 }
+.setting-panel > .n-card-header {
+  --uno: absolute right-0 z-1;
+}
+.setting-panel > .n-card__content {
+  --uno: p0;
+}
+</style>
+
+<style scoped>
 </style>
