@@ -118,20 +118,4 @@ function updateValue(value: string) {
 </template>
 
 <style scoped>
-.n-menu {
-  --n-item-height: 36px;
-  --n-arrow-color-child-active: var(--n-group-text-color);
-}
-
-:deep(.n-menu-item) {
-  margin-top: 4px;
-}
-
-:deep(.n-menu-item-content--collapsed) {
-  --n-arrow-color-child-active: ;
-}
-
-:deep(.n-menu-item-content--selected)::before {
-  border-left: 4px solid var(--n-item-text-color-active);
-}
 </style>

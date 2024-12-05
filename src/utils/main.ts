@@ -67,6 +67,7 @@ export function createSettingPanel() {
     autoFocus: false,
     bordered: false,
     closeOnEsc: false,
+    title: '设置',
     content: () => h(SettingPanel),
     maskClosable: false,
     preset: 'card',

@@ -47,7 +47,6 @@ defineExpose({
         v-for="(item, index) in items"
         :key="index"
         class="set-item mb3 wh-full rounded-2"
-        :content-style="{ padding: '0 20px' }"
       >
         <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
           <div class="flex items-center">
@@ -76,9 +75,7 @@ defineExpose({
           :class="{ 'set-item-other': checkComponentType(item) || item.width }"
           :style="{ '--w': setWidth(item.width) }"
         >
-          <n-form-item :path="item.path">
-            <component :is="item.component" />
-          </n-form-item>
+          <component :is="item.component" />
         </div>
       </n-card>
     </n-form>

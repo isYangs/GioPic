@@ -1,6 +1,5 @@
 export interface TabOption {
   title?: string
-  icon?: () => import('vue').VNode
   items: {
     name: string
     isDev?: boolean
@@ -10,4 +9,10 @@ export interface TabOption {
     component: () => import('vue').VNode
   }[]
   rules?: import('naive-ui').FormRules
+}
+
+export interface SettingEntry {
+  title?: string
+  icon?: () => import('vue').VNode
+  entries: TabOption[]
 }
