@@ -1,5 +1,6 @@
 export interface TabOption {
   title?: string
+  icon?: () => import('vue').VNode
   items: {
     name: string
     isDev?: boolean

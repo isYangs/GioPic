@@ -16,12 +16,12 @@ const {
 
 const osThemeRef = useOsTheme()
 
-const setTabsVal = ref('setTab1')
-const isUserScroll = ref(false)
+const activeIndex = ref(0)
 
 const settings = ref<TabOption[]>([
   {
     title: '常规',
+    icon: renderIcon('i-ph-sliders-horizontal-bold'),
     items: [
       {
         name: '深浅模式',
@@ -53,6 +53,7 @@ const settings = ref<TabOption[]>([
   },
   {
     title: '系统',
+    icon: renderIcon('i-ph-gear-six-bold'),
     items: [
       {
         name: '是否开机自启动',
@@ -98,6 +99,7 @@ const settings = ref<TabOption[]>([
   },
   {
     title: '其他',
+    icon: renderIcon('i-ph-dots-three-bold'),
     items: [
       {
         name: '开发者工具',
@@ -137,36 +139,54 @@ const settings = ref<TabOption[]>([
     ],
   },
 ])
+
+const settingTabs = computed(() => settings.value.map(({ title, icon }, index) => ({
+  label: h(
+    'a',
+    { onClick: () => activeIndex.value = index },
+    title,
+  ),
+  key: index,
+  icon,
+})))
 </script>
 
 <template>
-  <div class="h-full flex">
-    <n-scrollbar class="w-40 shrink-0">
-      1
-    </n-scrollbar>
-    <n-scrollbar class="h80vh grow-1">
+  <div class="h-full flex" style="display: flex">
+    <n-menu
+      :options="settingTabs"
+      :value="activeIndex"
+      class="w-40 shrink-0 p3 pt10"
+      @update:value="activeIndex = $event"
+    />
+    <n-scrollbar class="grow-1">
       <SettingSection
-        v-for="tab in settings"
-        :key="tab.title"
-        class="scroll-mt-10"
-        :title="tab.title"
-        :items="tab.items"
+        v-for="{ title, items } in [settings[activeIndex]]"
+        :key="title"
+        class="scroll-mt-10 p6 pt16"
+        :items
       />
     </n-scrollbar>
   </div>
 </template>
 
 <style>
-.setting-panel {
-  --uno: p0 w90% max-w-1024px h90vh max-h-720px;
+.setting-panel[class] {
+  --uno: p0 w80vw max-w-1024px h90vh max-h-720px overflow-hidden;
 }
 .setting-panel > .n-card-header {
   --uno: absolute right-0 z-1;
 }
 .setting-panel > .n-card__content {
-  --uno: p0;
+  --uno: p0 h-full;
 }
 </style>
 
 <style scoped>
+.setting-tab:hover {
+  background-color: var(--n-item-text-color-hover);
+}
+.setting-tab.active {
+  background-color: var(--n-item-text-color-active);
+}
 </style>

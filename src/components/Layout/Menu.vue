@@ -29,6 +29,7 @@ const storageList = ref({
         round: true,
         strong: true,
         secondary: true,
+        ariaLabel: '添加存储配置',
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
         onClick: (e) => {
           if (expandedKeys.value.includes('user-storage'))

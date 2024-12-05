@@ -38,7 +38,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="set-type pt7.5">
+  <div class="set-type">
     <n-h3 v-if="title" prefix="bar">
       {{ title }}
     </n-h3>

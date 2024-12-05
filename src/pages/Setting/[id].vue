@@ -59,7 +59,7 @@ const dangerousSettings = computed(() => [
           },
         })
       },
-    }, '删除存储'),
+    }, { default: () => '删除存储' }),
   },
 ])
 
