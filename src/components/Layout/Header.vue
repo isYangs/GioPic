@@ -18,7 +18,7 @@ const rememberChoice = ref(false)
 const themeOptions = computed(() => [
   {
     label: themeType.value === 'light' ? '深色模式' : '浅色模式',
-    key: 'lightTodark',
+    key: 'themeSwitch',
     icon: renderIcon(themeType.value === 'light' ? 'i-ph-moon-stars-bold' : 'i-ph-sun-bold'),
   },
   {
@@ -26,15 +26,15 @@ const themeOptions = computed(() => [
     key: 'setting',
     icon: renderIcon('i-ph-gear-six-bold'),
   },
-  {
-    label: '关于',
-    key: 'about',
-    icon: renderIcon('i-ph-info-bold'),
-  },
+  // {
+  //   label: '关于',
+  //   key: 'about',
+  //   icon: renderIcon('i-ph-info-bold'),
+  // },
 ])
 
 const dropdownOptions = {
-  lightTodark: () => {
+  themeSwitch: () => {
     themeType.value = themeType.value === 'dark' ? 'light' : 'dark'
     window.$message.info(`已切换至${themeType.value === 'light' ? '浅色' : '深色'}模式`, { showIcon: false })
     themeAuto.value = false
@@ -42,9 +42,9 @@ const dropdownOptions = {
   setting: () => {
     createSettingPanel()
   },
-  about: () => {
-    router.push('/About')
-  },
+  // about: () => {
+  //   router.push('/About')
+  // },
 }
 
 function onDropdownClick(key: keyof typeof dropdownOptions) {

@@ -2,6 +2,8 @@
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import Keycut from '~/components/Common/Keycut.vue'
 import type { SettingEntry, TabOption } from '~/types'
+import About from './About.vue'
+import SettingSection from './SettingSection.vue'
 
 const appStore = useAppStore()
 const {
@@ -126,18 +128,32 @@ const devOptions: TabOption[] = [{
   }],
 }]
 
+function renderSetting(options: TabOption[]) {
+  return () => h('ul', options.map(({ title, items }) =>
+    h(SettingSection, {
+      key: title,
+      title,
+      items,
+    }),
+  ))
+}
+
 const settings: SettingEntry[] = [{
   title: '界面外观',
   icon: renderIcon('i-ph-palette-bold size-5'),
-  entries: uiOptions,
+  comp: renderSetting(uiOptions),
 }, {
   title: '系统设置',
   icon: renderIcon('i-ph-sliders-horizontal-bold size-5'),
-  entries: systemOptions,
+  comp: renderSetting(systemOptions),
 }, {
   title: '高级设置',
   icon: renderIcon('i-ph-bug-beetle-bold size-5'),
-  entries: devOptions,
+  comp: renderSetting(devOptions),
+}, {
+  title: '关于',
+  icon: renderIcon('i-ph-info-bold size-5'),
+  comp: () => h(About),
 }]
 
 const settingTabs = computed(() =>
@@ -160,16 +176,8 @@ const settingTabs = computed(() =>
       :indent="22"
       @update:value="activeIndex = $event"
     />
-    <n-scrollbar class="setting-content grow-1">
-      <TransitionGroup appear mode="out-in">
-        <SettingSection
-          v-for="{ title, items } in settings[activeIndex].entries"
-          :key="title"
-          class="scroll-mt-10 p6 pt10"
-          :title
-          :items
-        />
-      </TransitionGroup>
+    <n-scrollbar class="setting-content grow-1" content-class="p6 pt10">
+      <component :is="settings[activeIndex].comp" :key="activeIndex" />
     </n-scrollbar>
   </div>
 </template>

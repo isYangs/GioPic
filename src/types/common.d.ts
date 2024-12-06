@@ -14,5 +14,5 @@ export interface TabOption {
 export interface SettingEntry {
   title?: string
   icon?: () => import('vue').VNode
-  entries: TabOption[]
+  comp: () => import('vue').VNode
 }

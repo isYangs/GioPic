@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    About: typeof import('./../components/Setting/About.vue')['default']
     CodeInput: typeof import('./../components/Common/CodeInput.vue')['default']
     ConfigLsky: typeof import('./../components/Setting/ConfigLsky.vue')['default']
     ConfigS3: typeof import('./../components/Setting/ConfigS3.vue')['default']
@@ -61,6 +62,7 @@ declare module 'vue' {
     Provider: typeof import('./../components/Global/Provider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Setting: typeof import('./../components/Setting/index.vue')['default']
     SettingPanel: typeof import('./../components/Setting/SettingPanel.vue')['default']
     SettingSection: typeof import('./../components/Setting/SettingSection.vue')['default']
     UpdateAvailable: typeof import('./../components/Update/UpdateAvailable.vue')['default']

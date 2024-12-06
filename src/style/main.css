@@ -16,7 +16,6 @@ img {
   -webkit-user-drag: none;
 }
 
-/* 禁用3D渲染 */
 img {
   transform: translate3d(0, 0, 0);
 }
@@ -73,7 +72,7 @@ img {
 }
 
 .n-menu-item-content--selected::before {
-  border-left: 4px solid var(--n-item-text-color-active);
+  /* border-left: 4px solid var(--n-item-text-color-active); */
 }
 
 
