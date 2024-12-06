@@ -1,5 +1,3 @@
-import type { ProgramType } from '~/stores'
-
 const initialState = {
   // 基础
   appCloseType: 'hide' as 'close' | 'hide', // 关闭类型 'close' | 'hide'
