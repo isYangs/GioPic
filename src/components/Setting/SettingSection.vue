@@ -83,6 +83,10 @@ defineExpose({
 </template>
 
 <style scoped>
+.set-type:deep(.n-h3) {
+  --n-bar-color: rgb(99, 226, 184);
+}
+
 .set-item :deep(.n-card__content) {
   --uno: flex flex-row items-center justify-between;
 }

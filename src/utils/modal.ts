@@ -5,7 +5,7 @@ import UpdateRestart from '~/components/Update/UpdateRestart.vue'
 
 // 打开设置面板
 export function openCreateSettingPanel() {
-  window.$modal.create({
+  const modal = window.$modal.create({
     autoFocus: false,
     bordered: false,
     closeOnEsc: false,
@@ -14,7 +14,7 @@ export function openCreateSettingPanel() {
     preset: 'card',
     transformOrigin: 'center',
     class: 'setting-panel',
-    content: () => h(SettingPanel),
+    content: () => h(SettingPanel, { onClose: () => modal.destroy() }),
   })
 }
 
