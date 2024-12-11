@@ -1,5 +1,4 @@
 import type { Router } from 'vue-router'
-import SettingPanel from '~/components/Setting/SettingPanel.vue'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -57,21 +56,7 @@ export function generateLink(type: string, url: string, name: string): string {
 // 全局路由跳转
 export function routerPush(router: Router) {
   window.ipcRenderer.on('open-setting', () =>
-    createSettingPanel())
+    openCreateSettingPanel())
   window.ipcRenderer.on('open-about', () =>
     router?.push('/About'))
-}
-
-export function createSettingPanel() {
-  window.$modal.create({
-    autoFocus: false,
-    bordered: false,
-    closeOnEsc: false,
-    title: '设置',
-    content: () => h(SettingPanel),
-    maskClosable: false,
-    preset: 'card',
-    transformOrigin: 'center',
-    class: 'setting-panel',
-  })
 }

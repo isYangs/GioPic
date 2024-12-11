@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
-import type { ProgramType } from '~/stores'
+import { type ProgramType, useProgramStore } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(route.params.id as ProgramType)

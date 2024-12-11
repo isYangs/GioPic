@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
-import CreateProgram from '../Setting/CreateProgram.vue'
+import { useAppStore, useProgramStore } from '~/stores'
+import { renderIcon } from '~/utils/main'
+import { openCreateProgram } from '~/utils/modal'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -9,7 +11,6 @@ const programStore = useProgramStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 const expandedKeys = ref<string[]>(['user-storage'])
-const showCreateProgram = ref(false)
 
 function expandedKeysChange(keys: string[]) {
   expandedKeys.value = keys
@@ -29,12 +30,13 @@ const storageList = ref({
         round: true,
         strong: true,
         secondary: true,
+        focusable: false,
         ariaLabel: '添加存储配置',
         renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
         onClick: (e) => {
           if (expandedKeys.value.includes('user-storage'))
             e.stopPropagation()
-          showCreateProgram.value = true
+          openCreateProgram()
         },
       }),
     ]),
@@ -113,7 +115,6 @@ function updateValue(value: string) {
       @update:expanded-keys="expandedKeysChange"
       @update:value="updateValue"
     />
-    <CreateProgram v-model="showCreateProgram" />
   </n-scrollbar>
 </template>
 

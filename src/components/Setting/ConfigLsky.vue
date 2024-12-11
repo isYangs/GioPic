@@ -2,6 +2,9 @@
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
+import { useProgramStore } from '~/stores'
+import { renderIcon } from '~/utils/main'
+import { createFormRule, validateLskyToken, validateUrl } from '~/utils/validate'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(Number.parseInt(route.params.id))

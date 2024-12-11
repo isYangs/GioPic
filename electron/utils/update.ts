@@ -106,7 +106,7 @@ export default function initUpdater(win: BrowserWindow) {
       releaseContent = '暂无更新说明'
     }
 
-    win.webContents.send('update', 'show-release', releaseInfo.version, releaseContent)
+    win.webContents.send('update-show-release', releaseInfo.version, releaseContent)
     ipcMain.on('download-update', (_e) => {
       // win.webContents.send('update', 'show-update-progress')
       logger.info('[update] User accepted the update. Downloading...')
@@ -132,7 +132,7 @@ export default function initUpdater(win: BrowserWindow) {
     // 手动更新下载进度
     win.webContents.send('update', 'update-update-progress', 100)
     logger.info('[update] Update downloaded, wating for quitting and installing...')
-    win.webContents.send('update', 'show-update-restart', updateOnThisStart)
+    win.webContents.send('update-show-update-restart', updateOnThisStart)
     // 退出并安装应用
     ipcMain.on('restart-and-install', (_e) => {
       setImmediate(() => autoUpdater.quitAndInstall(true, true))

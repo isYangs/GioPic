@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
 import Keycut from '~/components/Common/Keycut.vue'
+import { useAppStore } from '~/stores'
 import type { SettingEntry, TabOption } from '~/types'
+import { renderIcon } from '~/utils/main'
 import About from './About.vue'
 import SettingSection from './SettingSection.vue'
 
+// 从 store 获取响应式状态
 const appStore = useAppStore()
 const {
   appCloseTip,
@@ -17,26 +20,26 @@ const {
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
-
 const activeIndex = ref(0)
 
+// UI 主题设置选项
 const uiOptions: TabOption[] = [{
   title: '主题颜色',
   items: [{
     name: '深浅模式',
     component: () => h(NSelect, {
       value: themeType.value,
-      onUpdateValue: (val: 'dark' | 'light') => {
-        themeAuto.value = false
-        themeType.value = val
-      },
       options: [
         { label: '浅色模式', value: 'light' },
         { label: '深色模式', value: 'dark' },
       ],
+      onUpdateValue: (val: 'dark' | 'light') => {
+        themeAuto.value = false
+        themeType.value = val
+      },
     }),
   }, {
-    name: '深浅模式是否跟随系统',
+    name: '跟随系统',
     component: () => h(NSwitch, {
       value: themeAuto.value,
       round: false,
@@ -49,16 +52,17 @@ const uiOptions: TabOption[] = [{
   }],
 }]
 
+// 系统设置选项
 const systemOptions: TabOption[] = [{
   title: '启动和关闭',
   items: [{
-    name: '是否开机自启动',
+    name: '开机自启动',
     component: () => h(NSwitch, {
       value: autoStart.value,
       round: false,
-      onUpdateValue: (val: boolean) => {
+      onUpdateValue: async (val: boolean) => {
         autoStart.value = val
-        window.ipcRenderer.invoke('auto-start', val)
+        await window.ipcRenderer.invoke('auto-start', val)
       },
     }),
   }, {
@@ -66,11 +70,11 @@ const systemOptions: TabOption[] = [{
     component: () => h(NSelect, {
       value: appCloseType.value,
       disabled: appCloseTip.value,
-      onUpdateValue: (val: 'hide' | 'close') => appCloseType.value = val,
       options: [
         { label: '最小化到任务栏', value: 'hide' },
         { label: '直接退出', value: 'close' },
       ],
+      onUpdateValue: (val: 'hide' | 'close') => appCloseType.value = val,
     }),
   }, {
     name: '每次关闭程序时都询问',
@@ -90,17 +94,22 @@ const systemOptions: TabOption[] = [{
   }],
 }]
 
+// 开发者选项
 const devOptions: TabOption[] = [{
   title: '开发调试',
   items: [{
     name: '开发者工具',
-    tip: () => h('span', ['开启后可使用', h(Keycut, { ctrl: true, shift: true }, () => 'D'), '打开开发者工具']),
+    tip: () => h('span', [
+      '使用快捷键',
+      h(Keycut, { ctrl: true, shift: true }, () => 'D'),
+      '打开',
+    ]),
     component: () => h(NSwitch, {
       value: isDevToolsEnabled.value,
       round: false,
-      onUpdateValue: (val: boolean) => {
+      onUpdateValue: async (val: boolean) => {
         isDevToolsEnabled.value = val
-        window.ipcRenderer.invoke('reg-dev-tools', val)
+        await window.ipcRenderer.invoke('reg-dev-tools', val)
       },
     }),
   }, {
@@ -110,34 +119,34 @@ const devOptions: TabOption[] = [{
       type: 'error',
       strong: true,
       secondary: true,
-      onClick: () => {
-        window.$dialog.warning({
-          title: '重置',
-          content: '重置所有设置，是否继续？',
-          positiveText: '确定',
-          negativeText: '取消',
-          autoFocus: false,
-          onPositiveClick: async () => {
-            await appStore.resetState()
-            // 显示重置成功提示
-            window.$message.success('重置成功，部分设置在重启后生效')
-          },
-        })
-      },
+      onClick: () => confirmReset(),
     }, () => '重置'),
   }],
 }]
 
-function renderSetting(options: TabOption[]) {
-  return () => h('ul', options.map(({ title, items }) =>
-    h(SettingSection, {
-      key: title,
-      title,
-      items,
-    }),
-  ))
+// 重置确认
+function confirmReset() {
+  window.$dialog.warning({
+    title: '重置',
+    content: '重置所有设置，是否继续？',
+    positiveText: '确定',
+    negativeText: '取消',
+    autoFocus: false,
+    onPositiveClick: async () => {
+      await appStore.resetState()
+      window.$message.success('重置成功，部分设置在重启后生效')
+    },
+  })
 }
 
+// 渲染设置项
+function renderSetting(options: TabOption[]) {
+  return () =>
+    h('ul', options.map(({ title, items }) =>
+      h(SettingSection, { key: title, title, items })))
+}
+
+// 设置面板配置
 const settings: SettingEntry[] = [{
   title: '界面外观',
   icon: renderIcon('i-ph-palette-bold size-5'),
@@ -156,19 +165,19 @@ const settings: SettingEntry[] = [{
   comp: () => h(About),
 }]
 
+// 设置标签页
 const settingTabs = computed(() =>
   settings.map(({ title, icon }, index) => ({
     icon,
     key: index,
-    label: () => h('a', {
-      onClick: () => activeIndex.value = index,
-    }, title),
+    label: () => h('a', { onClick: () => activeIndex.value = index }, title),
   })),
 )
 </script>
 
 <template>
-  <div class="h-full flex" style="display: flex">
+  <div class="h-full flex">
+    <!-- 侧边栏菜单 -->
     <n-menu
       :options="settingTabs"
       :value="activeIndex"
@@ -176,6 +185,7 @@ const settingTabs = computed(() =>
       :indent="22"
       @update:value="activeIndex = $event"
     />
+    <!-- 内容区域 -->
     <n-scrollbar class="setting-content grow-1" content-class="p6 pt10">
       <component :is="settings[activeIndex].comp" :key="activeIndex" />
     </n-scrollbar>
@@ -195,12 +205,6 @@ const settingTabs = computed(() =>
 </style>
 
 <style scoped>
-.setting-tab:hover {
-  background-color: var(--n-item-text-color-hover);
-}
-.setting-tab.active {
-  background-color: var(--n-item-text-color-active);
-}
 :deep(.setting-aside) {
   border-right: solid 1px var(--n-border-color);
 }

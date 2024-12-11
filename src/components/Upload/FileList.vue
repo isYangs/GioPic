@@ -2,8 +2,9 @@
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestData from '~/api'
-import type { UploadData } from '~/stores'
-import { getLinkTypeOptions } from '~/utils'
+import { type UploadData, useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
+import debounce from '~/utils/debounce'
+import { generateLink, getLinkTypeOptions } from '~/utils/main'
 
 const appStore = useAppStore()
 const programStore = useProgramStore()

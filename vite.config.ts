@@ -65,10 +65,6 @@ export default defineConfig(({ command }) => {
             ],
           },
         ],
-        dirs: [
-          'src/stores',
-          'src/utils',
-        ],
       }),
       electron({
         main: {

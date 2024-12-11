@@ -2,6 +2,8 @@
 import type { GlobalThemeOverrides } from 'naive-ui'
 import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
 import { createTextVNode } from 'vue'
+import { useAppStore } from '~/stores'
+import { openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
 
 const appStore = useAppStore()
 const {
@@ -13,12 +15,6 @@ const {
 
 const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
-
-const showReleaseModal = ref(false)
-const releaseVersion = ref('')
-const releaseContent = ref('')
-const showUpdateRestart = ref(false)
-const forceUpdate = ref(false)
 
 const themeOverrides: GlobalThemeOverrides = {
   Typography: {
@@ -66,24 +62,33 @@ const updateHandlers: Record<string, (...args: any[]) => void> = {
     window.ipcRenderer.invoke('window-show')
     window.$message.info(args[0])
   },
-  'show-release': (...args) => {
-    ignoreVersion.value = ''
-    updateAtNext.value = false
-    releaseVersion.value = args[0]
-    releaseContent.value = args[1]
-    showReleaseModal.value = true
-  },
+  // 'show-release': (...args) => {
+  //   ignoreVersion.value = ''
+  //   updateAtNext.value = false
+  //   releaseVersion.value = args[0]
+  //   releaseContent.value = args[1]
+  //   showReleaseModal.value = true
+  // },
   // 'show-update-progress': (_) => {
   //   showDialogUpdateProgress.value = true
   // },
   // 'update-update-progress': (...args) => {
   //   updateProgress.value = args[0]
   // },
-  'show-update-restart': (...args) => {
-    forceUpdate.value = args[0]
-    showUpdateRestart.value = true
-  },
+  // 'show-update-restart': (...args) => {
+  //   forceUpdate.value = args[0]
+  // },
 }
+
+window.ipcRenderer.on('update-show-release', (_e, releaseVersion, releaseContent) => {
+  ignoreVersion.value = ''
+  updateAtNext.value = false
+  openUpdateAvailable(releaseVersion, releaseContent)
+})
+
+window.ipcRenderer.on('update-show-update-restart', (_e, forceUpdate) => {
+  openUpdateRestart(forceUpdate)
+})
 
 window.ipcRenderer.on('update', (_e, type, ...args) => {
   const handler = updateHandlers[type]
@@ -102,15 +107,15 @@ window.ipcRenderer.on('update', (_e, type, ...args) => {
     abstract
     inline-theme-disabled
   >
-    <UpdateAvailable
+    <!-- <UpdateAvailable
       v-model="showReleaseModal"
       :release-version
       :release-content
-    />
-    <UpdateRestart
+    /> -->
+    <!-- <UpdateRestart
       v-model="showUpdateRestart"
       :force-update
-    />
+    /> -->
     <n-loading-bar-provider>
       <n-modal-provider>
         <n-dialog-provider>

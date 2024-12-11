@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useAppStore } from '~/stores'
+import { renderIcon } from '~/utils/main'
+import { openCreateSettingPanel } from '~/utils/modal'
+
 const appStore = useAppStore()
 const { themeAuto, themeType, appCloseTip, appCloseType } = storeToRefs(appStore)
 const route = useRoute()
@@ -26,11 +30,6 @@ const themeOptions = computed(() => [
     key: 'setting',
     icon: renderIcon('i-ph-gear-six-bold'),
   },
-  // {
-  //   label: '关于',
-  //   key: 'about',
-  //   icon: renderIcon('i-ph-info-bold'),
-  // },
 ])
 
 const dropdownOptions = {
@@ -40,11 +39,8 @@ const dropdownOptions = {
     themeAuto.value = false
   },
   setting: () => {
-    createSettingPanel()
+    openCreateSettingPanel()
   },
-  // about: () => {
-  //   router.push('/About')
-  // },
 }
 
 function onDropdownClick(key: keyof typeof dropdownOptions) {

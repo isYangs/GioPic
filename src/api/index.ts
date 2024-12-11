@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from 'axios'
 import type { Program } from '~/stores'
-import { request } from '~/utils'
+import request from '~/utils/request'
 
 interface UploadData {
   file: File
