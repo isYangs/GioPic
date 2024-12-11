@@ -1,4 +1,5 @@
 import type { Router } from 'vue-router'
+import { openCreateSettingPanel } from './modal'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -55,8 +56,6 @@ export function generateLink(type: string, url: string, name: string): string {
 
 // 全局路由跳转
 export function routerPush(router: Router) {
-  window.ipcRenderer.on('open-setting', () =>
-    openCreateSettingPanel())
-  window.ipcRenderer.on('open-about', () =>
-    router?.push('/About'))
+  window.ipcRenderer.on('open-setting', () => openCreateSettingPanel())
+  window.ipcRenderer.on('open-about', () => router?.push('/About'))
 }
