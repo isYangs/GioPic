@@ -67,7 +67,7 @@ export default function initUpdater(win: BrowserWindow) {
   autoUpdater.on('checking-for-update', () => {
     logger.info('[update] Checking for updates...')
     if (!silentUpdateCheck) {
-      win.webContents.send('update', 'show-toast', '正在检查更新')
+      win.webContents.send('update-show-toast', '正在检查更新')
     }
     else {
       logger.info('[update] Silent update, skipping checking toast.')
@@ -108,7 +108,7 @@ export default function initUpdater(win: BrowserWindow) {
 
     win.webContents.send('update-show-release', releaseInfo.version, releaseContent)
     ipcMain.on('download-update', (_e) => {
-      // win.webContents.send('update', 'show-update-progress')
+      // win.webContents.send('update-show-update-progress')
       logger.info('[update] User accepted the update. Downloading...')
       // 下载更新
       autoUpdater.downloadUpdate()
@@ -124,13 +124,13 @@ export default function initUpdater(win: BrowserWindow) {
   autoUpdater.on('download-progress', (progress) => {
     const percent = Math.trunc(progress.percent)
     logger.info(`[update] Download progress: ${percent}%`)
-    // win.webContents.send('update', 'update-update-progress', percent)
+    // win.webContents.send('update-update-progress', percent)
   })
 
   // 当需要更新的内容下载完成后
   autoUpdater.on('update-downloaded', () => {
     // 手动更新下载进度
-    win.webContents.send('update', 'update-update-progress', 100)
+    win.webContents.send('update-update-progress', 100)
     logger.info('[update] Update downloaded, wating for quitting and installing...')
     win.webContents.send('update-show-update-restart', updateOnThisStart)
     // 退出并安装应用

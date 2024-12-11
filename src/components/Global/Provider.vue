@@ -56,45 +56,22 @@ watch(osThemeRef, (val) => {
     themeType.value = val
 })
 
-// 监听更新事件
-const updateHandlers: Record<string, (...args: any[]) => void> = {
-  'show-toast': (...args) => {
-    window.ipcRenderer.invoke('window-show')
-    window.$message.info(args[0])
-  },
-  // 'show-release': (...args) => {
-  //   ignoreVersion.value = ''
-  //   updateAtNext.value = false
-  //   releaseVersion.value = args[0]
-  //   releaseContent.value = args[1]
-  //   showReleaseModal.value = true
-  // },
-  // 'show-update-progress': (_) => {
-  //   showDialogUpdateProgress.value = true
-  // },
-  // 'update-update-progress': (...args) => {
-  //   updateProgress.value = args[0]
-  // },
-  // 'show-update-restart': (...args) => {
-  //   forceUpdate.value = args[0]
-  // },
-}
+// 监听更新提示信息
+window.ipcRenderer.on('update-show-toast', (_e, message) => {
+  window.ipcRenderer.invoke('window-show')
+  window.$message.info(message)
+})
 
+// 监听更新版本更新
 window.ipcRenderer.on('update-show-release', (_e, releaseVersion, releaseContent) => {
   ignoreVersion.value = ''
   updateAtNext.value = false
   openUpdateAvailable(releaseVersion, releaseContent)
 })
 
+// 监听更新重启
 window.ipcRenderer.on('update-show-update-restart', (_e, forceUpdate) => {
   openUpdateRestart(forceUpdate)
-})
-
-window.ipcRenderer.on('update', (_e, type, ...args) => {
-  const handler = updateHandlers[type]
-  if (handler) {
-    handler(...args)
-  }
 })
 </script>
 
@@ -107,15 +84,6 @@ window.ipcRenderer.on('update', (_e, type, ...args) => {
     abstract
     inline-theme-disabled
   >
-    <!-- <UpdateAvailable
-      v-model="showReleaseModal"
-      :release-version
-      :release-content
-    /> -->
-    <!-- <UpdateRestart
-      v-model="showUpdateRestart"
-      :force-update
-    /> -->
     <n-loading-bar-provider>
       <n-modal-provider>
         <n-dialog-provider>
