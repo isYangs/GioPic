@@ -1,11 +1,17 @@
+import type { ModalReactive } from 'naive-ui'
 import CreateProgram from '~/components/Setting/CreateProgram.vue'
 import SettingPanel from '~/components/Setting/SettingPanel.vue'
 import UpdateAvailable from '~/components/Update/UpdateAvailable.vue'
 import UpdateRestart from '~/components/Update/UpdateRestart.vue'
 
+let settingPanelInstance: ModalReactive | null = null
+
 // 打开设置面板
 export function openCreateSettingPanel() {
-  const modal = window.$modal.create({
+  if (settingPanelInstance)
+    return
+
+  settingPanelInstance = window.$modal.create({
     autoFocus: false,
     bordered: false,
     closeOnEsc: false,
@@ -14,7 +20,11 @@ export function openCreateSettingPanel() {
     preset: 'card',
     transformOrigin: 'center',
     class: 'setting-panel',
-    content: () => h(SettingPanel, { onClose: () => modal.destroy() }),
+    content: () => h(SettingPanel),
+    onClose: () => {
+      settingPanelInstance?.destroy()
+      settingPanelInstance = null
+    },
   })
 }
 
