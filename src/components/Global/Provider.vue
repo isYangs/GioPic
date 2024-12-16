@@ -18,7 +18,7 @@ const theme = ref(themeType.value === 'dark' ? darkTheme : null)
 
 const themeOverrides: GlobalThemeOverrides = {
   Typography: {
-    headerBarColor: 'currentColor',
+    // headerBarColor: 'currentColor',
   },
 }
 

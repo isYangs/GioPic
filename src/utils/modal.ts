@@ -1,77 +1,38 @@
-import type { ModalReactive } from 'naive-ui'
 import CreateProgram from '~/components/Setting/CreateProgram.vue'
 import SettingPanel from '~/components/Setting/SettingPanel.vue'
 import UpdateAvailable from '~/components/Update/UpdateAvailable.vue'
 import UpdateRestart from '~/components/Update/UpdateRestart.vue'
-
-let settingPanelInstance: ModalReactive | null = null
+import { useUniqueModal } from '~/composables/useModal'
 
 // 打开设置面板
 export function openCreateSettingPanel() {
-  if (settingPanelInstance)
-    return
-
-  settingPanelInstance = window.$modal.create({
-    autoFocus: false,
-    bordered: false,
-    closeOnEsc: false,
-    title: '设置',
-    maskClosable: false,
-    preset: 'card',
-    transformOrigin: 'center',
+  useUniqueModal('设置', SettingPanel, {
     class: 'setting-panel',
-    content: () => h(SettingPanel),
-    onClose: () => {
-      settingPanelInstance?.destroy()
-      settingPanelInstance = null
-    },
   })
 }
 
 // 打开创建存储类型面板
 export function openCreateProgram() {
-  const modal = window.$modal.create({
-    title: '创建存储',
-    autoFocus: false,
-    bordered: false,
-    closeOnEsc: false,
-    maskClosable: false,
-    preset: 'card',
-    transformOrigin: 'center',
-    content: () => h(CreateProgram, { onClose: () => modal.destroy() }),
-  })
+  useUniqueModal('创建存储', CreateProgram)
 }
 
 // 打开新版本更新提示
 export function openUpdateAvailable(releaseVersion: string, releaseContent: string) {
-  const modal = window.$modal.create({
-    title: `新版本：${releaseVersion}`,
-    autoFocus: false,
-    bordered: false,
-    closeOnEsc: false,
-    maskClosable: false,
-    closable: false,
-    preset: 'card',
-    transformOrigin: 'center',
-    content: () => h(UpdateAvailable, {
+  useUniqueModal(`新版本：${releaseVersion}`, {
+    comp: UpdateAvailable,
+    props: {
       releaseVersion,
       releaseContent,
-      onClose: () => modal.destroy(),
-    }),
-  })
+    },
+  }, { closable: false })
 }
 
 // 打开更新下载完成提示
 export function openUpdateRestart(forceUpdate: boolean) {
-  const modal = window.$modal.create({
-    title: '更新下载完成',
-    autoFocus: false,
-    bordered: false,
-    closeOnEsc: false,
-    maskClosable: false,
-    closable: false,
-    preset: 'card',
-    transformOrigin: 'center',
-    content: () => h(UpdateRestart, { forceUpdate, onClose: () => modal.destroy() }),
-  })
+  useUniqueModal('更新下载完成', {
+    comp: UpdateRestart,
+    props: {
+      forceUpdate,
+    },
+  }, { closable: false })
 }
