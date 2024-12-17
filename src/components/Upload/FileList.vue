@@ -266,7 +266,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
 <template>
   <template v-if="data.length">
     <n-flex class="my2 ml1 wfull">
-      <NButton type="primary" secondary :disabled="data.length <= 1 || isUpload" @click="allUploadImage">
+      <NButton type="primary" secondary :disabled="!data.length || isUpload" @click="allUploadImage">
         全部上传
       </NButton>
       <NButton type="error" secondary @click="allClear">
