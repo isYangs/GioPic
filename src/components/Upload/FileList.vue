@@ -25,8 +25,6 @@ if (!defaultProgram.value || !programStore.getProgram(defaultProgram.value).id) 
 
 const programs = computed(() => programStore.getProgramList())
 
-const program = computed(() => programStore.getProgram(defaultProgram.value))
-
 function resetUploadState() {
   data.value.forEach((item, index) => {
     if (item.uploadFailed) {
@@ -36,11 +34,10 @@ function resetUploadState() {
 }
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
-  if (!program.value.isOk) {
-    window.$message.error('存储程序配置有误，请检查设置。')
+  if (!defaultProgram.value) {
+    window.$message.error('你要上传到哪个存储程序呢？🤔')
     return
   }
-
   // 检查文件是否已经上传
   if (data.value[index].uploaded) {
     window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
@@ -50,38 +47,14 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data: responseData, status } = await requestData.uploadImage(defaultProgram.value, program.value.api, program.value.token, {
-      file,
-      permission: isAllPublic.value,
-      strategy_id: program.value.strategiesVal,
-    })
-
-    if (status !== 200) {
-      window.$message.error('上传失败')
-      uploadDataStore.setData({ uploadFailed: true }, index)
-      return
-    }
-
-    if (!responseData.status) {
-      window.$message.error(responseData.message)
-      uploadDataStore.setData({ uploadFailed: true }, index)
-      return
-    }
-
-    const { key, name, size, mimetype, links, origin_name } = responseData.data
+    const program = programStore.getProgram(defaultProgram.value)
+    const imageMeta = await requestData.uploadImage(program, file, isAllPublic.value)
 
     uploadDataStore.setData(
       {
-        key,
-        name,
-        size,
-        mimetype,
-        url: links.url,
-        origin_name,
+        ...imageMeta,
         uploadFailed: false,
         time: new Date().toISOString(),
-        isPublic: isAllPublic.value,
-        strategies: program.value.strategiesVal,
         uploaded: true, // 标记文件为已上传
       },
       index,
@@ -101,25 +74,10 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
 // 全部上传方法
 async function allUploadImage() {
-  if (!defaultProgram.value) {
-    window.$message.error('你要上传到那个存储程序呢？🤔')
-    return
-  }
-
-  if (program.value.api === '' || program.value.token === '') {
-    window.$message.error('不配置存储程序，我怎么上传？🤔')
-    return
-  }
-
-  if (program.value.strategiesVal === null) {
-    window.$message.error('我还不知道你要存在哪个策略中啊！😓')
-    return
-  }
-
   const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
-    window.$message.info('没有需要上传的图片。')
+    window.$message.info('没有需要上传的图片鸭~ 🫥')
     return
   }
 

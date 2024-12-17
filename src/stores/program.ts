@@ -86,6 +86,7 @@ export const useProgramStore = defineStore(
     }
 
     function getProgram(id: number | null): Program {
+      // 考虑 defaultProgram 的id可能为 null 的情况
       const program = programs.value.find(item => item.id === id)
       // 防止开发过程中异常路由导致程序崩溃
       if (!program) {
@@ -99,7 +100,7 @@ export const useProgramStore = defineStore(
         /** 程序名称 */
         label: item.name || getProgramTypeName(item.type),
         /** 程序ID */
-        value: item.id,
+        value: item.id as number,
         /** 程序类型 */
         type: item.type,
       }))
