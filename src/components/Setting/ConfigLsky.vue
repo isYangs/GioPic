@@ -2,6 +2,7 @@
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
+import type { ProgramDetail } from '~/stores'
 import { useProgramStore } from '~/stores'
 import { renderIcon } from '~/utils/main'
 import { createFormRule, validateLskyToken, validateUrl } from '~/utils/validate'
@@ -11,9 +12,9 @@ const id = ref(Number.parseInt(route.params.id))
 const programStore = useProgramStore()
 const api = ref('')
 const token = ref('')
-const strategiesVal = ref<number | null>(null)
+const activeStrategy = ref<number | null>(null)
 
-const settings = computed(() => programStore.getProgram(id.value))
+const settings = computed(() => programStore.getProgram(id.value).detail as ProgramDetail['lsky'])
 
 const setItem = useTemplateRef('setItemRef')
 
@@ -62,9 +63,9 @@ const settingOptions = computed(() => [
       return h('div', { class: 'flex gap-1' }, {
         default: () => [
           h(NSelect, {
-            value: strategiesVal.value,
+            value: activeStrategy.value,
             onUpdateValue: (val: number) => {
-              strategiesVal.value = val
+              activeStrategy.value = val
               saveSetting()
             },
             options: settings.value.strategies,
@@ -82,7 +83,7 @@ const settingOptions = computed(() => [
 
 function formValidation() {
   setItem.value?.formValidation(() => {
-    settings.value.strategiesVal = null
+    settings.value.activeStrategy = null
     settings.value.strategies = []
     saveSetting()
   })
@@ -90,17 +91,17 @@ function formValidation() {
 
 async function syncStrategies() {
   const loading = window.$message.loading('正在同步线上策略列表...')
+
   if (!await programStore.getLskyStrategies(id.value))
     window.$message.error('同步策略列表失败，请检查设置是否填写有误')
   loading.destroy()
 }
 
 async function saveSetting() {
-  programStore.setProgram(id.value, 'api', api.value)
-  programStore.setProgram(id.value, 'token', token.value)
-  if (settings.value.strategiesVal === null)
+  programStore.setProgramDetail(id.value, { api: api.value, token: token.value })
+  if (api.value && token.value && settings.value.activeStrategy === null)
     await syncStrategies()
-  programStore.setProgram(id.value, 'strategiesVal', strategiesVal.value)
+  programStore.setProgramDetail(id.value, { activeStrategy: activeStrategy.value })
   window.$message.success('保存成功')
 }
 
@@ -113,7 +114,7 @@ watch(() => route.params.id, () => {
 watchEffect(() => {
   api.value = settings.value.api
   token.value = settings.value.token
-  strategiesVal.value = settings.value.strategiesVal
+  activeStrategy.value = settings.value.activeStrategy
 })
 </script>
 

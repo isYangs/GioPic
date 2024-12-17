@@ -47,8 +47,8 @@ const storageList = ref({
         // BUG: 点击同页面还会跳转
         name: '/Setting/',
       },
-    }, { default: () => program.name || programStore.getProgramTypeName(program.type) }),
-    key: `/Setting/${program.id}`,
+    }, { default: () => program.label }),
+    key: `/Setting/${program.value}`,
   }))),
 })
 

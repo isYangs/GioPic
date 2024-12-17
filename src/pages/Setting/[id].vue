@@ -12,7 +12,6 @@ const {
   getProgram,
   getProgramTypeName,
   setProgramName,
-  indexOf,
   removeProgram,
 } = programStore
 
@@ -25,7 +24,7 @@ const programName = computed({
 const generalSettings = computed(() => [
   {
     name: '存储备注',
-    tip: '用于区分不同的存储',
+    tip: `存储类型：${getProgramTypeName(programType.value)}`,
     width: 300,
     component: () => h(NInput, {
       value: programName.value,
@@ -52,10 +51,9 @@ const dangerousSettings = computed(() => [
           negativeText: '取消',
           autoFocus: false,
           onPositiveClick: () => {
-            const index = indexOf(id.value)
-            removeProgram(id.value)
+            const prevIndex = removeProgram(id.value)
             window.$message.success('删除成功')
-            const nextId = programStore.programs[Math.max(index - 1, 0)]?.id
+            const nextId = programStore.programs[prevIndex]?.id
             router.push(`/Setting/${nextId ?? ''}`)
           },
         })

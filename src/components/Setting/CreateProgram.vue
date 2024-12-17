@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ProgramType, useProgramStore } from '~/stores'
+import { type ProgramType, programTypeName, useProgramStore } from '~/stores'
 
 const emit = defineEmits<{
   close: []
@@ -7,6 +7,11 @@ const emit = defineEmits<{
 
 const programStore = useProgramStore()
 const router = useRouter()
+
+const options = Object.entries(programTypeName).map(([key, value]) => ({
+  label: value,
+  value: key as ProgramType,
+}))
 
 const selectedType = ref<ProgramType>('lsky')
 
@@ -18,7 +23,7 @@ function finishCreateProgram() {
 </script>
 
 <template>
-  <n-select v-model:value="selectedType" class="mb6" :options="programStore.getProgramTypeList()" />
+  <n-select v-model:value="selectedType" class="mb6" :options />
   <n-flex align="center" justify="end">
     <n-button type="primary" class="wfull" @click="finishCreateProgram()">
       创建
