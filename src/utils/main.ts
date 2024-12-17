@@ -1,5 +1,5 @@
 import type { Router } from 'vue-router'
-import type { ProgramsName } from '~/types'
+import { openCreateSettingPanel } from './modal'
 
 interface LinkTypeMap { [key: string]: string }
 
@@ -54,32 +54,8 @@ export function generateLink(type: string, url: string, name: string): string {
   }
 }
 
-// 选择存储程序选项
-export const selectProgramsOptions = [
-  {
-    label: '兰空企业版',
-    value: 'lskyPro',
-  },
-  {
-    label: '兰空社区版',
-    value: 'lsky',
-  },
-]
-
-// 获取存储程序的名字
-export function getProgramsName(val: ProgramsName) {
-  const option = selectProgramsOptions.find(item => item.value === val)
-  return option ? option.label : ''
-}
-
 // 全局路由跳转
 export function routerPush(router: Router) {
-  window.ipcRenderer.on('open-setting', () => {
-    if (router)
-      router.push('/Setting')
-  })
-  window.ipcRenderer.on('open-about', () => {
-    if (router)
-      router.push('/About')
-  })
+  window.ipcRenderer.on('open-setting', () => openCreateSettingPanel())
+  window.ipcRenderer.on('open-about', () => router?.push('/About'))
 }

@@ -1,5 +1,5 @@
 export interface TabOption {
-  title: string
+  title?: string
   items: {
     name: string
     isDev?: boolean
@@ -11,4 +11,8 @@ export interface TabOption {
   rules?: import('naive-ui').FormRules
 }
 
-export type ProgramsName = 'lsky' | 'lskyPro'
+export interface SettingEntry {
+  title?: string
+  icon?: () => import('vue').VNode
+  comp: () => import('vue').VNode
+}

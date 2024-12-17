@@ -1,88 +1,92 @@
 <script setup lang="ts">
+import { NButton } from 'naive-ui'
 import { RouterLink } from 'vue-router/auto'
+import { useAppStore, useProgramStore } from '~/stores'
+import { renderIcon } from '~/utils/main'
+import { openCreateProgram } from '~/utils/modal'
 
 const router = useRouter()
 const appStore = useAppStore()
+const programStore = useProgramStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
+const expandedKeys = ref<string[]>(['user-storage'])
+
+function expandedKeysChange(keys: string[]) {
+  expandedKeys.value = keys
+}
+
+const storageList = ref({
+  label: () =>
+    h('div', {
+      class: 'flex justify-between items-center pr2 text-.93em',
+      style: { color: 'var(--n-arrow-color-child-active)' },
+    }, [
+      h('span', ['存储配置']),
+      h(NButton, {
+        class: 'w9 h5',
+        size: 'small',
+        type: 'tertiary',
+        round: true,
+        strong: true,
+        secondary: true,
+        focusable: false,
+        ariaLabel: '添加存储配置',
+        renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
+        onClick: (e) => {
+          if (expandedKeys.value.includes('user-storage'))
+            e.stopPropagation()
+          openCreateProgram()
+        },
+      }),
+    ]),
+  key: 'user-storage',
+  children: computed(() => programStore.getProgramList().map(program => ({
+    label: () => h(RouterLink, {
+      to: {
+        // BUG: 点击同页面还会跳转
+        name: '/Setting/',
+      },
+    }, { default: () => program.label }),
+    key: `/Setting/${program.value}`,
+  }))),
+})
 
 const menuOptions = computed(() => [
   {
     type: 'group',
     label: '我的图片',
-    key: 'mian',
+    key: 'main',
     children: [],
     show: !isMenuCollapsed.value,
   },
   {
     label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            name: 'Home',
-          },
+      h(RouterLink, {
+        to: {
+          name: 'Home',
         },
-        { default: () => '上传图片' },
-      ),
+      }, { default: () => '上传图片' }),
     key: '/',
-    icon: renderIcon('i-ph-upload-simple-bold !w20px !h20px'),
+    icon: renderIcon('i-ph-upload-simple-bold w20px h20px'),
   },
   {
     label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            name: '/Images/',
-          },
+      h(RouterLink, {
+        to: {
+          name: '/Images/',
         },
-        { default: () => '图片列表' },
-      ),
+      }, { default: () => '图片列表' }),
     key: '/Images',
-    icon: renderIcon('i-ph-list-bullets-bold !w20px !h20px'),
+    icon: renderIcon('i-ph-list-bullets-bold w20px h20px'),
   },
   {
     key: 'divider-1',
     type: 'divider',
   },
   {
-    label: () =>
-      h('div', { class: 'text-neutral-500 text-xs flex justify-between items-center pr5' }, [
-        h('span', { class: '' }, ['存储程序设置']),
-      ]),
-    key: 'user-storage',
+    ...storageList.value,
     show: !isMenuCollapsed.value,
-    children: [
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                path: `/Setting/lskyPro`,
-              },
-            },
-            { default: () => '兰空企业版' },
-          ),
-        key: `/Setting/lskyPro`,
-        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                path: `/Setting/lsky`,
-              },
-            },
-            { default: () => '兰空社区版' },
-          ),
-        key: `/Setting/lsky`,
-        icon: renderIcon('i-ph-hard-drives-bold !w18px !h18px'),
-      },
-    ],
   },
 ])
 
@@ -99,20 +103,20 @@ function updateValue(value: string) {
 </script>
 
 <template>
-  <n-menu
-    v-model:value="menuActiveKey"
-    :options="menuOptions"
-    :collapsed="isMenuCollapsed"
-    :collapsed-width="64"
-    :collapsed-icon-size="22"
-    :default-expanded-keys="['user-storage']"
-    :indent="22"
-    @update:value="updateValue"
-  />
+  <n-scrollbar>
+    <n-menu
+      v-model:value="menuActiveKey"
+      :options="menuOptions"
+      :collapsed="isMenuCollapsed"
+      :collapsed-width="64"
+      :default-expand-all="true"
+      :root-indent="22"
+      :indent="0"
+      @update:expanded-keys="expandedKeysChange"
+      @update:value="updateValue"
+    />
+  </n-scrollbar>
 </template>
 
 <style scoped>
-:deep(.n-menu-item-content.n-menu-item-content--selected)::before {
-  border-left: 4px solid var(--n-item-text-color-active);
-}
 </style>

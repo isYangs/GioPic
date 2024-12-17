@@ -2,30 +2,30 @@
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestData from '~/api'
-import type { UploadData } from '~/stores'
-import type { ProgramsName } from '~/types'
-import { getLinkTypeOptions, selectProgramsOptions } from '~/utils'
+import { type UploadData, useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
+import debounce from '~/utils/debounce'
+import { generateLink, getLinkTypeOptions } from '~/utils/main'
 
 const appStore = useAppStore()
-const programsStore = useProgramsStore()
+const programStore = useProgramStore()
 const uploadDataStore = useUploadDataStore()
-const { defaultPrograms, isImgListDelDialog } = storeToRefs(appStore)
+const { defaultProgram, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
 const isAllPublic = ref(1)
 const isUpload = ref(false)
-const uploadProgramsId = ref(defaultPrograms.value)
 
 const isPublicOptions = [
   { label: '全部公开', value: 1 },
   { label: '全部私有', value: 0 },
 ]
 
-const programs = computed(() => programsStore.getPrograms(uploadProgramsId.value))
+if (!defaultProgram.value || !programStore.getProgram(defaultProgram.value).id) {
+  defaultProgram.value = null
+}
 
-function changeDefaultProgram(val: ProgramsName) {
-  defaultPrograms.value = val
+const programs = computed(() => programStore.getProgramList())
 
-  // 重置失败图片的状态
+function resetUploadState() {
   data.value.forEach((item, index) => {
     if (item.uploadFailed) {
       uploadDataStore.setData({ uploadFailed: false }, index)
@@ -34,21 +34,10 @@ function changeDefaultProgram(val: ProgramsName) {
 }
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
-  if (!defaultPrograms.value) {
-    window.$message.error('你要上传到那个存储程序呢？🤔')
+  if (!defaultProgram.value) {
+    window.$message.error('你要上传到哪个存储程序呢？🤔')
     return
   }
-
-  if (programs.value.api === '' || programs.value.token === '') {
-    window.$message.error('不配置存储程序，我怎么上传？🤔')
-    return
-  }
-
-  if (programs.value.strategiesVal === null) {
-    window.$message.error('我还不知道你要存在那个策略中啊！😓')
-    return
-  }
-
   // 检查文件是否已经上传
   if (data.value[index].uploaded) {
     window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
@@ -58,38 +47,14 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data: responseData, status } = await requestData.uploadImage(uploadProgramsId.value, programs.value.api, programs.value.token, {
-      file,
-      permission: isAllPublic.value,
-      strategy_id: programs.value.strategiesVal,
-    })
-
-    if (status !== 200) {
-      window.$message.error('上传失败')
-      uploadDataStore.setData({ uploadFailed: true }, index)
-      return
-    }
-
-    if (!responseData.status) {
-      window.$message.error(responseData.message)
-      uploadDataStore.setData({ uploadFailed: true }, index)
-      return
-    }
-
-    const { key, name, size, mimetype, links, origin_name } = responseData.data
+    const program = programStore.getProgram(defaultProgram.value)
+    const imageMeta = await requestData.uploadImage(program, file, isAllPublic.value)
 
     uploadDataStore.setData(
       {
-        key,
-        name,
-        size,
-        mimetype,
-        url: links.url,
-        origin_name,
+        ...imageMeta,
         uploadFailed: false,
         time: new Date().toISOString(),
-        isPublic: isAllPublic.value,
-        strategies: programs.value.strategiesVal,
         uploaded: true, // 标记文件为已上传
       },
       index,
@@ -109,25 +74,10 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
 // 全部上传方法
 async function allUploadImage() {
-  if (!defaultPrograms.value) {
-    window.$message.error('你要上传到那个存储程序呢？🤔')
-    return
-  }
-
-  if (programs.value.api === '' || programs.value.token === '') {
-    window.$message.error('不配置存储程序，我怎么上传？🤔')
-    return
-  }
-
-  if (programs.value.strategiesVal === null) {
-    window.$message.error('我还不知道你要存在哪个策略中啊！😓')
-    return
-  }
-
   const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
-    window.$message.info('没有需要上传的图片。')
+    window.$message.info('没有需要上传的图片鸭~ 🫥')
     return
   }
 
@@ -274,7 +224,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
 <template>
   <template v-if="data.length">
     <n-flex class="my2 ml1 wfull">
-      <NButton type="primary" secondary :disabled="data.length <= 1 || isUpload" @click="allUploadImage">
+      <NButton type="primary" secondary :disabled="!data.length || isUpload" @click="allUploadImage">
         全部上传
       </NButton>
       <NButton type="error" secondary @click="allClear">
@@ -284,7 +234,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramsId" class="w30" :options="selectProgramsOptions" @update:value="changeDefaultProgram" />
+      <n-select v-model:value="defaultProgram" class="w30" :options="programs" @update:value="resetUploadState" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">

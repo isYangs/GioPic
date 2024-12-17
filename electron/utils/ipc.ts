@@ -1,7 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { app, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
-import { autoStart, clearStore, regDevToolsShortcut } from './app'
+import { autoStart, regDevToolsShortcut } from './app'
 import logger from './logger'
 
 export function setupIpcMain(win: BrowserWindow) {
@@ -77,8 +77,5 @@ export function setupIpcMain(win: BrowserWindow) {
 
   ipcMain.handle('reset-settings', () => {
     logger.info('[settings] Reset and restarting application.')
-    clearStore()
-    app.relaunch()
-    app.exit()
   })
 }

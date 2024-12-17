@@ -2,20 +2,19 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu(
   {
+    vue: true,
+    typescript: true,
     unocss: true,
     formatters: true,
-  },
-  {
+
     rules: {
-      'no-labels': 'off',
-      'no-lone-blocks': 'off',
-      'no-restricted-syntax': 'off',
-      'node/prefer-global/buffer': 'off',
+      'unused-imports/no-unused-imports': 'error',
       'node/prefer-global/process': 'off',
-      'vue/no-unused-refs': 'off',
     },
+
     ignores: [
-      'dist/',
+      '.vscode/*',
+      'dist/*',
       'rebuild.js',
       'vite.config.ts',
     ],

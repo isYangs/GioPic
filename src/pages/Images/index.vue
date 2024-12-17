@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { convertFileSize, getLinkTypeOptions } from '~/utils'
+import { convertFileSize, generateLink, getLinkTypeOptions } from '~/utils/main'
 
 const uploadData = ref<GP.DB.UploadData[]>([])
 const imagesInfoModal = ref(false)

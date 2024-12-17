@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UploadCustomRequestOptions } from 'naive-ui'
+import { useUploadDataStore } from '~/stores'
 
 const uploadDataStore = useUploadDataStore()
 

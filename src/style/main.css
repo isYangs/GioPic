@@ -1,3 +1,7 @@
+:root {
+  --font-mono: SFMono-Regular, Fira Code, JetBrains Mono, Menlo, Monaco, Consolas, 'monospace', system-ui, monospace;
+}
+
 html,
 body,
 #app {
@@ -12,7 +16,6 @@ img {
   -webkit-user-drag: none;
 }
 
-/* 禁用3D渲染 */
 img {
   transform: translate3d(0, 0, 0);
 }
@@ -55,6 +58,23 @@ img {
   top: 20px !important;
 }
 
+.n-menu[class] {
+  --n-item-height: 36px;
+  --n-arrow-color-child-active: var(--n-group-text-color);
+}
+
+.n-menu-item {
+  margin-top: 4px;
+}
+
+.n-menu-item-content--collapsed {
+  --n-arrow-color-child-active: ;
+}
+
+.n-menu-item-content--selected::before {
+  /* border-left: 4px solid var(--n-item-text-color-active); */
+}
+
 .n-modal {
   width: 50vw;
   max-width: 700px;
@@ -93,9 +113,6 @@ img {
   z-index: 20;
 }
 
-.n-menu-item-content {
-  padding-left: 22px !important;
-}
 /*
 -------------------------
     过渡动画样式处理
