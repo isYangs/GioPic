@@ -13,19 +13,21 @@ const { defaultProgram, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
 const isAllPublic = ref(1)
 const isUpload = ref(false)
-const uploadProgramId = ref(defaultProgram.value)
 
 const isPublicOptions = [
   { label: '全部公开', value: 1 },
   { label: '全部私有', value: 0 },
 ]
 
-const programs = computed(() => programStore.getProgram(uploadProgramId.value))
+if (!defaultProgram.value || !programStore.getProgram(defaultProgram.value).id) {
+  defaultProgram.value = null
+}
 
-function changeDefaultProgram(val: number) {
-  defaultProgram.value = val
+const programs = computed(() => programStore.getProgramList())
 
-  // 重置失败图片的状态
+const program = computed(() => programStore.getProgram(defaultProgram.value))
+
+function resetUploadState() {
   data.value.forEach((item, index) => {
     if (item.uploadFailed) {
       uploadDataStore.setData({ uploadFailed: false }, index)
@@ -34,7 +36,7 @@ function changeDefaultProgram(val: number) {
 }
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
-  if (!programs.value.isOk) {
+  if (!program.value.isOk) {
     window.$message.error('存储程序配置有误，请检查设置。')
     return
   }
@@ -48,10 +50,10 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
   uploadDataStore.setData({ isLoading: true }, index)
 
   try {
-    const { data: responseData, status } = await requestData.uploadImage(uploadProgramId.value, programs.value.api, programs.value.token, {
+    const { data: responseData, status } = await requestData.uploadImage(defaultProgram.value, program.value.api, program.value.token, {
       file,
       permission: isAllPublic.value,
-      strategy_id: programs.value.strategiesVal,
+      strategy_id: program.value.strategiesVal,
     })
 
     if (status !== 200) {
@@ -79,7 +81,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
         uploadFailed: false,
         time: new Date().toISOString(),
         isPublic: isAllPublic.value,
-        strategies: programs.value.strategiesVal,
+        strategies: program.value.strategiesVal,
         uploaded: true, // 标记文件为已上传
       },
       index,
@@ -104,12 +106,12 @@ async function allUploadImage() {
     return
   }
 
-  if (programs.value.api === '' || programs.value.token === '') {
+  if (program.value.api === '' || program.value.token === '') {
     window.$message.error('不配置存储程序，我怎么上传？🤔')
     return
   }
 
-  if (programs.value.strategiesVal === null) {
+  if (program.value.strategiesVal === null) {
     window.$message.error('我还不知道你要存在哪个策略中啊！😓')
     return
   }
@@ -274,7 +276,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
         复制全部URL
       </NButton>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
-      <n-select v-model:value="uploadProgramId" class="w30" :options="selectedProgramOptions" @update:value="changeDefaultProgram" />
+      <n-select v-model:value="defaultProgram" class="w30" :options="programs" @update:value="resetUploadState" />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">

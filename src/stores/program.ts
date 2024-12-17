@@ -5,7 +5,7 @@ export type ProgramType = keyof typeof programDetailTemplate
 export interface Program {
   type: ProgramType
   name: string
-  id: number
+  id: number | null
   detail: typeof programDetailTemplate[ProgramType]
   isOk?: boolean
 }
@@ -97,19 +97,22 @@ export const useProgramStore = defineStore(
       }))
     }
 
-    function getProgram(id: number): Program {
+    function getProgram(id: number | null): Program {
       const program = programs.value.find(item => item.id === id)
       // 防止开发过程中异常路由导致程序崩溃
       if (!program) {
-        return { type: 'lsky', name: '', id, detail: programDetailTemplate.lsky }
+        return { type: 'lsky', name: '', id: null, detail: programDetailTemplate.lsky }
       }
       return program
     }
 
     function getProgramList() {
       return programs.value.map(item => ({
-        id: item.id,
-        name: item.name,
+        /** 程序名称 */
+        label: item.name || getProgramTypeName(item.type),
+        /** 程序ID */
+        value: item.id,
+        /** 程序类型 */
         type: item.type,
       }))
     }
