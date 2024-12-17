@@ -84,7 +84,8 @@ const requestData = {
    * 上传图片
    *
    * @param program - 存储程序
-   * @param data - 接收一个对象，对象中传入上传的图片，权限，策略id，相册id，过期时间。
+   * @param file - 要上传的文件
+   * @param permission - 权限
    * @returns 返回一个Promise对象，表示异步上传操作
    */
   uploadImage: async (program: Program, file: File, permission: number = 1) => {
