@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import { NButton, NSelect } from 'naive-ui'
+import request from '~/api'
 import CodeInput from '~/components/Common/CodeInput.vue'
 import type { ProgramDetail } from '~/stores'
 import { useProgramStore } from '~/stores'
@@ -91,8 +92,7 @@ function formValidation() {
 
 async function syncStrategies() {
   const loading = window.$message.loading('正在同步线上策略列表...')
-
-  if (!await programStore.getLskyStrategies(id.value))
+  if (!await request.getStrategies(id.value))
     window.$message.error('同步策略列表失败，请检查设置是否填写有误')
   loading.destroy()
 }

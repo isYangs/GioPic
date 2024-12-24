@@ -1,5 +1,3 @@
-import requestData from '~/api'
-
 export type ProgramType = keyof typeof programDetailTemplate
 export type ProgramDetail = typeof programDetailTemplate
 
@@ -113,60 +111,6 @@ export const useProgramStore = defineStore(
       return Math.max(index - 1, 0)
     }
 
-    /**
-     * 获取所有的存储策略
-     */
-    async function getLskyStrategies(id: number): Promise<boolean> {
-      const program = getProgram(id)
-      const programType = program.type
-      if (programType === 'lsky') {
-        const detail = program.detail as typeof programDetailTemplate.lsky
-        const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
-
-        if (status !== 200)
-          return false
-
-        const strategiesData = data.data.strategies.map((item: {
-          name: string
-          id: number
-        }) => ({
-          label: item.name,
-          value: item.id,
-        }))
-
-        detail.strategies = strategiesData
-
-        if (!detail.activeStrategy && strategiesData.length > 0)
-          detail.activeStrategy = strategiesData[0].value
-
-        return true
-      }
-      else if (programType === 'lskyPro') {
-        const detail = program.detail as typeof programDetailTemplate.lskyPro
-        const { data, status } = await requestData.getLskyStrategies(detail.api, detail.token)
-
-        if (status !== 200)
-          return false
-
-        const strategiesData = data.data.strategies.map((item: {
-          name: string
-          id: number
-        }) => ({
-          label: item.name,
-          value: item.id,
-        }))
-
-        detail.strategies = strategiesData
-
-        if (!detail.activeStrategy && strategiesData.length > 0)
-          detail.activeStrategy = strategiesData[0].value
-        return true
-      }
-      else {
-        return false
-      }
-    }
-
     return {
       programs,
       createProgram,
@@ -176,7 +120,6 @@ export const useProgramStore = defineStore(
       getProgramList,
       getProgram,
       removeProgram,
-      getLskyStrategies,
     }
   },
   {

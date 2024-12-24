@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios'
-import type { Program, ProgramDetail } from '~/stores'
+import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
 import request from '~/utils/request'
 
 interface UploadData {
@@ -46,38 +46,56 @@ function createRequest(url: string, token?: string, customHeaders?: Record<strin
 
 const requestData = {
   /**
-   * 兰空社区版获取策略
-   *
-   * @param url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param token - 用于身份验证的 token，例如传入appStore中的token。
-   * @returns 返回一个 Promise，当策略获取成功时，Promise 将被解析。
+   * 获取存储策略列表
+   * @param id 程序ID，路由中的路径，为时间戳
+   * @returns Promise<boolean> 获取成功返回true，失败抛出错误
+   * @throws Error 当程序未配置或获取策略失败时抛出错误
    */
-  getLskyStrategies: (url: string, token: string) => {
-    const req = createRequest(url, token)
-    return req('/api/v1/strategies', 'get')
+  getStrategies: async (id: number) => {
+    const programStore = useProgramStore()
+    const program = programStore.getProgram(id)
+    if (program.type === 'lsky' || program.type === 'lskyPro') {
+      const detail = program.type === 'lsky' ? program.detail as ProgramDetail['lsky'] : program.detail as ProgramDetail['lskyPro']
+      if (!detail.api || !detail.token) {
+        return Promise.reject(new Error('该存储程序未配置'))
+      }
+
+      const resp = await requestData._getLskyStrategies(detail.api, detail.token)
+
+      const { status, data: respData } = resp
+
+      if (status !== 200 || !respData.status) {
+        return Promise.reject(new Error(`获取存储策略失败：[${status}] ${JSON.stringify(respData?.message ?? respData)}`))
+      }
+
+      const strategiesData = respData.data.strategies.map((item: {
+        name: string
+        id: number
+      }) => ({
+        label: item.name,
+        value: item.id,
+      }))
+
+      detail.strategies = strategiesData
+
+      if (!detail.activeStrategy && strategiesData.length > 0)
+        detail.activeStrategy = strategiesData[0].value
+
+      return true
+    }
+    else {
+      return Promise.reject(new Error(`未知错误：该程序${program.type}无需获取存储策略`))
+    }
   },
-  /**
-   * 兰空企业版获取策略
-   *
-   * @param url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param token - 用于身份验证的 token，例如传入appStore中的token。
-   * @returns 返回一个 Promise，当策略获取成功时，Promise 将被解析。
-   */
-  getLskyProStrategies: (url: string, token: string) => {
+
+  _getLskyStrategies: (url: string, token: string) => {
     const req = createRequest(url, token)
     return req('/api/v1/strategies', 'get')
   },
 
-  /**
-   * 兰空企业版v2获取策略
-   *
-   * @param url - 图床API地址，例如传入appStore中的apiUrl。
-   * @param token - 用于身份验证的 token，例如传入appStore中的token。
-   * @returns 返回一个 Promise，当策略获取成功时，Promise 将被解析。
-   */
-  getLskyProV2Strategies: (url: string, token: string) => {
+  _getLskyProV2Strategies: (url: string, token: string) => {
     const req = createRequest(url, token)
-    return req('/api/v2/strategies', 'get')
+    return req('/api/v2/group', 'get')
   },
 
   /**
@@ -86,13 +104,13 @@ const requestData = {
    * @param program - 存储程序
    * @param file - 要上传的文件
    * @param permission - 权限
-   * @returns 返回一个Promise对象，表示异步上传操作
+   * @returns 接口返回的数据
    */
   uploadImage: async (program: Program, file: File, permission: number = 1) => {
     if (program.type === 'lsky' || program.type === 'lskyPro') {
       const { api, token, activeStrategy } = program.detail as ProgramDetail['lsky']
       if (!api || !token || activeStrategy === null) {
-        return Promise.reject(new Error('该存储程序未配置 ⚠️'))
+        return Promise.reject(new Error('该存储程序未配置'))
       }
 
       const reqData: UploadData = {
@@ -105,7 +123,7 @@ const requestData = {
       const { status, data: respData } = resp
 
       if (status !== 200 || !respData.status) {
-        return Promise.reject(new Error(`上传失败：[${status}] ${JSON.stringify(respData?.message ?? respData)} ⚠️`))
+        return Promise.reject(new Error(`上传失败：[${status}] ${JSON.stringify(respData?.message ?? respData)}`))
       }
 
       const { key, name, size, mimetype, links, origin_name } = respData.data
@@ -115,15 +133,15 @@ const requestData = {
         name,
         size,
         mimetype,
-        url: links.origin,
+        url: links.url,
         origin_name,
       }
     }
     else if (program.type === 's3') {
-      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传 ⚠️`))
+      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))
     }
     else {
-      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传 ⚠️`))
+      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))
     }
   },
 
@@ -134,11 +152,11 @@ const requestData = {
     return req('/api/v1/upload', 'post', data)
   },
 
-  _uploadLskyProImage: (url: string, token: string, data: UploadData): Promise<LskyUploadResponse> => {
+  _uploadLskyProV2Image: (url: string, token: string, data: UploadData): Promise<LskyUploadResponse> => {
     const req = createRequest(url, token, {
       'Content-Type': 'multipart/form-data',
     })
-    return req('/api/v1/upload', 'post', data)
+    return req('/api/v2/upload', 'post', data)
   },
 }
 

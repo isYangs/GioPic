@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-import requestData from '~/api'
+import request from '~/api'
 import { type UploadData, useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 import { generateLink, getLinkTypeOptions } from '~/utils/main'
@@ -35,7 +35,7 @@ function resetUploadState() {
 // 上传方法
 async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
   if (!defaultProgram.value) {
-    window.$message.error('你要上传到哪个存储程序呢？🤔')
+    window.$message.error('请选择存储程序后再上传')
     return
   }
   // 检查文件是否已经上传
@@ -48,7 +48,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
   try {
     const program = programStore.getProgram(defaultProgram.value)
-    const imageMeta = await requestData.uploadImage(program, file, isAllPublic.value)
+    const imageMeta = await request.uploadImage(program, file, isAllPublic.value)
 
     uploadDataStore.setData(
       {
@@ -61,8 +61,9 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
     )
     window.$message.success('上传成功')
   }
-  catch {
-    window.$message.error('上传失败')
+  catch (error: any) {
+    const errorMessage = error.message || '上传失败'
+    window.$message.error(errorMessage)
     uploadDataStore.setData({ uploadFailed: true }, index)
   }
   finally {
@@ -77,7 +78,7 @@ async function allUploadImage() {
   const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
-    window.$message.info('没有需要上传的图片鸭~ 🫥')
+    window.$message.info('没有需要上传的图片鸭~')
     return
   }
 
