@@ -1,3 +1,5 @@
+import { useAppStore } from '~/stores'
+
 type TimeUnit = '秒' | '分钟' | '小时'
 
 interface Limit {
