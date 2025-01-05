@@ -70,10 +70,10 @@ useEventListener('paste', async (e) => {
         </n-icon>
       </div>
       <n-text class="text-4">
-        点击或者拖动文件到这里，支持上传多文件
+        点击或拖动文件到此处，支持多文件上传
       </n-text>
       <n-p depth="3" class="mt-2">
-        禁止上传任何包含(色情，暴力，宣扬恐怖主义)及违反中华人民共和国法律的图片
+        请勿上传任何包含色情、暴力、恐怖主义内容或违反中华人民共和国法律的图片
       </n-p>
     </n-upload-dragger>
   </n-upload>
