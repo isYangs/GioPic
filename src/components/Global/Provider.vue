@@ -3,7 +3,7 @@ import type { GlobalThemeOverrides } from 'naive-ui'
 import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
 import { createTextVNode } from 'vue'
 import { useAppStore } from '~/stores'
-import { openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
+import { openSettingPanel, openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
 
 const appStore = useAppStore()
 const {
@@ -73,6 +73,9 @@ window.ipcRenderer.on('update-show-release', (_e, releaseVersion, releaseContent
 window.ipcRenderer.on('update-show-update-restart', (_e, forceUpdate) => {
   openUpdateRestart(forceUpdate)
 })
+
+// 监听打开设置
+window.ipcRenderer.on('open-setting', (_e, tab?: string) => openSettingPanel(tab))
 </script>
 
 <template>

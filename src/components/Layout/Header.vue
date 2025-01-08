@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils/main'
-import { openCreateSettingPanel } from '~/utils/modal'
+import { openSettingPanel } from '~/utils/modal'
 
 const appStore = useAppStore()
 const { themeAuto, themeType, appCloseTip, appCloseType } = storeToRefs(appStore)
@@ -39,7 +39,7 @@ const dropdownOptions = {
     themeAuto.value = false
   },
   setting: () => {
-    openCreateSettingPanel()
+    openSettingPanel()
   },
 }
 

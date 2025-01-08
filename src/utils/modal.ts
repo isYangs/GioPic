@@ -5,8 +5,11 @@ import UpdateRestart from '~/components/Update/UpdateRestart.vue'
 import { useUniqueModal } from '~/composables/useModal'
 
 // 打开设置面板
-export function openCreateSettingPanel() {
-  useUniqueModal('设置', SettingPanel, {
+export function openSettingPanel(tab?: string) {
+  useUniqueModal('设置', {
+    comp: SettingPanel,
+    props: { tab },
+  }, {
     class: 'setting-panel',
   })
 }

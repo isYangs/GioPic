@@ -13,6 +13,7 @@ export interface TabOption {
 
 export interface SettingEntry {
   title?: string
+  key: string
   icon?: () => import('vue').VNode
   comp: () => import('vue').VNode
 }

@@ -7,6 +7,10 @@ import { renderIcon } from '~/utils/main'
 import About from './About.vue'
 import SettingSection from './SettingSection.vue'
 
+const props = defineProps<{
+  tab?: string
+}>()
+
 // 从 store 获取响应式状态
 const appStore = useAppStore()
 const {
@@ -20,7 +24,6 @@ const {
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
-const activeIndex = ref(0)
 
 // UI 主题设置选项
 const uiOptions: TabOption[] = [{
@@ -149,21 +152,28 @@ function renderSetting(options: TabOption[]) {
 // 设置面板配置
 const settings: SettingEntry[] = [{
   title: '界面外观',
+  key: 'appearance',
   icon: renderIcon('i-ph-palette-bold size-5'),
   comp: renderSetting(uiOptions),
 }, {
   title: '系统设置',
+  key: 'system',
   icon: renderIcon('i-ph-sliders-horizontal-bold size-5'),
   comp: renderSetting(systemOptions),
 }, {
   title: '高级设置',
+  key: 'advanced',
   icon: renderIcon('i-ph-bug-beetle-bold size-5'),
   comp: renderSetting(devOptions),
 }, {
   title: '关于',
+  key: 'about',
   icon: renderIcon('i-ph-info-bold size-5'),
   comp: () => h(About),
 }]
+
+const tabIndex = settings.findIndex(i => i.key === props.tab)
+const activeIndex = ref(tabIndex === -1 ? 0 : tabIndex)
 
 // 设置标签页
 const settingTabs = computed(() =>

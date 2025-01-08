@@ -24,8 +24,10 @@ interface ModalContent {
  */
 
 export function useUniqueModal(key: string, content: Component | ModalContent, nOptions?: NModalOptions) {
-  if (usingModal.has(key))
-    return
+  if (usingModal.has(key)) {
+    usingModal.get(key)?.destroy()
+    usingModal.delete(key)
+  }
 
   const modalContent = (content as ModalContent)?.props ? content as ModalContent : { comp: content } as ModalContent
 

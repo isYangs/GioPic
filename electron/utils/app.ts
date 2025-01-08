@@ -134,16 +134,10 @@ function unGlobalShortcut() {
 }
 
 // 打开设置
-function openSetting(win: BrowserWindow) {
-  win?.webContents.send('open-setting')
+function openSetting(win: BrowserWindow, tab?: string) {
+  win?.webContents.send('open-setting', tab)
   win?.show()
 }
-
-// 打开关于窗口
-// function openAbout(win: BrowserWindow) {
-//   win?.webContents.send('open-about')
-//   win?.show()
-// }
 
 // 开机自启
 export function autoStart(val: boolean) {
@@ -172,7 +166,7 @@ function createMenu(win: BrowserWindow) {
       {
         label: 'GioPic',
         submenu: [
-          // { label: '关于', accelerator: 'Command+I', click: () => openAbout(win) },
+          { label: '关于', click: () => openSetting(win, 'about') },
           { label: '设置', accelerator: 'CommandOrControl+,', click: () => openSetting(win) },
           { type: 'separator' },
           { label: '隐藏', role: 'hide' },
