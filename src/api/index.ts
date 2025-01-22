@@ -1,4 +1,7 @@
+import type { ObjectCannedACL } from '@aws-sdk/client-s3'
 import type { AxiosRequestConfig } from 'axios'
+import { S3Client } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
 import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
 import request from '~/utils/request'
 
@@ -138,7 +141,45 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))
+      // @ts-expect-error 未经过测试验证
+      const { accessKeyID, secretAccessKey, bucketName, uploadPath, region, endpoint, urlPrefix, pathStyleAccess, rejectUnauthorized, acl, disableBucketPrefixToURL } = program.detail as ProgramDetail['s3']
+      if (!accessKeyID || !secretAccessKey || !bucketName || !uploadPath || !region) {
+        return Promise.reject(new Error('该存储程序未配置'))
+      }
+
+      const client = new S3Client({
+        region,
+        credentials: {
+          accessKeyId: accessKeyID,
+          secretAccessKey,
+        },
+        endpoint,
+        tls: rejectUnauthorized,
+        forcePathStyle: pathStyleAccess,
+      })
+
+      const upload = new Upload({
+        client,
+        params: {
+          Bucket: bucketName,
+          Key: uploadPath + file.name,
+          Body: file,
+          ACL: acl as ObjectCannedACL | undefined,
+        },
+      })
+
+      const resp = await upload.done()
+
+      const { Key } = resp
+
+      return {
+        key: Key,
+        name: file.name,
+        size: file.size,
+        mimetype: file.type,
+        url: `${urlPrefix}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}`,
+        origin_name: file.name,
+      }
     }
     else {
       return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))
