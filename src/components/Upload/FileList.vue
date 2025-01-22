@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-import request from '~/api'
+import requestUtils from '~/api'
 import { type UploadData, useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 import { generateLink, getLinkTypeOptions } from '~/utils/main'
@@ -48,7 +48,7 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
   try {
     const program = programStore.getProgram(defaultProgram.value)
-    const imageMeta = await request.uploadImage(program, file, isAllPublic.value)
+    const imageMeta = await requestUtils.uploadImage(program, file, isAllPublic.value)
 
     uploadDataStore.setData(
       {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
-import { type ProgramType, useProgramStore } from '~/stores'
+import { useProgramStore } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
-const id = ref(route.params.id as ProgramType)
+const id = ref(Number.parseInt(route.params.id))
 const programStore = useProgramStore()
 
 // S3 配置项

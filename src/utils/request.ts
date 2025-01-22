@@ -38,7 +38,7 @@ function errorHandler(status: number, other: DataView) {
   }
 }
 
-const service = axios.create({
+const request = axios.create({
   timeout: 1000 * 120,
   headers: {
     Accept: 'application/json',
@@ -46,7 +46,7 @@ const service = axios.create({
 })
 
 // Request interceptors
-service.interceptors.request.use(
+request.interceptors.request.use(
   (config) => {
     return config
   },
@@ -56,7 +56,7 @@ service.interceptors.request.use(
 )
 
 // Response interceptors
-service.interceptors.response.use(
+request.interceptors.response.use(
   (response) => {
     if (response.status === 200)
       return Promise.resolve(response)
@@ -74,4 +74,4 @@ service.interceptors.response.use(
   },
 )
 
-export default service
+export default request

@@ -13,7 +13,7 @@ export function convertFileSize(size: number, isKb: boolean = false) {
   if (size < 1024)
     return `${size} ${units[0]}`
   const unitIndex = Math.floor(Math.log(size) / Math.log(1024))
-  return `${size.toFixed(2)} ${units[unitIndex]}`
+  return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
 }
 
 const linkTypeMap: LinkTypeMap = {

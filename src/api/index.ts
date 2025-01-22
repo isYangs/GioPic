@@ -44,7 +44,7 @@ function createRequest(url: string, token?: string, customHeaders?: Record<strin
   }
 }
 
-const requestData = {
+const requestUtils = {
   /**
    * 获取存储策略列表
    * @param id 程序ID，路由中的路径，为时间戳
@@ -60,7 +60,7 @@ const requestData = {
         return Promise.reject(new Error('该存储程序未配置'))
       }
 
-      const resp = await requestData._getLskyStrategies(detail.api, detail.token)
+      const resp = await requestUtils._getLskyStrategies(detail.api, detail.token)
 
       const { status, data: respData } = resp
 
@@ -118,7 +118,7 @@ const requestData = {
         permission,
         strategy_id: activeStrategy,
       }
-      const resp = await requestData._uploadLskyImage(api, token, reqData)
+      const resp = await requestUtils._uploadLskyImage(api, token, reqData)
 
       const { status, data: respData } = resp
 
@@ -160,4 +160,4 @@ const requestData = {
   },
 }
 
-export default requestData
+export default requestUtils

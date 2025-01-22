@@ -40,8 +40,6 @@ const programDetailTemplate = {
     region: '',
     /** 自定义终端节点 */
     endpoint: '',
-    /** 代理地址，仅支持http代理 */
-    proxy: '',
     /** 自定义域名 */
     urlPrefix: '',
     /** 是否启用S3 Path Style */
