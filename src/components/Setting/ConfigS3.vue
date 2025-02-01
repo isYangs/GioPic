@@ -7,18 +7,20 @@ const route = useRoute('/Setting/[id]')
 const id = ref(Number.parseInt(route.params.id))
 const programStore = useProgramStore()
 
+const setting = computed(() => programStore.getProgram(id.value).detail as ProgramDetail['s3'])
+
 // S3 配置项
-const accessKeyID = ref('')
-const secretAccessKey = ref('')
-const bucketName = ref('')
-const uploadPath = ref('')
-const region = ref('')
-const endpoint = ref('')
-const urlPrefix = ref('')
-const pathStyleAccess = ref(false)
-const rejectUnauthorized = ref(false)
-const acl = ref('')
-const disableBucketPrefixToURL = ref(false)
+const accessKeyID = ref(setting.value.accessKeyID)
+const secretAccessKey = ref(setting.value.secretAccessKey)
+const bucketName = ref(setting.value.bucketName)
+const uploadPath = ref(setting.value.uploadPath)
+const region = ref(setting.value.region)
+const endpoint = ref(setting.value.endpoint)
+const urlPrefix = ref(setting.value.urlPrefix)
+const pathStyleAccess = ref(setting.value.pathStyleAccess)
+const rejectUnauthorized = ref(setting.value.rejectUnauthorized)
+const acl = ref(setting.value.acl)
+const disableBucketPrefixToURL = ref(setting.value.disableBucketPrefixToURL)
 
 const setItem = useTemplateRef('setItemRef') // for validation
 

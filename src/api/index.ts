@@ -1,8 +1,8 @@
-import type { ObjectCannedACL } from '@aws-sdk/client-s3'
 import type { AxiosRequestConfig } from 'axios'
 import { S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
+import { wrapUrl } from '~/utils/main'
 import request from '~/utils/request'
 
 interface UploadData {
@@ -141,11 +141,12 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      // @ts-expect-error 未经过测试验证
       const { accessKeyID, secretAccessKey, bucketName, uploadPath, region, endpoint, urlPrefix, pathStyleAccess, rejectUnauthorized, acl, disableBucketPrefixToURL } = program.detail as ProgramDetail['s3']
-      if (!accessKeyID || !secretAccessKey || !bucketName || !uploadPath || !region) {
+      if (!accessKeyID || !secretAccessKey || !bucketName || (!uploadPath && !region)) {
         return Promise.reject(new Error('该存储程序未配置'))
       }
+
+      const realEndpoint = wrapUrl(endpoint) || `https://s3.${region}.amazonaws.com/`
 
       const client = new S3Client({
         region,
@@ -153,7 +154,7 @@ const requestUtils = {
           accessKeyId: accessKeyID,
           secretAccessKey,
         },
-        endpoint,
+        endpoint: realEndpoint,
         tls: rejectUnauthorized,
         forcePathStyle: pathStyleAccess,
       })
@@ -164,7 +165,7 @@ const requestUtils = {
           Bucket: bucketName,
           Key: uploadPath + file.name,
           Body: file,
-          ACL: acl as ObjectCannedACL | undefined,
+          ACL: permission ? 'public-read' : 'private',
         },
       })
 
@@ -172,12 +173,14 @@ const requestUtils = {
 
       const { Key } = resp
 
+      const url = `${urlPrefix || realEndpoint}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}`
+
       return {
         key: Key,
         name: file.name,
         size: file.size,
         mimetype: file.type,
-        url: `${urlPrefix}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}`,
+        url,
         origin_name: file.name,
       }
     }

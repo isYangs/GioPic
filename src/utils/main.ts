@@ -16,6 +16,14 @@ export function convertFileSize(size: number, isKb: boolean = false) {
   return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
 }
 
+export function wrapUrl(url: string, https?: boolean) {
+  if (!/^https?:/.test(url))
+    url = `${https ? 'https' : 'http'}://${url}`
+  if (!url.endsWith('/'))
+    url += '/'
+  return url
+}
+
 const linkTypeMap: LinkTypeMap = {
   url: 'URL',
   html: 'HTML',
