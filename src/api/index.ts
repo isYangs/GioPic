@@ -134,7 +134,7 @@ const requestUtils = {
       return {
         key,
         name,
-        size,
+        size: size * 1024,
         mimetype,
         url: links.url,
         origin_name,

@@ -95,7 +95,7 @@ function openImagesInfoModal(data: GP.DB.UploadData) {
     >
       图片名称：{{ currentImagesData?.name }}
       <n-divider />
-      图片大小：{{ convertFileSize(Number(currentImagesData?.size), true) }}
+      图片大小：{{ convertFileSize(currentImagesData?.size) }}
       <n-divider />
       图片类型：{{ currentImagesData?.mimetype }}
       <n-divider />
