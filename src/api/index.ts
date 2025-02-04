@@ -141,12 +141,25 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      const { accessKeyID, secretAccessKey, bucketName, uploadPath, region, endpoint, urlPrefix, pathStyleAccess, rejectUnauthorized, acl, disableBucketPrefixToURL } = program.detail as ProgramDetail['s3']
-      if (!accessKeyID || !secretAccessKey || !bucketName || (!uploadPath && !region)) {
-        return Promise.reject(new Error('该存储程序未配置'))
+      const { accessKeyID, secretAccessKey, bucketName, uploadPath, region, endpoint, urlPrefix, pathStyleAccess, tls, disableBucketPrefixToURL } = program.detail as ProgramDetail['s3']
+      if (!accessKeyID || !secretAccessKey || !bucketName) {
+        return Promise.reject(new Error('存储配置不完整,请检查 AccessKey/SecretKey/Bucket 配置'))
       }
 
-      const realEndpoint = wrapUrl(endpoint) || `https://s3.${region}.amazonaws.com/`
+      let realEndpoint = ''
+
+      if (endpoint) {
+        const url = wrapUrl(endpoint)
+        const portStr = url.port ? `:${url.port}` : ''
+        console.log(url.port)
+        realEndpoint = pathStyleAccess
+          ? `${url.protocol}//${url.hostname}${portStr}/${bucketName}`
+          : `${url.protocol}//${bucketName}.${url.hostname}${portStr}`
+        console.log(realEndpoint)
+      }
+      else {
+        realEndpoint = `https://s3.${region}.amazonaws.com/`
+      }
 
       const client = new S3Client({
         region,
@@ -155,16 +168,22 @@ const requestUtils = {
           secretAccessKey,
         },
         endpoint: realEndpoint,
-        tls: rejectUnauthorized,
         forcePathStyle: pathStyleAccess,
       })
+
+      const key = uploadPath
+        ? uploadPath.endsWith('/')
+          ? uploadPath + file.name
+          : `${uploadPath}/${file.name}`
+        : file.name
 
       const upload = new Upload({
         client,
         params: {
           Bucket: bucketName,
-          Key: uploadPath + file.name,
+          Key: key,
           Body: file,
+          ContentType: file.type,
           ACL: permission ? 'public-read' : 'private',
         },
       })
@@ -173,7 +192,9 @@ const requestUtils = {
 
       const { Key } = resp
 
-      const url = `${urlPrefix || realEndpoint}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}`
+      const url = urlPrefix
+        ? `${wrapUrl(urlPrefix)}${Key}` // 自定义CDN域名
+        : `${realEndpoint}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}` // 默认域名
 
       return {
         key: Key,

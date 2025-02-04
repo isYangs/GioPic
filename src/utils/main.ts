@@ -16,12 +16,21 @@ export function convertFileSize(size: number, isKb: boolean = false) {
   return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
 }
 
-export function wrapUrl(url: string, https?: boolean) {
-  if (!/^https?:/.test(url))
-    url = `${https ? 'https' : 'http'}://${url}`
-  if (!url.endsWith('/'))
-    url += '/'
-  return url
+export function wrapUrl(url: string, https?: boolean): URL {
+  if (!url) {
+    throw new Error('URL cannot be empty')
+  }
+
+  try {
+    if (/^https?:\/\//.test(url)) {
+      return new URL(url)
+    }
+
+    return new URL(`${https ? 'https' : 'http'}://${url}`)
+  }
+  catch (error: any) {
+    throw new Error(`Invalid URL: ${error.message}`)
+  }
 }
 
 const linkTypeMap: LinkTypeMap = {

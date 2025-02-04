@@ -44,8 +44,6 @@ const programDetailTemplate = {
     urlPrefix: '',
     /** 是否启用S3 Path Style */
     pathStyleAccess: false,
-    /** 是否拒绝未经授权的SSL证书 */
-    rejectUnauthorized: false,
     /** 权限 */
     acl: '',
     /** 是否禁用存储桶前缀 */

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type FormRules, NSwitch } from 'naive-ui'
 import CodeInput from '~/components/Common/CodeInput.vue'
+import type { ProgramDetail } from '~/stores'
 import { useProgramStore } from '~/stores'
 
 const route = useRoute('/Setting/[id]')
@@ -18,7 +19,7 @@ const region = ref(setting.value.region)
 const endpoint = ref(setting.value.endpoint)
 const urlPrefix = ref(setting.value.urlPrefix)
 const pathStyleAccess = ref(setting.value.pathStyleAccess)
-const rejectUnauthorized = ref(setting.value.rejectUnauthorized)
+const tls = ref(setting.value.tls)
 const acl = ref(setting.value.acl)
 const disableBucketPrefixToURL = ref(setting.value.disableBucketPrefixToURL)
 
@@ -140,29 +141,18 @@ const settingOptions = computed(() => [
     tip: '以路径风格访问',
     component: () => {
       return h(NSwitch, {
+        value: pathStyleAccess.value,
         round: false,
-        checked: pathStyleAccess.value,
         onUpdateValue: (val: boolean) => {
           pathStyleAccess.value = val
-        },
-      })
-    },
-  },
-  {
-    name: 'rejectUnauthorized',
-    tip: '拒绝未授权的请求',
-    component: () => {
-      return h(NSwitch, {
-        round: false,
-        checked: rejectUnauthorized.value,
-        onUpdateValue: (val: boolean) => {
-          rejectUnauthorized.value = val
+          saveSetting()
         },
       })
     },
   },
   {
     name: 'ACL',
+    width: 300,
     tip: '访问控制列表',
     component: () => {
       return h(CodeInput, {
@@ -180,10 +170,11 @@ const settingOptions = computed(() => [
     tip: '禁用存储桶前缀',
     component: () => {
       return h(NSwitch, {
+        value: disableBucketPrefixToURL.value,
         round: false,
-        checked: disableBucketPrefixToURL.value,
         onUpdateValue: (val: boolean) => {
           disableBucketPrefixToURL.value = val
+          saveSetting()
         },
       })
     },
@@ -200,7 +191,7 @@ async function saveSetting() {
     endpoint: endpoint.value,
     urlPrefix: urlPrefix.value,
     pathStyleAccess: pathStyleAccess.value,
-    rejectUnauthorized: rejectUnauthorized.value,
+    tls: tls.value,
     acl: acl.value,
     disableBucketPrefixToURL: disableBucketPrefixToURL.value,
   })
