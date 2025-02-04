@@ -5,11 +5,11 @@ export function renderIcon(icon: string) {
   return () => h('div', { class: `${icon}` })
 }
 
-// 将文件大小从字节或千字节转换为 KB、MB 或 GB
-export function convertFileSize(size: number, isKb: boolean = false) {
-  const units = ['Bytes', 'kiB', 'MiB', 'GiB']
-  if (isKb)
-    size *= 1024
+// 将文件大小从字节转换为 KB、MB 或 GB
+export function convertFileSize(size?: number) {
+  if (!size)
+    return ''
+  const units = ['B', 'KB', 'MB', 'GB']
   if (size < 1024)
     return `${size} ${units[0]}`
   const unitIndex = Math.floor(Math.log(size) / Math.log(1024))
