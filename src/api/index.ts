@@ -2,7 +2,7 @@ import type { AxiosRequestConfig } from 'axios'
 import { S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
-import { wrapUrl } from '~/utils/main'
+import { ensureEndWith, insertSubdomain, wrapUrl } from '~/utils/main'
 import request from '~/utils/request'
 
 interface UploadData {
@@ -141,47 +141,29 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      const { accessKeyID, secretAccessKey, bucketName, uploadPath, region, endpoint, urlPrefix, pathStyleAccess, tls, disableBucketPrefixToURL } = program.detail as ProgramDetail['s3']
-      if (!accessKeyID || !secretAccessKey || !bucketName) {
+      const { accessKeyId, secretAccessKey, bucketName, pathPrefix, region, endpoint, customDomain, forcePathStyle } = program.detail as ProgramDetail['s3']
+
+      if (!accessKeyId || !secretAccessKey || !bucketName) {
         return Promise.reject(new Error('存储配置不完整,请检查 AccessKey/SecretKey/Bucket 配置'))
-      }
-
-      let realEndpoint = ''
-
-      if (endpoint) {
-        const url = wrapUrl(endpoint)
-        const portStr = url.port ? `:${url.port}` : ''
-        console.log(url.port)
-        realEndpoint = pathStyleAccess
-          ? `${url.protocol}//${url.hostname}${portStr}/${bucketName}`
-          : `${url.protocol}//${bucketName}.${url.hostname}${portStr}`
-        console.log(realEndpoint)
-      }
-      else {
-        realEndpoint = `https://s3.${region}.amazonaws.com/`
       }
 
       const client = new S3Client({
         region,
         credentials: {
-          accessKeyId: accessKeyID,
+          accessKeyId,
           secretAccessKey,
         },
-        endpoint: realEndpoint,
-        forcePathStyle: pathStyleAccess,
+        endpoint: wrapUrl(endpoint) || undefined,
+        forcePathStyle,
       })
 
-      const key = uploadPath
-        ? uploadPath.endsWith('/')
-          ? uploadPath + file.name
-          : `${uploadPath}/${file.name}`
-        : file.name
+      const path = pathPrefix ? ensureEndWith(pathPrefix, '/') + file.name : file.name
 
       const upload = new Upload({
         client,
         params: {
           Bucket: bucketName,
-          Key: key,
+          Key: path,
           Body: file,
           ContentType: file.type,
           ACL: permission ? 'public-read' : 'private',
@@ -190,20 +172,19 @@ const requestUtils = {
 
       const resp = await upload.done()
 
-      const { Key } = resp
+      const { Key: key } = resp
 
-      const url = urlPrefix
-        ? `${wrapUrl(urlPrefix)}${Key}` // 自定义CDN域名
-        : `${realEndpoint}${disableBucketPrefixToURL ? '' : `${bucketName}/`}${Key}` // 默认域名
+      const realEndpoint = endpoint
+        ? wrapUrl(endpoint)
+        : `https://s3.${region}.amazonaws.com/`
 
-      return {
-        key: Key,
-        name: file.name,
-        size: file.size,
-        mimetype: file.type,
-        url,
-        origin_name: file.name,
-      }
+      const url = customDomain
+        ? `${wrapUrl(customDomain)}${key}`
+        : `${insertSubdomain(realEndpoint, bucketName)}${key}`
+
+      const { name, size, type: mimetype } = file
+
+      return { key, name, size, mimetype, url, origin_name: name }
     }
     else {
       return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))

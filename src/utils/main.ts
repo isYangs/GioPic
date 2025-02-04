@@ -16,21 +16,21 @@ export function convertFileSize(size?: number) {
   return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
 }
 
-export function wrapUrl(url: string, https?: boolean): URL {
-  if (!url) {
-    throw new Error('URL cannot be empty')
-  }
+export function wrapUrl(url: string, https?: boolean) {
+  if (!url)
+    return ''
+  if (!/^https?:/.test(url))
+    url = `${https ? 'https' : 'http'}://${url}`
+  return ensureEndWith(url, '/')
+}
 
-  try {
-    if (/^https?:\/\//.test(url)) {
-      return new URL(url)
-    }
+export function ensureEndWith(str: string, end: string) {
+  return str.endsWith(end) ? str : `${str}${end}`
+}
 
-    return new URL(`${https ? 'https' : 'http'}://${url}`)
-  }
-  catch (error: any) {
-    throw new Error(`Invalid URL: ${error.message}`)
-  }
+export function insertSubdomain(url: string, subdomain: string) {
+  const host = new URL(url).host
+  return url.replace(host, `${subdomain}.${host}`)
 }
 
 const linkTypeMap: LinkTypeMap = {

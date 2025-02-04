@@ -11,17 +11,15 @@ const programStore = useProgramStore()
 const setting = computed(() => programStore.getProgram(id.value).detail as ProgramDetail['s3'])
 
 // S3 配置项
-const accessKeyID = ref(setting.value.accessKeyID)
+const accessKeyId = ref(setting.value.accessKeyId)
 const secretAccessKey = ref(setting.value.secretAccessKey)
 const bucketName = ref(setting.value.bucketName)
-const uploadPath = ref(setting.value.uploadPath)
+const pathPrefix = ref(setting.value.pathPrefix)
 const region = ref(setting.value.region)
 const endpoint = ref(setting.value.endpoint)
-const urlPrefix = ref(setting.value.urlPrefix)
-const pathStyleAccess = ref(setting.value.pathStyleAccess)
-const tls = ref(setting.value.tls)
+const customDomain = ref(setting.value.customDomain)
+const forcePathStyle = ref(setting.value.forcePathStyle)
 const acl = ref(setting.value.acl)
-const disableBucketPrefixToURL = ref(setting.value.disableBucketPrefixToURL)
 
 const setItem = useTemplateRef('setItemRef') // for validation
 
@@ -32,15 +30,15 @@ const rules: FormRules = {
 
 const settingOptions = computed(() => [
   {
-    name: 'accessKeyID',
+    name: 'accessKeyId',
     width: 300,
     tip: '访问ID',
     component: () => {
       return h(CodeInput, {
-        value: accessKeyID.value,
+        value: accessKeyId.value,
         type: 'text',
         onUpdateValue: (val: string) => {
-          accessKeyID.value = val
+          accessKeyId.value = val
           saveSetting()
         },
       })
@@ -77,15 +75,15 @@ const settingOptions = computed(() => [
     },
   },
   {
-    name: 'uploadPath',
+    name: 'pathPrefix',
     width: 300,
-    tip: '上传路径',
+    tip: '上传路径前缀',
     component: () => {
       return h(CodeInput, {
-        value: uploadPath.value,
+        value: pathPrefix.value,
         type: 'text',
         onUpdateValue: (val: string) => {
-          uploadPath.value = val
+          pathPrefix.value = val
           saveSetting()
         },
       })
@@ -122,29 +120,29 @@ const settingOptions = computed(() => [
     },
   },
   {
-    name: 'urlPrefix',
+    name: 'customDomain',
     width: 300,
-    tip: 'URL前缀',
+    tip: '自定义域名',
     component: () => {
       return h(CodeInput, {
-        value: urlPrefix.value,
+        value: customDomain.value,
         type: 'text',
         onUpdateValue: (val: string) => {
-          urlPrefix.value = val
+          customDomain.value = val
           saveSetting()
         },
       })
     },
   },
   {
-    name: 'pathStyleAccess',
-    tip: '以路径风格访问',
+    name: 'forcePathStyle',
+    tip: '存储桶名作为URL路径，仅支持 AWS S3',
     component: () => {
       return h(NSwitch, {
-        value: pathStyleAccess.value,
+        value: forcePathStyle.value,
         round: false,
         onUpdateValue: (val: boolean) => {
-          pathStyleAccess.value = val
+          forcePathStyle.value = val
           saveSetting()
         },
       })
@@ -165,35 +163,19 @@ const settingOptions = computed(() => [
       })
     },
   },
-  {
-    name: 'disableBucketPrefixToURL',
-    tip: '禁用存储桶前缀',
-    component: () => {
-      return h(NSwitch, {
-        value: disableBucketPrefixToURL.value,
-        round: false,
-        onUpdateValue: (val: boolean) => {
-          disableBucketPrefixToURL.value = val
-          saveSetting()
-        },
-      })
-    },
-  },
 ])
 
 async function saveSetting() {
   await programStore.setProgramDetail(id.value, {
-    accessKeyID: accessKeyID.value,
+    accessKeyId: accessKeyId.value,
     secretAccessKey: secretAccessKey.value,
     bucketName: bucketName.value,
-    uploadPath: uploadPath.value,
+    pathPrefix: pathPrefix.value,
     region: region.value,
     endpoint: endpoint.value,
-    urlPrefix: urlPrefix.value,
-    pathStyleAccess: pathStyleAccess.value,
-    tls: tls.value,
+    customDomain: customDomain.value,
+    forcePathStyle: forcePathStyle.value,
     acl: acl.value,
-    disableBucketPrefixToURL: disableBucketPrefixToURL.value,
   })
 }
 </script>

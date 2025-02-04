@@ -28,26 +28,24 @@ const programDetailTemplate = {
     activeStrategy: null as (number | null),
   },
   s3: {
-    /** accessKeyID */
-    accessKeyID: '',
+    /** accessKeyId */
+    accessKeyId: '',
     /** secretAccessKey */
     secretAccessKey: '',
     /** 存储桶名称 */
     bucketName: '',
     /** 上传路径 */
-    uploadPath: '',
+    pathPrefix: '',
     /** 区域 */
     region: '',
     /** 自定义终端节点 */
     endpoint: '',
     /** 自定义域名 */
-    urlPrefix: '',
+    customDomain: '',
     /** 是否启用S3 Path Style */
-    pathStyleAccess: false,
+    forcePathStyle: false,
     /** 权限 */
     acl: '',
-    /** 是否禁用存储桶前缀 */
-    disableBucketPrefixToURL: false,
   },
 }
 
