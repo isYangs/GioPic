@@ -55,51 +55,20 @@ function openRemoveDialog() {
 
 <template>
   <n-form>
-    <n-card class="set-item mb3 wh-full rounded-2">
-      <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
-        <div class="flex items-center">
-          存储备注
-        </div>
-        <n-text class="text-xs op80">
-          存储类型：{{ getProgramTypeName(programType) }}
-        </n-text>
-      </div>
+    <setting-item title="存储备注" :desc="`存储类型：${getProgramTypeName(programType)}`">
       <CodeInput
         v-model:value="programName"
         type="text"
         :placeholder="getProgramTypeName(programType)"
       />
-    </n-card>
+    </setting-item>
+
     <component :is="comp" />
-    <n-card class="set-item mb3 wh-full rounded-2">
-      <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
-        <div class="flex items-center">
-          删除存储
-        </div>
-        <n-text class="text-xs op80">
-          删除存储会导致配置丢失，请谨慎操作
-        </n-text>
-      </div>
+
+    <setting-item title="删除存储" desc="删除存储会导致配置丢失，请谨慎操作">
       <n-button type="error" :secondary="true" @click="openRemoveDialog">
         删除存储
       </n-button>
-    </n-card>
+    </setting-item>
   </n-form>
 </template>
-
-<style scoped>
-.set-item :deep(.n-card__content) {
-  --uno: flex flex-row items-center justify-between;
-}
-
-.set-item :deep(.n-select) {
-  --uno: w50;
-}
-
-.set-item :deep(.n-input) {
-  --uno: w75;
-}
-:deep(.n-form-item) > .n-form-item-feedback-wrapper {
-  --uno: text-xs;
-}
-</style>
