@@ -26,6 +26,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.732.0",
+    "@aws-sdk/lib-storage": "^3.732.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@vueuse/core": "^11.0.3",
     "animate.css": "^4.1.1",

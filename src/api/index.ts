@@ -1,5 +1,8 @@
 import type { AxiosRequestConfig } from 'axios'
+import { S3Client } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
 import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
+import { ensureEndWith, insertSubdomain, wrapUrl } from '~/utils/main'
 import request from '~/utils/request'
 
 interface UploadData {
@@ -138,7 +141,50 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))
+      const { accessKeyId, secretAccessKey, bucketName, pathPrefix, region, endpoint, customDomain, forcePathStyle } = program.detail as ProgramDetail['s3']
+
+      if (!accessKeyId || !secretAccessKey || !bucketName) {
+        return Promise.reject(new Error('存储配置不完整,请检查 AccessKey/SecretKey/Bucket 配置'))
+      }
+
+      const client = new S3Client({
+        region,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+        endpoint: wrapUrl(endpoint) || undefined,
+        forcePathStyle,
+      })
+
+      const path = pathPrefix ? ensureEndWith(pathPrefix, '/') + file.name : file.name
+
+      const upload = new Upload({
+        client,
+        params: {
+          Bucket: bucketName,
+          Key: path,
+          Body: file,
+          ContentType: file.type,
+          ACL: permission ? 'public-read' : 'private',
+        },
+      })
+
+      const resp = await upload.done()
+
+      const { Key: key } = resp
+
+      const realEndpoint = endpoint
+        ? wrapUrl(endpoint)
+        : `https://s3.${region}.amazonaws.com/`
+
+      const url = customDomain
+        ? `${wrapUrl(customDomain)}${key}`
+        : `${insertSubdomain(realEndpoint, bucketName)}${key}`
+
+      const { name, size, type: mimetype } = file
+
+      return { key, name, size, mimetype, url, origin_name: name }
     }
     else {
       return Promise.reject(new Error(`未知错误：不支持${program.type}类型上传`))

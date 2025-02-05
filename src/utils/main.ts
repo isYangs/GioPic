@@ -16,6 +16,23 @@ export function convertFileSize(size?: number) {
   return `${(size / 1024 ** unitIndex).toFixed(2)} ${units[unitIndex]}`
 }
 
+export function wrapUrl(url: string, https?: boolean) {
+  if (!url)
+    return ''
+  if (!/^https?:/.test(url))
+    url = `${https ? 'https' : 'http'}://${url}`
+  return ensureEndWith(url, '/')
+}
+
+export function ensureEndWith(str: string, end: string) {
+  return str.endsWith(end) ? str : `${str}${end}`
+}
+
+export function insertSubdomain(url: string, subdomain: string) {
+  const host = new URL(url).host
+  return url.replace(host, `${subdomain}.${host}`)
+}
+
 const linkTypeMap: LinkTypeMap = {
   url: 'URL',
   html: 'HTML',
