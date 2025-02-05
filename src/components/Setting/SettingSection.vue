@@ -43,58 +43,30 @@ defineExpose({
       {{ title }}
     </n-h3>
     <n-form ref="setFormRef" :rules="rules">
-      <n-card
+      <setting-item
         v-for="(item, index) in items"
         :key="index"
         class="set-item mb3 wh-full rounded-2"
+        :title="item.name"
+        :is-dev="item.isDev"
       >
-        <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
-          <div class="flex items-center">
-            {{ item.name }}
-            <n-tag
-              v-if="item.isDev"
-              :bordered="false"
-              round
-              size="small"
-              type="warning"
-              class="ml1"
-            >
-              开发中
-              <template #icon>
-                <div i-ph-code-bold />
-              </template>
-            </n-tag>
-          </div>
-          <n-text class="text-xs op80">
-            <component :is="typeof item.tip === 'string' ? 'span' : item.tip">
-              {{ typeof item.tip === 'string' ? item.tip : '' }}
-            </component>
-          </n-text>
-        </div>
+        <template #desc>
+          <component :is="typeof item.tip === 'string' ? 'span' : item.tip">
+            {{ typeof item.tip === 'string' ? item.tip : '' }}
+          </component>
+        </template>
         <div
           :class="{ 'set-item-other': checkComponentType(item) || item.width }"
           :style="{ '--w': setWidth(item.width) }"
         >
           <component :is="item.component" />
         </div>
-      </n-card>
+      </setting-item>
     </n-form>
   </div>
 </template>
 
 <style scoped>
-.set-item :deep(.n-card__content) {
-  --uno: flex flex-row items-center justify-between;
-}
-
-.set-item :deep(.n-select) {
-  --uno: w50;
-}
-
-:deep(.n-form-item) > .n-form-item-feedback-wrapper {
-  --uno: text-xs;
-}
-
 .set-item .set-item-other,
 .set-item .set-item-other :deep(.n-select),
 .set-item .set-item-other :deep(.n-input) {
