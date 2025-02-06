@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { NButton, NSelect, NSwitch, useOsTheme } from 'naive-ui'
+import { useOsTheme } from 'naive-ui'
 import Keycut from '~/components/Common/Keycut.vue'
 import { useAppStore } from '~/stores'
-import type { SettingEntry, TabOption } from '~/types'
+import type { SettingEntry } from '~/types'
 import { renderIcon } from '~/utils/main'
 import About from './About.vue'
-import SettingSection from './SettingSection.vue'
 
 const props = defineProps<{
   tab?: string
 }>()
 
-// 从 store 获取响应式状态
 const appStore = useAppStore()
 const {
   appCloseTip,
@@ -25,107 +23,15 @@ const {
 
 const osThemeRef = useOsTheme()
 
-// UI 主题设置选项
-const uiOptions: TabOption[] = [{
-  title: '主题颜色',
-  items: [{
-    name: '深浅模式',
-    component: () => h(NSelect, {
-      value: themeType.value,
-      options: [
-        { label: '浅色模式', value: 'light' },
-        { label: '深色模式', value: 'dark' },
-      ],
-      onUpdateValue: (val: 'dark' | 'light') => {
-        themeAuto.value = false
-        themeType.value = val
-      },
-    }),
-  }, {
-    name: '跟随系统',
-    component: () => h(NSwitch, {
-      value: themeAuto.value,
-      round: false,
-      onUpdateValue: (val: boolean) => {
-        themeAuto.value = val
-        if (val)
-          themeType.value = osThemeRef.value
-      },
-    }),
-  }],
-}]
+const themeOptions = [
+  { label: '浅色模式', value: 'light' },
+  { label: '深色模式', value: 'dark' },
+]
 
-// 系统设置选项
-const systemOptions: TabOption[] = [{
-  title: '启动和关闭',
-  items: [{
-    name: '开机自启动',
-    component: () => h(NSwitch, {
-      value: autoStart.value,
-      round: false,
-      onUpdateValue: async (val: boolean) => {
-        autoStart.value = val
-        await window.ipcRenderer.invoke('auto-start', val)
-      },
-    }),
-  }, {
-    name: '关闭程序时',
-    component: () => h(NSelect, {
-      value: appCloseType.value,
-      disabled: appCloseTip.value,
-      options: [
-        { label: '最小化到任务栏', value: 'hide' },
-        { label: '直接退出', value: 'close' },
-      ],
-      onUpdateValue: (val: 'hide' | 'close') => appCloseType.value = val,
-    }),
-  }, {
-    name: '每次关闭程序时都询问',
-    component: () => h(NSwitch, {
-      value: appCloseTip.value,
-      round: false,
-      onUpdateValue: (val: boolean) => appCloseTip.value = val,
-    }),
-  }, {
-    name: '自动检测更新',
-    tip: '在启动时检测是否有新版本',
-    component: () => h(NSwitch, {
-      value: autoUpdate.value,
-      round: false,
-      onUpdateValue: (val: boolean) => autoUpdate.value = val,
-    }),
-  }],
-}]
-
-// 开发者选项
-const devOptions: TabOption[] = [{
-  title: '开发调试',
-  items: [{
-    name: '开发者工具',
-    tip: () => h('span', [
-      '使用快捷键',
-      h(Keycut, { ctrl: true, shift: true }, () => 'D'),
-      '打开',
-    ]),
-    component: () => h(NSwitch, {
-      value: isDevToolsEnabled.value,
-      round: false,
-      onUpdateValue: async (val: boolean) => {
-        isDevToolsEnabled.value = val
-        await window.ipcRenderer.invoke('reg-dev-tools', val)
-      },
-    }),
-  }, {
-    name: '程序重置',
-    tip: '若程序显示异常或出现问题时可尝试此操作',
-    component: () => h(NButton, {
-      type: 'error',
-      strong: true,
-      secondary: true,
-      onClick: () => confirmReset(),
-    }, () => '重置'),
-  }],
-}]
+const closeOptions = [
+  { label: '最小化到任务栏', value: 'hide' },
+  { label: '直接退出', value: 'close' },
+]
 
 // 重置确认
 function confirmReset() {
@@ -142,35 +48,29 @@ function confirmReset() {
   })
 }
 
-// 渲染设置项
-function renderSetting(options: TabOption[]) {
-  return () =>
-    h('ul', options.map(({ title, items }) =>
-      h(SettingSection, { key: title, title, items })))
-}
-
 // 设置面板配置
-const settings: SettingEntry[] = [{
-  title: '界面外观',
-  key: 'appearance',
-  icon: renderIcon('i-ph-palette-bold size-5'),
-  comp: renderSetting(uiOptions),
-}, {
-  title: '系统设置',
-  key: 'system',
-  icon: renderIcon('i-ph-sliders-horizontal-bold size-5'),
-  comp: renderSetting(systemOptions),
-}, {
-  title: '高级设置',
-  key: 'advanced',
-  icon: renderIcon('i-ph-bug-beetle-bold size-5'),
-  comp: renderSetting(devOptions),
-}, {
-  title: '关于',
-  key: 'about',
-  icon: renderIcon('i-ph-info-bold size-5'),
-  comp: () => h(About),
-}]
+const settings: SettingEntry[] = [
+  {
+    title: '界面外观',
+    key: 'appearance',
+    icon: renderIcon('i-ph-palette-bold size-5'),
+  },
+  {
+    title: '系统设置',
+    key: 'system',
+    icon: renderIcon('i-ph-sliders-horizontal-bold size-5'),
+  },
+  {
+    title: '高级设置',
+    key: 'advanced',
+    icon: renderIcon('i-ph-bug-beetle-bold size-5'),
+  },
+  {
+    title: '关于',
+    key: 'about',
+    icon: renderIcon('i-ph-info-bold size-5'),
+  },
+]
 
 const tabIndex = settings.findIndex(i => i.key === props.tab)
 const activeIndex = ref(tabIndex === -1 ? 0 : tabIndex)
@@ -183,11 +83,34 @@ const settingTabs = computed(() =>
     label: () => h('a', { onClick: () => activeIndex.value = index }, title),
   })),
 )
+
+function onThemeChange(val?: boolean) {
+  if (val !== undefined) {
+    themeAuto.value = val
+    if (val)
+      themeType.value = osThemeRef.value
+  }
+  else {
+    themeAuto.value = false
+  }
+}
+
+// function onThemeAutoChange(val: boolean) {
+//   if (val)
+//     themeType.value = osThemeRef.value
+// }
+
+async function onAutoStartChange(val: boolean) {
+  await window.ipcRenderer.invoke('auto-start', val)
+}
+
+async function onDevToolsChange(val: boolean) {
+  await window.ipcRenderer.invoke('reg-dev-tools', val)
+}
 </script>
 
 <template>
   <div class="h-full flex">
-    <!-- 侧边栏菜单 -->
     <n-menu
       :options="settingTabs"
       :value="activeIndex"
@@ -195,9 +118,75 @@ const settingTabs = computed(() =>
       :indent="22"
       @update:value="activeIndex = $event"
     />
-    <!-- 内容区域 -->
     <n-scrollbar class="setting-content grow-1" content-class="p6 pt10">
-      <component :is="settings[activeIndex].comp" :key="activeIndex" />
+      <template v-if="activeIndex === 0">
+        <setting-item title="深浅模式">
+          <n-select
+            v-model:value="themeType"
+            :options="themeOptions"
+            @update-value="onThemeChange"
+          />
+        </setting-item>
+        <setting-item title="跟随系统">
+          <n-switch
+            v-model:value="themeAuto"
+            :round="false"
+            @update-value="onThemeChange"
+          />
+        </setting-item>
+      </template>
+
+      <template v-if="activeIndex === 1">
+        <setting-item title="开机自启动">
+          <n-switch
+            v-model:value="autoStart"
+            :round="false"
+            @update-value="onAutoStartChange"
+          />
+        </setting-item>
+        <setting-item title="关闭程序时">
+          <n-select
+            v-model:value="appCloseType"
+            :disabled="appCloseTip"
+            :options="closeOptions"
+          />
+        </setting-item>
+        <setting-item title="每次关闭程序时都询问">
+          <n-switch v-model:value="appCloseTip" :round="false" />
+        </setting-item>
+        <setting-item title="自动检测更新" desc="在启动时检测是否有新版本">
+          <n-switch v-model:value="autoUpdate" :round="false" />
+        </setting-item>
+      </template>
+
+      <template v-if="activeIndex === 2">
+        <setting-item title="开发者工具">
+          <template #desc>
+            <span>
+              使用快捷键
+              <Keycut ctrl shift>D</Keycut>
+              打开
+            </span>
+          </template>
+          <n-switch
+            v-model:value="isDevToolsEnabled"
+            :round="false"
+            @update-value="onDevToolsChange"
+          />
+        </setting-item>
+        <setting-item
+          title="程序重置"
+          desc="若程序显示异常或出现问题时可尝试此操作"
+        >
+          <n-button type="error" strong secondary @click="confirmReset">
+            重置
+          </n-button>
+        </setting-item>
+      </template>
+
+      <template v-if="activeIndex === 3">
+        <About />
+      </template>
     </n-scrollbar>
   </div>
 </template>

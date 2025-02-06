@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormRules } from 'naive-ui'
 import requestUtils from '~/api'
-import CodeInput from '~/components/Common/CodeInput.vue'
 import type { ProgramDetail } from '~/stores'
 import { useProgramStore } from '~/stores'
 
@@ -41,11 +40,11 @@ async function syncStrategies() {
 <template>
   <n-form ref="setFormRef" :rules="rules">
     <setting-item title="API 地址" desc="http(s)://域名，不含尾随斜杠">
-      <CodeInput v-model:value="setting.api" type="text" placeholder="请填写图床API地址" />
+      <code-input v-model:value="setting.api" type="text" placeholder="请填写图床API地址" />
     </setting-item>
 
     <setting-item title="Token" desc="例如：1|1bJbwlqBfnggmOMEZqXT5XusaIwqiZjCDs7r1Ob5">
-      <CodeInput v-model:value="setting.token" type="text" placeholder="请填写图床生成的Token" />
+      <code-input v-model:value="setting.token" type="text" placeholder="请填写图床生成的Token" />
     </setting-item>
 
     <setting-item title="存储策略">
