@@ -7,6 +7,6 @@ definePage({
 
 <template>
   <div>
-    <Upload />
+    <upload />
   </div>
 </template>

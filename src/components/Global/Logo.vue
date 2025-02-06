@@ -11,7 +11,7 @@ const { isMenuCollapsed } = storeToRefs(appStore)
   <div class="h9 cursor-pointer" :class="isMenuCollapsed ? 'w16 px2' : 'w60 px1'">
     <div class="no-draggable mx4 hfull w-fit flex items-center gap-1.5" @click="router.push('/')">
       <div class="w5">
-        <IconSVG />
+        <icon-svg />
       </div>
       <template v-if="!isMenuCollapsed">
         <h1 class="font-type translate-y-[.04em] text-lg">

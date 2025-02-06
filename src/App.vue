@@ -6,7 +6,7 @@ const { isMenuCollapsed } = storeToRefs(appStore)
 </script>
 
 <template>
-  <Provider>
+  <provider>
     <n-layout has-sider class="wh-full">
       <n-layout-sider
         bordered
@@ -21,24 +21,24 @@ const { isMenuCollapsed } = storeToRefs(appStore)
         @expand="isMenuCollapsed = false"
       >
         <n-layout-header bordered>
-          <Logo class="draggable" />
+          <logo class="draggable" />
         </n-layout-header>
-        <Menu class="no-draggable" />
+        <side-bar class="no-draggable" />
       </n-layout-sider>
       <n-layout content-class="flex flex-col">
         <n-layout-header bordered>
-          <Header />
+          <title-bar />
         </n-layout-header>
         <n-layout class="pr.5" content-class="p6" :native-scrollbar="false">
           <router-view v-slot="{ Component }">
             <keep-alive>
-              <Transition name="router" mode="out-in">
+              <transition name="router" mode="out-in">
                 <component :is="Component" />
-              </Transition>
+              </transition>
             </keep-alive>
           </router-view>
         </n-layout>
       </n-layout>
     </n-layout>
-  </Provider>
+  </provider>
 </template>

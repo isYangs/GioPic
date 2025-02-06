@@ -66,7 +66,7 @@ useEventListener('paste', async (e) => {
     <n-upload-dragger class="rounded-3">
       <div class="mb-3">
         <n-icon size="48" :depth="3">
-          <IconSVG />
+          <icon-svg />
         </n-icon>
       </div>
       <n-text class="text-4">
@@ -77,5 +77,5 @@ useEventListener('paste', async (e) => {
       </n-p>
     </n-upload-dragger>
   </n-upload>
-  <FileList />
+  <file-list />
 </template>

@@ -225,15 +225,15 @@ window.ipcRenderer.on('upload-shortcut', () => {
 <template>
   <template v-if="data.length">
     <n-flex class="my2 ml1 wfull">
-      <NButton type="primary" secondary :disabled="!data.length || isUpload" @click="allUploadImage">
+      <n-button type="primary" secondary :disabled="!data.length || isUpload" @click="allUploadImage">
         全部上传
-      </NButton>
-      <NButton type="error" secondary @click="allClear">
+      </n-button>
+      <n-button type="error" secondary @click="allClear">
         清空列表
-      </NButton>
-      <NButton secondary :disabled="false" @click="copyAllUrl">
+      </n-button>
+      <n-button secondary :disabled="false" @click="copyAllUrl">
         复制全部URL
-      </NButton>
+      </n-button>
       <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
       <n-select v-model:value="defaultProgram" class="w30" :options="programs" @update:value="resetUploadState" />
     </n-flex>
@@ -261,20 +261,20 @@ window.ipcRenderer.on('upload-shortcut', () => {
               <n-flex justify="center">
                 <template v-if="file && file.url && file.origin_name">
                   <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type:string) => file.url && file.origin_name && copyLink(type, file.url, file.origin_name)">
-                    <NButton secondary strong class="wfull" type="info" @click="copyLink('url', file.url, file.origin_name)">
+                    <n-button secondary strong class="wfull" type="info" @click="copyLink('url', file.url, file.origin_name)">
                       复制链接
-                    </NButton>
+                    </n-button>
                   </n-dropdown>
                 </template>
                 <template v-else>
-                  <NButton
+                  <n-button
                     tertiary class="wfull"
                     :disabled="file.isLoading"
                     type="primary"
                     @click="file.fileInfo?.file && uploadImage(index, file.fileInfo.file)"
                   >
                     上传
-                  </NButton>
+                  </n-button>
                 </template>
               </n-flex>
             </template>

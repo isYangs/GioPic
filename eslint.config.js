@@ -10,6 +10,9 @@ export default antfu(
     rules: {
       'unused-imports/no-unused-imports': 'error',
       'node/prefer-global/process': 'off',
+      'vue/component-name-in-template-casing': ['error', 'kebab-case', {
+        registeredComponentsOnly: false,
+      }],
     },
 
     ignores: [

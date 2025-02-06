@@ -93,7 +93,7 @@ window.ipcRenderer.on('open-setting', (_e, tab?: string) => openSettingPanel(tab
           <n-notification-provider :max="1" container-style="margin-top:3.5rem">
             <n-message-provider :max="1" placement="bottom">
               <slot />
-              <NaiveProviderContext />
+              <naive-provider-context />
             </n-message-provider>
           </n-notification-provider>
         </n-dialog-provider>

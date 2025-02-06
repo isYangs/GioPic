@@ -56,7 +56,7 @@ function openRemoveDialog() {
 <template>
   <n-form>
     <setting-item title="存储备注" :desc="`存储类型：${getProgramTypeName(programType)}`">
-      <CodeInput
+      <code-input
         v-model:value="programName"
         type="text"
         :placeholder="getProgramTypeName(programType)"

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { useOsTheme } from 'naive-ui'
-import Keycut from '~/components/Common/Keycut.vue'
 import { useAppStore } from '~/stores'
 import type { SettingEntry } from '~/types'
 import { renderIcon } from '~/utils/main'
-import About from './About.vue'
 
 const props = defineProps<{
   tab?: string
@@ -136,7 +134,7 @@ async function onDevToolsChange(val: boolean) {
         </setting-item>
       </template>
 
-      <template v-if="activeIndex === 1">
+      <template v-else-if="activeIndex === 1">
         <setting-item title="开机自启动">
           <n-switch
             v-model:value="autoStart"
@@ -159,14 +157,14 @@ async function onDevToolsChange(val: boolean) {
         </setting-item>
       </template>
 
-      <template v-if="activeIndex === 2">
+      <template v-else-if="activeIndex === 2">
         <setting-item title="开发者工具">
           <template #desc>
-            <span>
-              使用快捷键
-              <Keycut ctrl shift>D</Keycut>
-              打开
-            </span>
+            使用快捷键
+            <keycut ctrl shift>
+              D
+            </keycut>
+            打开
           </template>
           <n-switch
             v-model:value="isDevToolsEnabled"
@@ -184,8 +182,8 @@ async function onDevToolsChange(val: boolean) {
         </setting-item>
       </template>
 
-      <template v-if="activeIndex === 3">
-        <About />
+      <template v-else-if="activeIndex === 3">
+        <about />
       </template>
     </n-scrollbar>
   </div>
