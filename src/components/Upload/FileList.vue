@@ -2,7 +2,8 @@
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
 import requestUtils from '~/api'
-import { type UploadData, useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
+import type { ProgramDetail, UploadData } from '~/stores'
+import { useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 import { generateLink, getLinkTypeOptions } from '~/utils/main'
 
@@ -18,6 +19,13 @@ const isPublicOptions = [
   { label: '全部公开', value: 1 },
   { label: '全部私有', value: 0 },
 ]
+
+const hasPresetAcl = computed(() => {
+  if (!defaultProgram.value)
+    return false
+  const program = programStore.getProgram(defaultProgram.value)
+  return Boolean(program.type === 's3' && (program.detail as ProgramDetail['s3']).acl)
+})
 
 if (!defaultProgram.value || !programStore.getProgram(defaultProgram.value).id) {
   defaultProgram.value = null
@@ -48,7 +56,10 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
   try {
     const program = programStore.getProgram(defaultProgram.value)
-    const imageMeta = await requestUtils.uploadImage(program, file, isAllPublic.value)
+    const permission = program.type === 's3' && (program.detail as ProgramDetail['s3']).acl
+      ? undefined
+      : isAllPublic.value
+    const imageMeta = await requestUtils.uploadImage(program, file, permission)
 
     uploadDataStore.setData(
       {
@@ -234,7 +245,13 @@ window.ipcRenderer.on('upload-shortcut', () => {
       <n-button secondary :disabled="false" @click="copyAllUrl">
         复制全部URL
       </n-button>
-      <n-select v-model:value="isAllPublic" class="w30" :options="isPublicOptions" />
+      <n-select
+        v-model:value="isAllPublic"
+        class="w30"
+        :options="isPublicOptions"
+        :disabled="hasPresetAcl"
+        :title="hasPresetAcl ? '当前存储程序已设置默认访问控制' : ''"
+      />
       <n-select v-model:value="defaultProgram" class="w30" :options="programs" @update:value="resetUploadState" />
     </n-flex>
     <n-image-group>

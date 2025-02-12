@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios'
-import { S3Client } from '@aws-sdk/client-s3'
+import { type ObjectCannedACL, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { type Program, type ProgramDetail, useProgramStore } from '~/stores'
 import { ensureEndWith, insertSubdomain, wrapUrl } from '~/utils/main'
@@ -141,7 +141,7 @@ const requestUtils = {
       }
     }
     else if (program.type === 's3') {
-      const { accessKeyId, secretAccessKey, bucketName, pathPrefix, region, endpoint, customDomain, forcePathStyle } = program.detail as ProgramDetail['s3']
+      const { accessKeyId, secretAccessKey, bucketName, pathPrefix, region, endpoint, customDomain, forcePathStyle, acl } = program.detail as ProgramDetail['s3']
 
       if (!accessKeyId || !secretAccessKey || !bucketName) {
         return Promise.reject(new Error('存储配置不完整,请检查 AccessKey/SecretKey/Bucket 配置'))
@@ -166,7 +166,7 @@ const requestUtils = {
           Key: path,
           Body: file,
           ContentType: file.type,
-          ACL: permission ? 'public-read' : 'private',
+          ACL: acl as ObjectCannedACL || (permission ? 'public-read' : 'private') as ObjectCannedACL,
         },
       })
 

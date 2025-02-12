@@ -89,7 +89,8 @@ const aclOptions = aclTypes.map(value => ({ label: value, value }))
       <n-select
         v-model:value="setting.acl"
         :options="aclOptions"
-        placeholder="public-read"
+        placeholder="请选择访问控制级别"
+        clearable
       />
     </setting-item>
   </n-form>
