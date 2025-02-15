@@ -6,7 +6,6 @@ import { useProgramStore } from '~/stores'
 const route = useRoute('/Setting/[id]')
 const id = ref(Number.parseInt(route.params.id))
 const programStore = useProgramStore()
-const activeStrategy = ref<number | null>(null)
 
 const setting = computed({
   get: () => programStore.getProgram(id.value).detail as ProgramDetail['lsky'],
@@ -42,7 +41,7 @@ async function syncStrategies() {
     <setting-item title="存储策略" desc="选择上传使用的存储策略">
       <div class="flex gap-1">
         <n-select
-          v-model:value="activeStrategy"
+          v-model:value="setting.activeStrategy"
           :options="setting.strategies"
           placeholder="请选择存储策略"
         />

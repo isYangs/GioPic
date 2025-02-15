@@ -11,7 +11,8 @@ async function setStore(key: string, value: string) {
 }
 
 async function getStore(key: string): Promise<string> {
-  return await window.ipcRenderer.invoke('get-store', key)
+  const value = await window.ipcRenderer.invoke('get-store', key)
+  return JSON.stringify(value)
 }
 
 async function deleteStore(key: string): Promise<void> {

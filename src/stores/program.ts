@@ -60,7 +60,7 @@ export const useProgramStore = defineStore(
         type,
         name: '',
         id,
-        detail: programDetailTemplate.lsky,
+        detail: { ...programDetailTemplate[type] },
       })
       return id
     }
