@@ -5,7 +5,7 @@ import { platform } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from '../db'
 import { setupIpcMain as initIpcMain } from '../ipc'
-import { fixElectronCors, initStore, initSystem } from '../utils/app'
+import { initStore, initSystem } from '../utils/app'
 import initUpdater from '../utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -71,7 +71,6 @@ async function createMainWindow() {
   // 设置应用程序名称
   app.dock?.setIcon(icon)
 
-  fixElectronCors(mainWindow)
   initIpcMain(mainWindow)
   initDB()
   initStore()

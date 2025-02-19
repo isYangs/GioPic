@@ -67,7 +67,7 @@ function createHttpService(options: CreateServiceOptions): AxiosInstance {
         throw new Error('响应数据为空')
       }
 
-      if (responseData.code !== 200) {
+      if (processed.status !== 200) {
         throw new Error(responseData.message || '请求失败', {
           cause: { code: responseData.code },
         })

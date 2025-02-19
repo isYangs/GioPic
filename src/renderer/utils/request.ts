@@ -8,7 +8,7 @@ export const safeRequest = {
     return {
       getStrategies: async () => {
         try {
-          const { data } = await window.ipcRenderer.invoke('lsky:getStrategies', { config: { api: config.api, token: config.token } })
+          const data = await window.ipcRenderer.invoke('lsky:getStrategies', { config: { api: config.api, token: config.token } })
 
           if (!data?.strategies)
             throw new Error('获取策略列表失败')
@@ -19,7 +19,7 @@ export const safeRequest = {
           }))
         }
         catch (error) {
-          console.log(error)
+          console.error(error)
           throw error
         }
       },

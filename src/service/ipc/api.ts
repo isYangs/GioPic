@@ -20,7 +20,7 @@ export function setupIpcRequest() {
       const service = createLskyService(config)
       const lsky = lskyUploader(service)
       const result = await lsky.getStrategies()
-      return JSON.parse(JSON.stringify(result))
+      return JSON.stringify(result)
     }
     catch (error) {
       logger.error('[lsky] Get strategies failed:', error)
