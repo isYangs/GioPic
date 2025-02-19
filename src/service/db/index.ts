@@ -15,8 +15,8 @@ let db: BetterSqliteDatabase
 
 // 定义数据库文件路径，针对macOS系统进行适配
 const DB_PATH = platform.isMacOS
-  ? path.join(app.getPath('userData'), '/GPData.db') // 对于macOS，将数据库存放在用户数据目录下
-  : path.join(path.dirname(app.getPath('exe')), '/GPData.db') // 对于其他平台，将数据库存放在应用程序目录下
+  ? path.join(app.getPath('userData'), '/GPData.db')
+  : path.join(path.dirname(app.getPath('exe')), '/GPData.db')
 
 const initTables = (db: BetterSqliteDatabase) => db.exec(`${Array.from(tables.values()).join('\n')}`)
 

@@ -1,8 +1,9 @@
 import type { BrowserWindow } from 'electron'
 import { app, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from '../db/modules'
-import { autoStart, regDevToolsShortcut } from './app'
-import logger from './logger'
+import { autoStart, regDevToolsShortcut } from '../utils/app'
+import logger from '../utils/logger'
+import { setupIpcRequest } from './api'
 
 export function setupIpcMain(win: BrowserWindow) {
   ipcMain.handle('window-min', () => {
@@ -78,4 +79,6 @@ export function setupIpcMain(win: BrowserWindow) {
   ipcMain.handle('reset-settings', () => {
     logger.info('[settings] Reset and restarting application.')
   })
+
+  setupIpcRequest()
 }

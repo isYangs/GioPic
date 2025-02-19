@@ -1,5 +1,4 @@
-export type ProgramType = keyof typeof programDetailTemplate
-export type ProgramDetail = typeof programDetailTemplate
+import type { ProgramType } from '@/types/common'
 
 export interface Program {
   type: ProgramType
@@ -14,7 +13,7 @@ export const programTypeName: Record<ProgramType, string> = {
   s3: 'S3(AWS/腾讯云/阿里云)',
 }
 
-const programDetailTemplate = {
+export const programDetailTemplate = {
   lsky: {
     api: '',
     token: '',

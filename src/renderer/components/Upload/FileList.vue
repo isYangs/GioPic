@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-import requestUtils from '~/api'
-import type { ProgramDetail, UploadData } from '~/stores'
+// import requestUtils from '~/api'
+import type { ProgramDetail } from '@/types'
+import type { UploadData } from '~/stores'
 import { useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 import { generateLink, getLinkTypeOptions } from '~/utils/main'

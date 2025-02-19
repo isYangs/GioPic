@@ -7,8 +7,7 @@ import logger from './logger'
 import { getStore } from './store'
 import { checkForUpdates } from './update'
 
-export * from './cors'
-export * from './ipc'
+export * from '../utils/cors'
 export * from './store'
 
 let tray: Tray | null = null

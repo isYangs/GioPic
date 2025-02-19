@@ -4,21 +4,12 @@ import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from '../db'
-import { fixElectronCors, setupIpcMain as initIpcMain, initStore, initSystem } from '../utils/app'
+import { setupIpcMain as initIpcMain } from '../ipc'
+import { fixElectronCors, initStore, initSystem } from '../utils/app'
 import initUpdater from '../utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// The built directory structure
-//
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
-// │ └─┬ preload
-// │   └── index.mjs   > Preload-Scripts
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
-//
 process.env.APP_ROOT = path.join(__dirname, '../..')
 
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
@@ -64,7 +55,7 @@ async function createMainWindow() {
     },
   })
 
-  if (VITE_DEV_SERVER_URL) { // #298
+  if (VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(VITE_DEV_SERVER_URL)
   }
   else {
@@ -78,7 +69,6 @@ async function createMainWindow() {
   })
 
   // 设置应用程序名称
-  // app.setName(app.getName())
   app.dock?.setIcon(icon)
 
   fixElectronCors(mainWindow)

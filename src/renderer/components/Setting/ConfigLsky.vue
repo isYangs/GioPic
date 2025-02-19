@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import requestUtils from '~/api'
-import type { ProgramDetail } from '~/stores'
+import type { ProgramDetail } from '@/types/common'
 import { useProgramStore } from '~/stores'
+import { safeRequest } from '~/utils/request'
 
 const route = useRoute('/Setting/[id]')
 const id = ref(Number.parseInt(route.params.id))
@@ -12,11 +12,23 @@ const setting = computed({
   set: val => programStore.setProgramDetail(id.value, val),
 })
 
+const program = programStore.getProgram(id.value)
+const lskyRequest = safeRequest.lsky(program)
+
 async function syncStrategies() {
   const loading = window.$message.loading('正在同步线上策略列表...')
-  if (!await requestUtils.getStrategies(id.value))
+  try {
+    const strategies = await lskyRequest.getStrategies()
+    setting.value.strategies = strategies
+    window.$message.success('同步策略列表成功')
+  }
+  catch (error) {
+    console.log(error)
     window.$message.error('同步策略列表失败，请检查设置是否填写有误')
-  loading.destroy()
+  }
+  finally {
+    loading.destroy()
+  }
 }
 </script>
 
