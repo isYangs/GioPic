@@ -3,10 +3,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
-import { init as initDB } from '../db'
-import { setupIpcMain as initIpcMain } from '../ipc'
-import { initStore, initSystem } from '../utils/app'
-import initUpdater from '../utils/update'
+import { init as initDB } from './db'
+import { registerIpc } from './ipc'
+import createShortcutService from './services/ShortcutService'
+import createTrayService from './services/TrayService'
+import { initStore, initSystem } from './utils/app'
+import initUpdater from './utils/update'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -71,7 +73,9 @@ async function createMainWindow() {
   // 设置应用程序名称
   app.dock?.setIcon(icon)
 
-  initIpcMain(mainWindow)
+  registerIpc(mainWindow)
+  createTrayService(mainWindow)
+  createShortcutService(mainWindow)
   initDB()
   initStore()
   initSystem(mainWindow)
@@ -88,6 +92,14 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized())
+      mainWindow.restore()
+    mainWindow.focus()
+  }
+})
+
 app.on('activate', () => {
   const allWindows = BrowserWindow.getAllWindows()
   if (allWindows.length) {
@@ -95,5 +107,11 @@ app.on('activate', () => {
   }
   else {
     createMainWindow()
+  }
+})
+
+app.on('before-quit', () => {
+  if (import.meta.env.DEV) {
+    app.exit()
   }
 })

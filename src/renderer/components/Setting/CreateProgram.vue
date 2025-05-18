@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type ProgramType, programTypeName, useProgramStore } from '~/stores'
+import type { ProgramType } from '@/types'
+import { programTypeName, useProgramStore } from '~/stores'
 
 const emit = defineEmits<{
   close: []

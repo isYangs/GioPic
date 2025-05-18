@@ -1,4 +1,5 @@
-import type { ProgramType } from '@/types/common'
+import type { ProgramType } from '@/types'
+import type { SelectOption } from 'naive-ui'
 
 export interface Program {
   type: ProgramType
@@ -17,7 +18,7 @@ export const programDetailTemplate = {
   lsky: {
     api: '',
     token: '',
-    strategies: [] as [],
+    strategies: [] as ([] | SelectOption[]),
     activeStrategy: null as (number | null),
   },
   lskyPro: {

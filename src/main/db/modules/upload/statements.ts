@@ -35,12 +35,13 @@ export function createDeleteStatement(): Statement<[string]> {
 }
 
 /**
- * 创建上传数据的清空语句
- * @returns 清空语句
+ * 创建查询特定key的语句
+ * @returns 查询语句
  */
-export function createClearStatement(): Statement<[]> {
+export function createQueryByKeyStatement(): Statement<[string]> {
   const db = getDB()
-  return db.prepare<[]>(`
-    DELETE FROM "main"."upload_data"
+  return db.prepare<[string]>(`
+    SELECT COUNT(*) as count FROM "main"."upload_data"
+    WHERE "key" = ?
   `)
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { SettingEntry } from '@/types'
 import { useOsTheme } from 'naive-ui'
 import { useAppStore } from '~/stores'
-import type { SettingEntry } from '~/types'
 import { renderIcon } from '~/utils/main'
 
 const props = defineProps<{

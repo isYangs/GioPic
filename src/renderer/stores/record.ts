@@ -27,7 +27,7 @@ export interface UploadData extends BaseData {
 
 export const useUploadDataStore = defineStore('uploadDataStore', () => {
   const state: State = reactive({
-    data: [], // 上传的文件数组对象（在FileInfo中包含File对象）
+    data: [],
   })
 
   /**
@@ -67,7 +67,20 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     state.data
       .filter(item => item.url && item.key)
       .forEach(({ key, name, time, size, mimetype, url, origin_name }: UploadData) => {
-        window.ipcRenderer.invoke('insert-upload-data', JSON.stringify({ key, name, time, size, mimetype, url, origin_name }))
+        try {
+          window.ipcRenderer.invoke('insert-upload-data', JSON.stringify({
+            key,
+            name,
+            time,
+            size,
+            mimetype,
+            url,
+            origin_name,
+          }))
+        }
+        catch (e) {
+          console.error('Error inserting upload data:', e)
+        }
       })
   }
 

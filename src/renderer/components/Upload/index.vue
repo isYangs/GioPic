@@ -56,7 +56,8 @@ useEventListener('paste', async (e) => {
 
 <template>
   <n-upload
-    directory-dnd multiple
+    directory-dnd
+    multiple
     auto-upload="false"
     :custom-request="upload"
     accept="image/*"

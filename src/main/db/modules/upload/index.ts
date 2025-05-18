@@ -1,4 +1,4 @@
-import { createDeleteStatement, createInsertStatement, createQueryStatement } from './statements'
+import { createDeleteStatement, createInsertStatement, createQueryByKeyStatement, createQueryStatement } from './statements'
 
 /**
  * 查询上传数据
@@ -11,10 +11,19 @@ export function queryUploadData() {
 /**
  * 插入上传数据
  * @param data 上传数据对象
+ * @returns 成功返回true，数据已存在返回false
  */
-export function insertUploadData(data: GP.DB.UploadData) {
+export function insertUploadData(data: GP.DB.UploadData): boolean {
+  const queryByKeyStatement = createQueryByKeyStatement()
+  const result = queryByKeyStatement.get(data.key) as { count: number }
+
+  if (result.count > 0) {
+    return false
+  }
+
   const insertStatement = createInsertStatement()
   insertStatement.run(data)
+  return true
 }
 
 /**

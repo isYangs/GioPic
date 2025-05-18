@@ -1,9 +1,8 @@
 <script setup lang="ts">
+import type { ProgramDetail } from '@/types'
 import { NButton, NCheckbox } from 'naive-ui'
 import pLimit from 'p-limit'
-// import requestUtils from '~/api'
-import type { ProgramDetail } from '@/types'
-import type { UploadData } from '~/stores'
+import { apiClient } from '~/api'
 import { useAppStore, useProgramStore, useUploadDataStore } from '~/stores'
 import debounce from '~/utils/debounce'
 import { generateLink, getLinkTypeOptions } from '~/utils/main'
@@ -13,9 +12,10 @@ const programStore = useProgramStore()
 const uploadDataStore = useUploadDataStore()
 const { defaultProgram, isImgListDelDialog } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
+
 const isAllPublic = ref(1)
 const isUpload = ref(false)
-
+const isResetting = ref(false)
 const isPublicOptions = [
   { label: '全部公开', value: 1 },
   { label: '全部私有', value: 0 },
@@ -28,26 +28,45 @@ const hasPresetAcl = computed(() => {
   return Boolean(program.type === 's3' && (program.detail as ProgramDetail['s3']).acl)
 })
 
-if (!defaultProgram.value || !programStore.getProgram(defaultProgram.value).id) {
+const programs = computed(() => programStore.getProgramList())
+
+const isProgramValid = computed(() => {
+  return defaultProgram.value && programStore.getProgram(defaultProgram.value)?.id
+})
+
+if (!isProgramValid.value) {
   defaultProgram.value = null
 }
 
-const programs = computed(() => programStore.getProgramList())
+const hasUploadableImages = computed(() => {
+  return data.value.some(item => !item.url && !item.uploadFailed && !item.uploaded)
+})
 
 function resetUploadState() {
-  data.value.forEach((item, index) => {
-    if (item.uploadFailed) {
-      uploadDataStore.setData({ uploadFailed: false }, index)
-    }
-  })
+  if (isResetting.value)
+    return
+
+  isResetting.value = true
+
+  try {
+    const newData = data.value.map(item => ({
+      isLoading: item.isLoading || false,
+      fileUrl: item.fileUrl,
+      fileInfo: item.fileInfo,
+    }))
+    uploadDataStore.$state.data = newData
+  }
+  finally {
+    isResetting.value = false
+  }
 }
-// 上传方法
-async function uploadImage(index: number, file: File, isGetRecord: boolean = true) {
+
+async function uploadImage(index: number, file: File, isGetRecord = true) {
   if (!defaultProgram.value) {
     window.$message.error('请选择存储程序后再上传')
     return
   }
-  // 检查文件是否已经上传
+
   if (data.value[index].uploaded) {
     window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
     return
@@ -60,14 +79,16 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
     const permission = program.type === 's3' && (program.detail as ProgramDetail['s3']).acl
       ? undefined
       : isAllPublic.value
-    const imageMeta = await requestUtils.uploadImage(program, file, permission)
+
+    const path = file.path || ''
+    const { data: res } = await apiClient.upload(program.type, { path, permission })
 
     uploadDataStore.setData(
       {
-        ...imageMeta,
+        ...res,
         uploadFailed: false,
         time: new Date().toISOString(),
-        uploaded: true, // 标记文件为已上传
+        uploaded: true,
       },
       index,
     )
@@ -87,57 +108,51 @@ async function uploadImage(index: number, file: File, isGetRecord: boolean = tru
 
 // 全部上传方法
 async function allUploadImage() {
-  const uploadList = data.value.filter((item: any) => !item.links && !item.uploadFailed && !item.uploaded)
+  const uploadList = data.value.filter(item => !item.url && !item.uploadFailed && !item.uploaded)
 
   if (!uploadList.length) {
-    window.$message.info('没有需要上传的图片鸭~')
+    window.$message.info('没有需要上传的图片')
     return
   }
 
-  const limit = pLimit(3) // 最多同时进行 3 个上传任务
-
-  // 创建一个数组来跟踪正在进行的上传任务
+  const limit = pLimit(3)
   const uploadingTasks = new Set()
+  isUpload.value = true
 
-  const tasks = uploadList.map((item: any, index: number) => {
-    if (item.links || item.uploadFailed || item.uploaded) {
+  const tasks = uploadList.map((item, index) => {
+    if (item.url || item.uploadFailed || item.uploaded) {
       window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
+      return null
+    }
+
+    if (!item.fileInfo?.file) {
+      window.$message.error(`图片 ${index + 1} 文件对象无效，无法上传。`)
       return null
     }
 
     const originalIndex = data.value.indexOf(item)
 
-    // 创建一个新的上传任务
     const task = limit(() =>
-      uploadImage(originalIndex, item.fileInfo.file, false)
+      uploadImage(originalIndex, item.fileInfo!.file!, false)
         .then(() => {
-          // 从正在进行的上传任务中移除这个任务
           uploadingTasks.delete(task)
-          // 检查是否所有的上传任务都已完成
           if (uploadingTasks.size === 0) {
             isUpload.value = false
             uploadDataStore.getUploadData()
           }
         })
         .catch((error) => {
-          // 处理上传失败
           window.$message.error(`图片 ${originalIndex + 1} 上传失败：${error.message}`)
         }),
     )
 
-    // 将这个任务添加到正在进行的上传任务中
     uploadingTasks.add(task)
-
     return task
-  }).filter(task => task !== null)
+  }).filter(Boolean)
 
-  isUpload.value = true
-
-  // 等待所有上传任务完成
   await Promise.all(tasks)
 }
 
-// 删除图片方法
 function delImage(index: number) {
   if (isImgListDelDialog.value) {
     uploadDataStore.delData(index)
@@ -161,9 +176,7 @@ function delImage(index: number) {
           h(NButton, {
             size: 'small',
             class: 'mr4',
-            onClick: () => {
-              n.destroy()
-            },
+            onClick: () => n.destroy(),
           }, {
             default: () => '取消',
           }),
@@ -183,7 +196,6 @@ function delImage(index: number) {
   })
 }
 
-// 清空列表方法
 function allClear() {
   uploadDataStore.delData()
 }
@@ -192,17 +204,14 @@ function copyLink(type: string, url: string, name: string) {
   const link = generateLink(type, url, name)
   navigator.clipboard
     .writeText(link)
-    .then(() => {
-      window.$message.success('复制成功')
-    })
-    .catch(() => {
-      window.$message.error('复制失败')
-    })
+    .then(() => window.$message.success('复制成功'))
+    .catch(() => window.$message.error('复制失败'))
 }
 
-// 复制全部URL方法
 function copyAllUrl() {
-  const urlList = data.value.map((item: UploadData) => item?.url).filter((item: string | undefined) => item)
+  const urlList = data.value
+    .map(item => item?.url)
+    .filter(Boolean)
 
   if (!urlList.length) {
     window.$message.info('没有可以复制的图片链接')
@@ -213,12 +222,8 @@ function copyAllUrl() {
 
   navigator.clipboard
     .writeText(url)
-    .then(() => {
-      window.$message.success('复制成功')
-    })
-    .catch(() => {
-      window.$message.error('复制失败')
-    })
+    .then(() => window.$message.success('复制成功'))
+    .catch(() => window.$message.error('复制失败'))
 }
 
 const debouncedAllUploadImage = debounce(async () => {
@@ -237,13 +242,22 @@ window.ipcRenderer.on('upload-shortcut', () => {
 <template>
   <template v-if="data.length">
     <n-flex class="my2 ml1 wfull">
-      <n-button type="primary" secondary :disabled="!data.length || isUpload" @click="allUploadImage">
+      <n-button
+        type="primary"
+        secondary
+        :disabled="!hasUploadableImages || isUpload"
+        @click="allUploadImage"
+      >
         全部上传
       </n-button>
       <n-button type="error" secondary @click="allClear">
         清空列表
       </n-button>
-      <n-button secondary :disabled="false" @click="copyAllUrl">
+      <n-button
+        secondary
+        :disabled="!data.some(item => item?.url)"
+        @click="copyAllUrl"
+      >
         复制全部URL
       </n-button>
       <n-select
@@ -253,7 +267,12 @@ window.ipcRenderer.on('upload-shortcut', () => {
         :disabled="hasPresetAcl"
         :title="hasPresetAcl ? '当前存储程序已设置默认访问控制' : ''"
       />
-      <n-select v-model:value="defaultProgram" class="w30" :options="programs" @update:value="resetUploadState" />
+      <n-select
+        v-model:value="defaultProgram"
+        class="w30"
+        :options="programs"
+        @update:value="resetUploadState"
+      />
     </n-flex>
     <n-image-group>
       <n-grid cols="3 l:5 xl:6 2xl:8" responsive="screen" :x-gap="12" :y-gap="8">
@@ -273,12 +292,16 @@ window.ipcRenderer.on('upload-shortcut', () => {
               <n-image class="h50 wfull border-rd-sm" :src="file.fileUrl" object-fit="cover" style="image-rendering: optimizeQuality;" />
             </n-spin>
             <template #description>
-              正在上传，请耐心等待...
+              <span v-if="file.isLoading">正在上传，请耐心等待...</span>
             </template>
             <template #footer>
               <n-flex justify="center">
                 <template v-if="file && file.url && file.origin_name">
-                  <n-dropdown trigger="hover" :options="getLinkTypeOptions()" @select="(type:string) => file.url && file.origin_name && copyLink(type, file.url, file.origin_name)">
+                  <n-dropdown
+                    trigger="hover"
+                    :options="getLinkTypeOptions()"
+                    @select="(type) => copyLink(type, file.url!, file.origin_name!)"
+                  >
                     <n-button secondary strong class="wfull" type="info" @click="copyLink('url', file.url, file.origin_name)">
                       复制链接
                     </n-button>
@@ -286,8 +309,9 @@ window.ipcRenderer.on('upload-shortcut', () => {
                 </template>
                 <template v-else>
                   <n-button
-                    tertiary class="wfull"
-                    :disabled="file.isLoading"
+                    tertiary
+                    class="wfull"
+                    :disabled="file.isLoading || !file.fileInfo?.file"
                     type="primary"
                     @click="file.fileInfo?.file && uploadImage(index, file.fileInfo.file)"
                   >
@@ -314,5 +338,16 @@ window.ipcRenderer.on('upload-shortcut', () => {
 
 :deep(.n-image) > img {
   --uno: wh-full;
+  object-fit: cover; /* 确保图片覆盖容器 */
+  transition: transform 0.2s ease; /* 添加平滑过渡效果 */
+}
+
+:deep(.n-image:hover) > img {
+  transform: scale(1.03); /* 鼠标悬停时轻微放大效果 */
+}
+
+/* 优化按钮悬停效果 */
+:deep(.n-button:not(:disabled):hover) {
+  opacity: 0.9;
 }
 </style>

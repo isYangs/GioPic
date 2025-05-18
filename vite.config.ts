@@ -50,7 +50,7 @@ export default defineConfig(({ command }) => {
       }),
       AutoImport({
         dts: 'src/renderer/typings/auto-imports.d.ts',
-        include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
+        include: [/\.[tj]s?$/, /\.vue$/, /\.vue\?vue/],
         imports: [
           'vue',
           '@vueuse/core',
@@ -69,7 +69,7 @@ export default defineConfig(({ command }) => {
       }),
       electron({
         main: {
-          entry: 'src/service/main/index.ts',
+          entry: 'src/main/index.ts',
           onstart({ startup }) {
             if (process.env.VSCODE_DEBUG) {
               console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
@@ -87,10 +87,15 @@ export default defineConfig(({ command }) => {
                 external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
               },
             },
+            resolve: {
+              alias: {
+                '@/': `${path.resolve(__dirname,'src')}/`,
+              },
+            },
           },
         },
         preload: {
-          input: 'src/service/preload/index.ts',
+          input: 'src/preload/index.ts',
           vite: {
             build: {
               sourcemap: sourcemap ? 'inline' : undefined, // #332
@@ -101,6 +106,11 @@ export default defineConfig(({ command }) => {
               },
               rollupOptions: {
                 external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              },
+            },
+            resolve: {
+              alias: {
+                '@/': `${path.resolve(__dirname,'src')}/`,
               },
             },
           },
