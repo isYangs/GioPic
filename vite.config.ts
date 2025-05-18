@@ -28,28 +28,29 @@ export default defineConfig(({ command }) => {
   return {
     resolve: {
       alias: {
-        '~/': `${path.resolve(__dirname, 'src')}/`,
+        '~/': `${path.resolve(__dirname, 'src/renderer')}/`,
+        '@/': `${path.resolve(__dirname,'src')}/`,
       },
     },
     plugins: [
       VueRouter({
-        routesFolder: 'src/pages',
+        routesFolder: 'src/renderer/pages',
         exclude: ['**/components/*.vue'],
-        dts: 'src/typings/typed-router.d.ts',
+        dts: 'src/renderer/typings/typed-router.d.ts',
         extensions: ['.vue'],
       }),
       vue(),
       UnoCSS(),
       VueDevTools(),
       Components({
-        dirs: ['src/components'],
+        dirs: ['src/renderer/components'],
         extensions: ['vue'],
-        dts: 'src/typings/components.d.ts',
+        dts: 'src/renderer/typings/components.d.ts',
         resolvers: [NaiveUiResolver()],
       }),
       AutoImport({
-        dts: 'src/typings/auto-imports.d.ts',
-        include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
+        dts: 'src/renderer/typings/auto-imports.d.ts',
+        include: [/\.[tj]s?$/, /\.vue$/, /\.vue\?vue/],
         imports: [
           'vue',
           '@vueuse/core',
@@ -68,7 +69,7 @@ export default defineConfig(({ command }) => {
       }),
       electron({
         main: {
-          entry: 'electron/main/index.ts',
+          entry: 'src/main/index.ts',
           onstart({ startup }) {
             if (process.env.VSCODE_DEBUG) {
               console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
@@ -86,10 +87,15 @@ export default defineConfig(({ command }) => {
                 external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
               },
             },
+            resolve: {
+              alias: {
+                '@/': `${path.resolve(__dirname,'src')}/`,
+              },
+            },
           },
         },
         preload: {
-          input: 'electron/preload/index.ts',
+          input: 'src/preload/index.ts',
           vite: {
             build: {
               sourcemap: sourcemap ? 'inline' : undefined, // #332
@@ -100,6 +106,11 @@ export default defineConfig(({ command }) => {
               },
               rollupOptions: {
                 external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              },
+            },
+            resolve: {
+              alias: {
+                '@/': `${path.resolve(__dirname,'src')}/`,
               },
             },
           },
@@ -120,8 +131,6 @@ export default defineConfig(({ command }) => {
   }
 })
 
-// https://github.com/WiseLibs/better-sqlite3/blob/v8.5.2/lib/database.js#L36
-// https://github.com/WiseLibs/better-sqlite3/blob/v8.5.2/lib/database.js#L50
 function bindingSqlite3(options: {
   output?: string
   better_sqlite3_node?: string
@@ -135,7 +144,6 @@ function bindingSqlite3(options: {
   return {
     name: 'vite-plugin-binding-sqlite3',
     config(config) {
-      // https://github.com/vitejs/vite/blob/v4.4.9/packages/vite/src/node/config.ts#L496-L499
       const pathUtils = process.platform === 'win32' ? path.win32 : path.posix
       const rootDir = pathUtils.resolve(config.root || process.cwd())
       const outputDir = pathUtils.join(rootDir, options.output || 'dist-native')
