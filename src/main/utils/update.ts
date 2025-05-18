@@ -1,4 +1,5 @@
 import type { BrowserWindow } from 'electron'
+import https from 'node:https'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
@@ -22,6 +23,77 @@ let silentUpdateCheck = true
  */
 const updateOnThisStart = getStore('updateAtNext')
 
+/**
+ * 设置更新服务器
+ * 根据用户选择的更新源进行配置
+ */
+async function setupUpdateServer() {
+  const updateSource = getStore('updateSource') || 'github'
+
+  logger.info(`[update] Setting up update server: ${updateSource}`)
+
+  if (updateSource === 'cn') {
+    // 配置国内服务器
+    autoUpdater.setFeedURL({
+      provider: 'generic',
+      url: 'https://update.isyangs.cn/',
+      channel: 'latest',
+    })
+    logger.info('[update] Using China update server')
+  }
+  else if (updateSource === 'auto') {
+    const isGithubAccessible = await checkGithubAccessibility()
+    if (!isGithubAccessible) {
+      autoUpdater.setFeedURL({
+        provider: 'generic',
+        url: 'https://update.isyangs.cn/',
+        channel: 'latest',
+      })
+      logger.info('[update] Auto-selected China update server')
+    }
+    else {
+      logger.info('[update] Auto-selected GitHub update server')
+    }
+  }
+  else {
+    logger.info('[update] Using GitHub update server')
+  }
+}
+
+/**
+ * 检查 GitHub 是否可访问
+ * 使用网络请求检测 GitHub 可访问性
+ */
+async function checkGithubAccessibility(): Promise<boolean> {
+  try {
+    return new Promise<boolean>((resolve) => {
+      const request = https.get('https://api.github.com', {
+        timeout: 5000,
+        headers: { 'User-Agent': 'GioPic' },
+      }, (response) => {
+        resolve(response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode < 500)
+      })
+
+      request.on('error', (error) => {
+        logger.error(`[update] GitHub accessibility check error: ${error}`)
+        resolve(false)
+      })
+
+      request.on('timeout', () => {
+        logger.error('[update] GitHub accessibility check timeout')
+        request.destroy()
+        resolve(false)
+      })
+
+      request.end()
+    })
+  }
+  catch (error) {
+    logger.error(`[update] Error checking GitHub accessibility: ${error}`)
+    return false
+  }
+}
+
 export async function checkForUpdates() {
   logger.info('[update] Checking for updates...')
   try {
@@ -42,10 +114,24 @@ export default function initUpdater(win: BrowserWindow) {
     autoUpdater.updateConfigPath = path.resolve(__dirname, '../../dev-app-update.yml')
   }
 
+  // 设置更新服务器
+  setupUpdateServer().catch((e) => {
+    logger.error(`[update] Error setting up update server: ${e}`)
+  })
+
   // 关闭自动下载
   autoUpdater.autoDownload = false
   // 关闭自动安装
   autoUpdater.autoInstallOnAppQuit = false
+
+  // 监听更新源变更事件
+  ipcMain.on('change-update-source', (_e, source) => {
+    setStore('updateSource', source)
+    logger.info(`[update] Update source changed to: ${source}`)
+    setupUpdateServer().catch((e) => {
+      logger.error(`[update] Error setting up update server after source change: ${e}`)
+    })
+  })
 
   ipcMain.on('check-for-update', checkForUpdates)
 

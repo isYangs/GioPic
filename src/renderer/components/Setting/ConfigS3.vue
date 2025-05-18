@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramDetail } from '~/stores'
+import type { ProgramDetail } from '@/types'
 import { useProgramStore } from '~/stores'
 
 const route = useRoute('/Setting/[id]')

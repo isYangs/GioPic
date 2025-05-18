@@ -88,9 +88,9 @@ export function registerIpc(win: BrowserWindow) {
       logger.info(`[upload] ${type} upload successful: ${JSON.stringify(result)}`)
       return { success: true, data: result }
     }
-    catch (err) {
-      logger.error(`[upload] ${type} upload failed: ${err}`)
-      return { success: false, message: (err as Error).message }
+    catch (e) {
+      logger.error(`[upload] ${type} upload failed: ${e}`)
+      return { success: false, message: (e as Error).message }
     }
   })
 

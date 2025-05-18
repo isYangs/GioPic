@@ -8,12 +8,14 @@ const props = defineProps<{
   tab?: string
 }>()
 
+const isMac = computed(() => navigator.userAgent.includes('Mac OS'))
 const appStore = useAppStore()
 const {
   appCloseTip,
   appCloseType,
   autoStart,
   autoUpdate,
+  updateSource,
   isDevToolsEnabled,
   themeType,
   themeAuto,
@@ -29,6 +31,12 @@ const themeOptions = [
 const closeOptions = [
   { label: '最小化到任务栏', value: 'hide' },
   { label: '直接退出', value: 'close' },
+]
+
+const updateOptions = [
+  { label: 'Github', value: 'github' },
+  { label: '国内源', value: 'cn' },
+  { label: '自动选择', value: 'auto' },
 ]
 
 // 重置确认
@@ -93,11 +101,6 @@ function onThemeChange(val?: boolean) {
   }
 }
 
-// function onThemeAutoChange(val: boolean) {
-//   if (val)
-//     themeType.value = osThemeRef.value
-// }
-
 async function onAutoStartChange(val: boolean) {
   await window.ipcRenderer.invoke('auto-start', val)
 }
@@ -105,6 +108,10 @@ async function onAutoStartChange(val: boolean) {
 async function onDevToolsChange(val: boolean) {
   await window.ipcRenderer.invoke('reg-dev-tools', val)
 }
+
+watch(updateSource, (newValue) => {
+  window.ipcRenderer.send('change-update-source', newValue)
+})
 </script>
 
 <template>
@@ -116,7 +123,7 @@ async function onDevToolsChange(val: boolean) {
       :indent="22"
       @update:value="activeIndex = $event"
     />
-    <n-scrollbar class="setting-content grow-1" content-class="p6 pt10">
+    <n-scrollbar class="setting-content grow-1" content-class="p6 pt12">
       <template v-if="activeIndex === 0">
         <setting-item title="深浅模式">
           <n-select
@@ -154,6 +161,16 @@ async function onDevToolsChange(val: boolean) {
         </setting-item>
         <setting-item title="自动检测更新" desc="在启动时检测是否有新版本">
           <n-switch v-model:value="autoUpdate" :round="false" />
+        </setting-item>
+        <setting-item title="更新源" desc="当无法访问Github时可切换为国内源">
+          <n-select
+            v-model:value="updateSource"
+            :options="updateOptions"
+            :style="{ width: '130px' }"
+            :consistent-menu-width="false"
+            size="medium"
+            placement="bottom"
+          />
         </setting-item>
       </template>
 

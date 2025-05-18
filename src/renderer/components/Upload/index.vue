@@ -4,7 +4,6 @@ import { useUploadDataStore } from '~/stores'
 
 const uploadDataStore = useUploadDataStore()
 
-// 上传文件，将文件信息存储到store中
 async function upload({ file, onFinish }: UploadCustomRequestOptions) {
   if (!file.file) {
     window.$message.error('文件不存在')
@@ -22,7 +21,6 @@ async function upload({ file, onFinish }: UploadCustomRequestOptions) {
   onFinish()
 }
 
-// 监听粘贴事件，将粘贴的图片文件存储到store中
 useEventListener('paste', async (e) => {
   const items = e.clipboardData?.items
   if (!items)

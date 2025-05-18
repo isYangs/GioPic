@@ -59,3 +59,73 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: 'release/**'
+
+  sync-to-cn-server:
+    name: Sync update files to CN server
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-latest
+          path: ./release-artifacts/windows
+
+      - name: Download MacOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-latest
+          path: ./release-artifacts/macos
+
+      - name: Prepare update files
+        run: |
+          mkdir -p ./update-files
+          echo "Finding all update files..."
+          find ./release-artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "latest*.yml" | sort
+          echo "Copying Windows files..."
+          cp -v ./release-artifacts/windows/**/latest*.yml ./update-files/ 2>/dev/null || echo "No Windows yml files found"
+          cp -v ./release-artifacts/windows/**/*.exe ./update-files/ 2>/dev/null || echo "No Windows exe files found"
+          echo "Copying macOS files..."
+          cp -v ./release-artifacts/macos/**/latest*.yml ./update-files/ 2>/dev/null || echo "No macOS yml files found"
+          cp -v ./release-artifacts/macos/**/*.dmg ./update-files/ 2>/dev/null || echo "No macOS dmg files found"
+          echo "Files ready for upload:"
+          ls -la ./update-files/
+          if [ -z "$(ls -A ./update-files/)" ]; then
+            echo "ERROR: No files found to upload!"
+            exit 1
+          fi
+
+      - name: Clean target directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.CN_SERVER_HOST }}
+          username: ${{ secrets.CN_SERVER_USERNAME }}
+          password: ${{ secrets.CN_SERVER_PASSWORD }}
+          port: ${{ secrets.CN_SERVER_PORT }}
+          script: |
+            mkdir -p /wwwroot/update.isyangs.cn
+            rm -rf /wwwroot/update.isyangs.cn/*
+            echo "Update directory cleaned!"
+
+      - name: Deploy to CN server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.CN_SERVER_HOST }}
+          username: ${{ secrets.CN_SERVER_USERNAME }}
+          password: ${{ secrets.CN_SERVER_PASSWORD }}
+          port: ${{ secrets.CN_SERVER_PORT }}
+          source: './update-files/*'
+          target: /wwwroot/update.isyangs.cn
+          strip_components: 1
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.CN_SERVER_HOST }}
+          username: ${{ secrets.CN_SERVER_USERNAME }}
+          password: ${{ secrets.CN_SERVER_PASSWORD }}
+          port: ${{ secrets.CN_SERVER_PORT }}
+          script: |
+            cd /wwwroot/update.isyangs.cn
+            ls -la
+            echo "Update files sync completed!"

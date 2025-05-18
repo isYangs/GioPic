@@ -6,6 +6,7 @@ import { platform } from '@electron-toolkit/utils'
 import Database from 'better-sqlite3'
 import { app } from 'electron'
 import logger from '../utils/logger'
+import { backupDatabase, runMigrations } from './migrations'
 import tables from './tables'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -26,6 +27,7 @@ export function init(): boolean | null {
   const databasePath = DB_PATH
   const nativeBinding = path.join(root, import.meta.env.VITE_BETTER_SQLITE3_BINDING)
   let dbFileExists = true
+  let isNewDb = false
 
   try {
     db = new Database(databasePath, {
@@ -33,6 +35,9 @@ export function init(): boolean | null {
       nativeBinding,
     })
     logger.info('[db] Database file exists.')
+
+    // 在更新前创建备份
+    backupDatabase(databasePath)
   }
   catch {
     logger.warn('[db] Database file does not exist, creating a new one.')
@@ -41,9 +46,24 @@ export function init(): boolean | null {
     })
     initTables(db)
     dbFileExists = false
+    isNewDb = true
   }
 
   if (fs.existsSync(DB_PATH)) {
+    // 仅当数据库已存在时运行迁移
+    if (!isNewDb) {
+      // 获取当前应用版本
+      const appVersion = app.getVersion()
+
+      // 运行数据库迁移
+      try {
+        runMigrations(db, appVersion)
+      }
+      catch (error) {
+        logger.error('[db] Migration failed:', error)
+      }
+    }
+
     logger.info('[db] Optimizing database...')
     db.exec('PRAGMA optimize;')
   }

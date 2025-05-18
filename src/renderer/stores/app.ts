@@ -9,6 +9,7 @@ const initialState = {
   isMenuCollapsed: false, // 是否折叠菜单
   ignoreVersion: '', // 忽略更新的版本号
   updateAtNext: false, // 是否在下次启动时更新
+  updateSource: 'github' as 'github' | 'cn' | 'auto', // 更新源
 
   // 主题
   themeType: 'light' as 'light' | 'dark' | null, // 主题类型 'light' | 'dark' | null
