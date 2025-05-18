@@ -14,7 +14,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '../..')
 let db: BetterSqliteDatabase
 
-// 定义数据库文件路径，针对macOS系统进行适配
 const DB_PATH = platform.isMacOS
   ? path.join(app.getPath('userData'), '/GPData.db')
   : path.join(path.dirname(app.getPath('exe')), '/GPData.db')
@@ -23,7 +22,6 @@ const initTables = (db: BetterSqliteDatabase) => db.exec(`${Array.from(tables.va
 
 // 打开、初始化数据库
 export function init(): boolean | null {
-  logger.info('[db] Initializing database...')
   const databasePath = DB_PATH
   const nativeBinding = path.join(root, import.meta.env.VITE_BETTER_SQLITE3_BINDING)
   let dbFileExists = true
@@ -34,9 +32,6 @@ export function init(): boolean | null {
       fileMustExist: true,
       nativeBinding,
     })
-    logger.info('[db] Database file exists.')
-
-    // 在更新前创建备份
     backupDatabase(databasePath)
   }
   catch {
@@ -50,12 +45,8 @@ export function init(): boolean | null {
   }
 
   if (fs.existsSync(DB_PATH)) {
-    // 仅当数据库已存在时运行迁移
     if (!isNewDb) {
-      // 获取当前应用版本
       const appVersion = app.getVersion()
-
-      // 运行数据库迁移
       try {
         runMigrations(db, appVersion)
       }
@@ -64,18 +55,15 @@ export function init(): boolean | null {
       }
     }
 
-    logger.info('[db] Optimizing database...')
     db.exec('PRAGMA optimize;')
   }
 
   process.on('exit', () => {
     db.close()
-    logger.info('[db] Database connection closed.')
   })
 
   logger.info(`[db] Database initialized; path: ${DB_PATH}`)
   return dbFileExists
 }
 
-// 获取数据库实例
 export const getDB = (): BetterSqliteDatabase => db

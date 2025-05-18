@@ -2,7 +2,7 @@ import type { LskyUploadParams, LskyUploadResponse, UploaderResponse } from '@/t
 import fs from 'node:fs'
 import logger from '@/main/utils/logger'
 import FormData from 'form-data'
-import { httpRequest } from '../../HTTPService'
+import { httpRequest } from '../../HTTPClient'
 
 export async function upload(options: LskyUploadParams): Promise<UploaderResponse> {
   const { api, token, path, ...data } = options

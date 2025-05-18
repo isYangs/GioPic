@@ -3,10 +3,11 @@ import type { SupportedUploader } from './services/beds'
 import { app, ipcMain } from 'electron'
 import { deleteUploadData, insertUploadData, queryUploadData } from './db/modules'
 import { uploaders } from './services/beds'
-import { autoStart } from './utils/app'
+import createShortcutService from './services/ShortcutService'
+import createWindowService from './services/WindowService'
 import logger from './utils/logger'
 
-export function registerIpc(win: BrowserWindow) {
+export function registerIpc(win: BrowserWindow, loadingWindow: BrowserWindow | null) {
   // ---------- 窗口操作 ----------
   ipcMain.handle('window-min', () => win.minimize())
 
@@ -26,9 +27,19 @@ export function registerIpc(win: BrowserWindow) {
   ipcMain.handle('window-show', () => win.show())
   ipcMain.handle('app-version', () => app.getVersion())
 
-  // ---------- 启动项 ----------
+  ipcMain.on('win-loaded', () => {
+    if (loadingWindow && !loadingWindow.isDestroyed())
+      loadingWindow.close()
+    win?.show()
+    win?.focus()
+  }) // ---------- 启动项 ----------
+  const windowService = createWindowService(win)
+
   ipcMain.handle('auto-start', (_event, val) => {
-    autoStart(val)
+    process.nextTick(() => {
+      windowService.setAutoStart(val)
+    })
+    return Promise.resolve(true)
   })
 
   // ---------- 数据库操作 ----------
@@ -36,12 +47,6 @@ export function registerIpc(win: BrowserWindow) {
     try {
       const data = JSON.parse(dataString)
       const isInserted = insertUploadData(data)
-      if (!isInserted) {
-        logger.info(`[upload] Record with key '${data.key}' already exists, skipped insertion`)
-      }
-      else {
-        logger.info(`[upload] Successfully inserted record with key '${data.key}'`)
-      }
       return isInserted
     }
     catch (e) {
@@ -53,7 +58,6 @@ export function registerIpc(win: BrowserWindow) {
   ipcMain.handle('fetch-all-upload-data', () => {
     try {
       const data = queryUploadData()
-      logger.info('[upload] Query success')
       return data
     }
     catch (e) {
@@ -64,7 +68,6 @@ export function registerIpc(win: BrowserWindow) {
   ipcMain.handle('delete-upload-data', (_event, key) => {
     try {
       deleteUploadData(key)
-      logger.info('[upload] Delete success')
     }
     catch (e) {
       logger.error(`[upload] Delete error: ${e}`)
@@ -73,6 +76,22 @@ export function registerIpc(win: BrowserWindow) {
 
   ipcMain.handle('reset-settings', () => {
     logger.info('[settings] Reset and restarting')
+  })
+
+  // ---------- 开发者工具设置 ----------
+  const shortcutService = createShortcutService(win)
+
+  ipcMain.handle('reg-dev-tools', (_event, enabled) => {
+    try {
+      process.nextTick(() => {
+        shortcutService.updateDevToolsShortcut(enabled)
+      })
+      return Promise.resolve(true)
+    }
+    catch (e) {
+      logger.error(`[devTools] Error setting developer tools: ${e}`)
+      return Promise.resolve(false)
+    }
   })
 
   // ---------- 上传接口 ----------
@@ -85,7 +104,7 @@ export function registerIpc(win: BrowserWindow) {
       }
 
       const result = await uploader.upload(params)
-      logger.info(`[upload] ${type} upload successful: ${JSON.stringify(result)}`)
+      logger.info(`[upload] ${type} upload successful`)
       return { success: true, data: result }
     }
     catch (e) {

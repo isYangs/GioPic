@@ -3,7 +3,7 @@ const initialState = {
   appCloseType: 'hide' as 'close' | 'hide', // 关闭类型 'close' | 'hide'
   appCloseTip: false, // 是否显示关闭应用对话框
   autoStart: false, // 是否开机自启动
-  autoUpdate: false, // 是否自动更新
+  autoUpdate: true, // 是否自动更新
   isDevToolsEnabled: true, // 是否打开开发者工具
   defaultProgram: null as number | null, // 默认上传存储程序
   isMenuCollapsed: false, // 是否折叠菜单
@@ -51,7 +51,24 @@ export const useAppStore = defineStore(
   {
     persistedState: {
       key: '__giopic_app_store__',
-      excludePaths: ['isMenuCollapsed', 'isImgListDelDialog', 'isUploadRecordDelDialog'],
+      excludePaths: [
+        'isMenuCollapsed',
+        'isImgListDelDialog',
+        'isUploadRecordDelDialog',
+        'lastCallTimes',
+      ],
+      serialize: (state) => {
+        const serialized = JSON.stringify(state)
+        return serialized
+      },
+      deserialize: (serializedState) => {
+        try {
+          return JSON.parse(serializedState)
+        }
+        catch {
+          return {}
+        }
+      },
     },
   },
 )

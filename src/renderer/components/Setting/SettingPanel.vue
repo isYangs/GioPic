@@ -8,7 +8,6 @@ const props = defineProps<{
   tab?: string
 }>()
 
-const isMac = computed(() => navigator.userAgent.includes('Mac OS'))
 const appStore = useAppStore()
 const {
   appCloseTip,
@@ -102,11 +101,11 @@ function onThemeChange(val?: boolean) {
 }
 
 async function onAutoStartChange(val: boolean) {
-  await window.ipcRenderer.invoke('auto-start', val)
+  window.ipcRenderer.invoke('auto-start', val)
 }
 
 async function onDevToolsChange(val: boolean) {
-  await window.ipcRenderer.invoke('reg-dev-tools', val)
+  window.ipcRenderer.invoke('reg-dev-tools', val)
 }
 
 watch(updateSource, (newValue) => {
@@ -169,7 +168,7 @@ watch(updateSource, (newValue) => {
             :style="{ width: '130px' }"
             :consistent-menu-width="false"
             size="medium"
-            placement="bottom"
+            placement="top"
           />
         </setting-item>
       </template>

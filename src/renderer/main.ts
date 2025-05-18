@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
 import App from './App.vue'
 import store from './stores'
@@ -11,7 +11,7 @@ import '@unocss/reset/tailwind-compat.css'
 const app = createApp(App)
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: import.meta.env.DEV ? createWebHistory(import.meta.env.BASE_URL) : createWebHashHistory(),
   routes,
 })
 
@@ -20,6 +20,7 @@ app
   .use(router)
   .mount('#app')
   .$nextTick(() => {
-    // Remove Preload scripts loading
-    postMessage({ payload: 'removeLoading' }, '*')
+    setTimeout(() => {
+      window.ipcRenderer.send('win-loaded')
+    }, 3000)
   })

@@ -5,17 +5,8 @@ import { app } from 'electron'
 import logger from '../../utils/logger'
 
 export interface Migration {
-  /**
-   * 迁移版本号，格式如 1.0.0
-   */
   version: string
-  /**
-   * 迁移名称
-   */
   name: string
-  /**
-   * 迁移 SQL 或函数
-   */
   up: string | ((db: Database) => void)
 }
 
@@ -67,7 +58,7 @@ function getCurrentVersion(db: Database): { version: string, name: string } | nu
 function getAllMigrations(): Migration[] {
   const migrations: Migration[] = [
     {
-      version: '1.0.0',
+      version: '0.1.0',
       name: 'initial',
       up: '',
     },
@@ -81,8 +72,6 @@ function recordMigration(db: Database, migration: Migration): void {
   db.prepare(
     'INSERT INTO db_version (version, name, applied_at) VALUES (?, ?, ?)',
   ).run(migration.version, migration.name, new Date().toISOString())
-
-  logger.info(`[db] Applied migration: ${migration.version} - ${migration.name}`)
 }
 
 /**
@@ -112,30 +101,21 @@ function applyMigration(db: Database, migration: Migration): void {
 /**
  * 执行所有待处理的数据库迁移
  */
-export function runMigrations(db: Database, appVersion: string): void {
-  logger.info('[db] Checking for database migrations...')
-
+export function runMigrations(db: Database, _appVersion: string): void {
   const currentDbInfo = getCurrentVersion(db)
   const currentVersion = currentDbInfo?.version || '0.0.0'
-
-  logger.info(`[db] Current database version: ${currentVersion || 'None'}`)
-  logger.info(`[db] Current app version: ${appVersion}`)
-
   const migrations = getAllMigrations()
-
   const pendingMigrations = migrations.filter(migration =>
     compareVersions(migration.version, currentVersion) > 0,
   )
 
   if (pendingMigrations.length === 0) {
-    logger.info('[db] Database is up to date')
     return
   }
 
   logger.info(`[db] Found ${pendingMigrations.length} pending migrations`)
 
   for (const migration of pendingMigrations) {
-    logger.info(`[db] Applying migration: ${migration.version} - ${migration.name}`)
     applyMigration(db, migration)
   }
 
@@ -144,8 +124,11 @@ export function runMigrations(db: Database, appVersion: string): void {
 
 /**
  * 数据库备份功能
+ * @param dbPath 数据库文件路径
+ * @param maxBackups 保留的最大备份数量，默认为5
+ * @returns 备份文件路径或null（备份失败时）
  */
-export function backupDatabase(dbPath: string): string | null {
+export function backupDatabase(dbPath: string, maxBackups: number = 5): string | null {
   try {
     const backupDir = path.join(app.getPath('userData'), 'backups')
 
@@ -157,6 +140,31 @@ export function backupDatabase(dbPath: string): string | null {
     const backupPath = path.join(backupDir, `GPData_backup_${timestamp}.db`)
 
     fs.copyFileSync(dbPath, backupPath)
+
+    const cleanupOldBackups = () => {
+      try {
+        const backupFiles = fs.readdirSync(backupDir)
+          .filter(file => file.startsWith('GPData_backup_') && file.endsWith('.db'))
+          .map(file => ({
+            name: file,
+            path: path.join(backupDir, file),
+            time: fs.statSync(path.join(backupDir, file)).mtime.getTime(),
+          }))
+          .sort((a, b) => b.time - a.time)
+
+        if (backupFiles.length > maxBackups) {
+          const filesToDelete = backupFiles.slice(maxBackups)
+          for (const file of filesToDelete) {
+            fs.unlinkSync(file.path)
+          }
+        }
+      }
+      catch (cleanupError) {
+        logger.error('[db] Failed to cleanup old backups:', cleanupError)
+      }
+    }
+
+    cleanupOldBackups()
 
     logger.info(`[db] Database backup created: ${backupPath}`)
     return backupPath

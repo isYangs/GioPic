@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GioPic</title>
+
+    <style>
+      :root {
+        --primary-color: #18a058;
+        --secondary-color: #63e2b7;
+        --accent-color: #36ad6a;
+        --bg-color: #ffffff;
+        --text-color: #333333;
+        --text-secondary: #686868;
+        --shadow-color: rgba(0, 0, 0, 0.08);
+        --footer-bg: rgba(0, 0, 0, 0.02);
+        --button-hover: #36ad6a;
+        --button-active: #0c7a43;
+        --border-color: rgba(0, 0, 0, 0.08);
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-round: 999px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --primary-color: #63e2b7;
+          --secondary-color: #36ad6a;
+          --accent-color: #18a058;
+          --bg-color: #18181c;
+          --text-color: #f8f9fa;
+          --text-secondary: #c9c9c9;
+          --shadow-color: rgba(0, 0, 0, 0.25);
+          --footer-bg: rgba(255, 255, 255, 0.05);
+          --button-hover: #36ad6a;
+          --button-active: #63e2b7;
+          --border-color: rgba(255, 255, 255, 0.12);
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-user-drag: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-color);
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        transition: background-color 0.3s ease;
+        position: relative;
+        color: var(--text-color);
+      }
+
+      @font-face {
+        font-family: 'GioPic';
+        src: url('../public/fonts/GioPic.ttf') format('truetype');
+        font-display: swap;
+      }
+
+      .font-type {
+        font-family: 'GioPic', sans-serif;
+        font-weight: 700;
+      }
+
+      .content-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .app-name {
+        font-size: 3.5rem;
+        line-height: 1.2;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        letter-spacing: 0.5px;
+        position: relative;
+        display: inline-block;
+        text-align: center;
+        width: 100%;
+        animation: gentle-pulse 3s infinite ease-in-out;
+        text-shadow: 0 2px 10px rgba(24, 160, 88, 0.2);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .app-name {
+          text-shadow: 0 0 15px rgba(99, 226, 183, 0.3);
+        }
+      }
+
+      .loading-animation {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin-bottom: 30px;
+      }
+
+      .loading-dot {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(0);
+        background: var(--primary-color);
+      }
+
+      .loading-dot:nth-child(1) {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      .loading-dot:nth-child(2) {
+        background: var(--secondary-color);
+        animation: pulse 1.5s ease-in-out 0.5s infinite;
+      }
+
+      .loading-dot:nth-child(3) {
+        background: var(--accent-color);
+        animation: pulse 1.5s ease-in-out 1s infinite;
+      }
+
+      .rotating-dots {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        animation: rotate 8s linear infinite;
+      }
+
+      .dot {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 0 8px rgba(24, 160, 88, 0.3);
+      }
+
+      .dot:nth-child(2) {
+        transform: rotate(72deg) translateY(-35px);
+      }
+
+      .dot:nth-child(3) {
+        transform: rotate(144deg) translateY(-35px);
+      }
+
+      .dot:nth-child(4) {
+        transform: rotate(216deg) translateY(-35px);
+      }
+
+      .dot:nth-child(5) {
+        transform: rotate(288deg) translateY(-35px);
+      }
+
+      #start-app {
+        margin-top: 20px;
+        padding: 10px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--primary-color);
+        background-color: rgba(54, 173, 106, 0.12);
+        background-size: 200% 200%;
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        outline: none;
+        opacity: 0;
+        transform: translateY(10px);
+        animation:
+          button-appear 0.5s forwards 2s,
+          gradient-shift 8s infinite ease-in-out;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        box-shadow: 0 2px 10px rgba(24, 160, 88, 0.15);
+        letter-spacing: 0.5px;
+        text-shadow: none;
+      }
+
+      #start-app::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 100%;
+        background-color: rgba(54, 173, 106, 0.08);
+        transition: width 0.3s ease;
+        z-index: -1;
+      }
+
+      #start-app:hover {
+        background-color: rgba(54, 173, 106, 0.18);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(24, 160, 88, 0.2);
+        letter-spacing: 1px;
+      }
+
+      #start-app:hover::before {
+        width: 100%;
+      }
+
+      #start-app:active {
+        background-color: rgba(54, 173, 106, 0.25);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(24, 160, 88, 0.15);
+        border-color: var(--accent-color);
+      }
+
+      footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px 0;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+        width: 100%;
+        backdrop-filter: blur(10px);
+      }
+
+      footer span {
+        display: inline-block;
+        transition: color 0.3s;
+      }
+
+      @keyframes appear {
+        0%,
+        20% {
+          opacity: 0;
+          transform: scale(0);
+        }
+
+        30%,
+        70% {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        90%,
+        100% {
+          opacity: 0;
+          transform: scale(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.8;
+          transform: scale(0);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.5);
+        }
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes title-glow {
+        0% {
+          text-shadow: 0 0 5px rgba(24, 160, 88, 0.1);
+        }
+        100% {
+          text-shadow: 0 0 15px rgba(24, 160, 88, 0.4);
+        }
+      }
+
+      @keyframes gentle-pulse {
+        0% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(-2px);
+          opacity: 0.95;
+        }
+        100% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes gradient-shift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      @keyframes button-appear {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="content-container">
+      <h1 class="app-name font-type">GioPic</h1>
+      <div class="loading-animation">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="rotating-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <button id="start-app">启动程序</button>
+    </div>
+
+    <footer>
+      <span>GioPic Copyright &copy; <span id="year"></span> isYangs</span>
+    </footer>
+
+    <script>
+      const startAppBtn = document.getElementById('start-app')
+      let timer = null
+
+      document.getElementById('year').textContent = new Date().getFullYear() + ' '
+
+      startAppBtn.addEventListener('click', () => {
+        window.ipcRenderer.send('win-loaded')
+      })
+
+      window.addEventListener('load', () => {
+        const timer = setTimeout(() => {
+          startAppBtn.style.opacity = 1
+          startAppBtn.style.transform = 'translateY(0)'
+        }, 3000)
+      })
+
+      window.addEventListener('beforeunload', () => {
+        clearTimeout(timer)
+      })
+    </script>
+  </body>
+</html>

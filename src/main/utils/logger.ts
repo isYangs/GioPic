@@ -19,9 +19,9 @@ function getCurrentDateString() {
 }
 
 // 配置日志
-logger.transports.file.level = 'silly' // 日志级别
-logger.transports.file.maxSize = 10 * 1024 * 1024 // 文件最大不超过 10M
-logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}' // 输出格式
+logger.transports.file.level = 'warn'
+logger.transports.file.maxSize = 10 * 1024 * 1024
+logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}'
 logger.transports.file.resolvePathFn = () => {
   const dateStr = getCurrentDateString()
   return path.join(app.getPath('userData'), `logs/${dateStr}.log`)

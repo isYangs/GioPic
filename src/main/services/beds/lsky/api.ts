@@ -1,6 +1,6 @@
 import type { LskyOptions, LskyStrategiesResponse } from '@/types'
 import logger from '@/main/utils/logger'
-import { httpRequest } from '../../HTTPService'
+import { httpRequest } from '../../HTTPClient'
 
 function getHeaders(token: string) {
   return {

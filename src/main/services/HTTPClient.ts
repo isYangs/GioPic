@@ -9,7 +9,6 @@ const instance: AxiosInstance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    logger.info(`[request] Request initiated - Method: ${config.method}, URL: ${config.url}`)
     return config
   },
   (error) => {
@@ -20,7 +19,6 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   (response) => {
-    logger.info(`[response] Response sent - Method: ${response.config.method}, URL: ${response.config.url}, Status: ${response.status} (${response.statusText})`)
     return response.data
   },
   (error) => {
