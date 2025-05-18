@@ -13,7 +13,7 @@ fs.writeFileSync(path.join(__dirname, '.debug.env'), envContent.join('\n'))
 
 // bootstrap
 spawn(
-  process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+  'pnpm',
   ['run', 'dev'],
   {
     stdio: 'inherit',

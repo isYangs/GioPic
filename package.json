@@ -37,6 +37,8 @@
     "electron-log": "^5.2.0",
     "electron-store": "^10.0.0",
     "electron-updater": "^6.3.4",
+    "form-data": "^4.0.2",
+    "mime": "^4.0.7",
     "p-limit": "^6.1.0",
     "pinia": "^2.2.2",
     "pinia-plugin-persistedstate-2": "^2.0.24",
