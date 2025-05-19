@@ -1,4 +1,3 @@
-import presetRemToPx from '@unocss/preset-rem-to-px'
 import {
   defineConfig,
   presetAttributify,
@@ -15,7 +14,6 @@ export default defineConfig({
       scale: 1.2,
       warn: true,
     }),
-    presetRemToPx(),
   ],
   shortcuts: {
     'wh-full': 'w-full h-full',
