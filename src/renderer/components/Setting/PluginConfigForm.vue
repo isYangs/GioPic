@@ -45,7 +45,7 @@ function getFieldValue(field: string) {
         </div>
       </template>
 
-      <n-input
+      <code-input
         v-if="item.type === 'text'"
         :value="getFieldValue(item.field)"
         :placeholder="item.placeholder"

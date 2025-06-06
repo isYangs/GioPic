@@ -57,95 +57,34 @@ function generateCustomColors(baseColor: string) {
   }
 }
 
-const themeOverrides = computed((): GlobalThemeOverrides => {
-  const lightColorMap = {
-    default: {
-      primaryColor: '#18a058',
-      primaryColorHover: '#36ad6a',
-      primaryColorPressed: '#0c7a43',
-      primaryColorSuppl: '#36ad6a',
-    },
-    blue: {
-      primaryColor: '#2080f0',
-      primaryColorHover: '#4098fc',
-      primaryColorPressed: '#1060c9',
-      primaryColorSuppl: '#4098fc',
-    },
-    purple: {
-      primaryColor: '#722ed1',
-      primaryColorHover: '#8a4fdd',
-      primaryColorPressed: '#551a8b',
-      primaryColorSuppl: '#8a4fdd',
-    },
-    orange: {
-      primaryColor: '#fa8c16',
-      primaryColorHover: '#ffb04a',
-      primaryColorPressed: '#d97008',
-      primaryColorSuppl: '#ffb04a',
-    },
-    red: {
-      primaryColor: '#e03e3e',
-      primaryColorHover: '#e85d5d',
-      primaryColorPressed: '#c53030',
-      primaryColorSuppl: '#e85d5d',
-    },
-  }
+const primaryColorPalette = {
+  light: {
+    default: '#3a7',
+    blue: '#27f',
+    purple: '#75e',
+    orange: '#e62',
+    red: '#e33',
+  },
+  dark: {
+    default: '#7fa',
+    blue: '#7bf',
+    purple: '#c8f',
+    orange: '#f83',
+    red: '#f66',
+  },
+}
 
-  const darkColorMap = {
-    default: {
-      primaryColor: '#63e2b7',
-      primaryColorHover: '#7fe7c4',
-      primaryColorPressed: '#50c890',
-      primaryColorSuppl: '#7fe7c4',
-    },
-    blue: {
-      primaryColor: '#3b82f6',
-      primaryColorHover: '#60a5fa',
-      primaryColorPressed: '#1d4ed8',
-      primaryColorSuppl: '#60a5fa',
-    },
-    purple: {
-      primaryColor: '#8b5cf6',
-      primaryColorHover: '#a78bfa',
-      primaryColorPressed: '#6d28d9',
-      primaryColorSuppl: '#a78bfa',
-    },
-    orange: {
-      primaryColor: '#f59e0b',
-      primaryColorHover: '#fbbf24',
-      primaryColorPressed: '#d97706',
-      primaryColorSuppl: '#fbbf24',
-    },
-    red: {
-      primaryColor: '#ef4444',
-      primaryColorHover: '#f87171',
-      primaryColorPressed: '#dc2626',
-      primaryColorSuppl: '#f87171',
-    },
-  }
-
-  const colorMap = themeType.value === 'dark' ? darkColorMap : lightColorMap
-  let colors
-
-  if (primaryColor.value === 'custom') {
-    colors = generateCustomColors(customPrimaryColor.value)
-  }
-  else {
-    colors = colorMap[primaryColor.value as keyof typeof colorMap] || colorMap.default
-  }
-
-  return {
-    common: {
-      primaryColor: colors.primaryColor,
-      primaryColorHover: colors.primaryColorHover,
-      primaryColorPressed: colors.primaryColorPressed,
-      primaryColorSuppl: colors.primaryColorSuppl,
-    },
-    Typography: {
-      // headerBarColor: 'currentColor',
-    },
-  }
-})
+const themeOverrides = computed((): GlobalThemeOverrides => ({
+  common: {
+    ...generateCustomColors(primaryColor.value === 'custom'
+      ? customPrimaryColor.value
+      : primaryColorPalette[themeType.value || 'light'][primaryColor.value],
+    ),
+  },
+  Typography: {
+    // headerBarColor: 'currentColor',
+  },
+}))
 
 function setupNaiveTools() {
   // 对话框
@@ -190,11 +129,6 @@ watch(themeType, (val) => {
     theme.value = null
     document.documentElement.classList.remove('dark')
   }
-}, { immediate: true })
-
-watch(primaryColor, (val) => {
-  document.documentElement.classList.remove('theme-default', 'theme-blue', 'theme-purple', 'theme-orange', 'theme-red', 'theme-custom')
-  document.documentElement.classList.add(`theme-${val}`)
 }, { immediate: true })
 
 watch(enableAnimations, (val) => {

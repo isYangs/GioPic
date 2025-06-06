@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
-import { RouterLink } from 'vue-router/auto'
 import { useAppStore, useProgramStore } from '~/stores'
 import { renderIcon } from '~/utils/main'
 import { openCreateProgram } from '~/utils/modal'
@@ -47,7 +46,6 @@ const storageList = ref({
         size: 'small',
         type: 'tertiary',
         round: true,
-        strong: true,
         secondary: true,
         focusable: false,
         ariaLabel: '添加存储配置',
@@ -60,25 +58,21 @@ const storageList = ref({
       }),
     ]),
   key: 'user-storage',
-  children: computed(() => programStore.getProgramList().filter(program => program.value !== null).map(program => ({
-    label: () => h('div', {
-      class: 'flex justify-between items-center w-full group',
-    }, [
-      h(RouterLink, {
-        to: `/Setting/${program.value}`,
-        class: 'flex-1 text-left truncate',
-      }, { default: () => program.label }),
-      h('div', {
-        class: `${menuActiveKey.value === `/Setting/${program.value}` ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity ml2 flex-shrink-0 flex-center cursor-pointer rounded-1`,
-        ariaLabel: '删除存储',
-        onClick: e => openRemoveDialog(program.value as number, program.label, e),
-      }, [
-        h('div', { class: 'i-ic-round-close text-sm' }),
+  children: computed(() => programStore.getProgramList()
+    .filter(program => program.value !== null)
+    .map(({ value, label }) => ({
+      label: () => h('div', { class: 'flex items-center w-full' }, [
+        h('span', { class: 'flex-1 truncate' }, label),
+        h('div', {
+          class: 'i-ic-round-close delete-storage-btn',
+          ariaLabel: '删除存储',
+          onClick: e => openRemoveDialog(value as number, label, e),
+        }),
       ]),
-    ]),
-    key: `/Setting/${program.value}`,
-    icon: renderIcon('i-ph-database-bold w16px h16px'),
-  }))),
+      key: `/Setting/${value}`,
+      icon: renderIcon('i-ph-database-bold w16px h16px'),
+    })),
+  ),
 })
 
 const menuOptions = computed(() => [
@@ -90,32 +84,17 @@ const menuOptions = computed(() => [
     show: !isMenuCollapsed.value,
   },
   {
-    label: () =>
-      h(RouterLink, {
-        to: {
-          name: 'Home',
-        },
-      }, { default: () => '上传图片' }),
+    label: '上传图片',
     key: '/',
     icon: renderIcon('i-ph-upload-simple-bold w20px h20px'),
   },
   {
-    label: () =>
-      h(RouterLink, {
-        to: {
-          name: '/Images/',
-        },
-      }, { default: () => '图片列表' }),
+    label: '图片列表',
     key: '/Images',
     icon: renderIcon('i-ph-list-bullets-bold w20px h20px'),
   },
   {
-    label: () =>
-      h(RouterLink, {
-        to: {
-          name: '/Setting/Plugins',
-        },
-      }, { default: () => '插件管理' }),
+    label: '插件管理',
     key: '/Setting/Plugins',
     icon: renderIcon('i-ph-puzzle-piece-bold w20px h20px'),
   },
@@ -136,6 +115,7 @@ watch(
   },
 )
 
+// Menu的key作为RouterLink的to属性，更简洁
 function updateValue(value: string) {
   router.push(value)
 }
@@ -187,5 +167,21 @@ function expandedKeysChange(keys: string[]) {
 .upload-stats-fade-enter-to,
 .upload-stats-fade-leave-from {
   opacity: 1;
+}
+
+:deep(.n-menu-item-group-title) {
+  --uno: truncate;
+}
+
+:deep() .delete-storage-btn {
+  opacity: 0;
+  max-width: 0;
+  transition: all 0.1s;
+}
+
+:deep(:is(.n-menu-item-content:hover, .n-menu-item-content--selected)) .delete-storage-btn {
+  margin-left: 0.3em;
+  opacity: 1;
+  max-width: 1em;
 }
 </style>
