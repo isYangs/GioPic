@@ -4,16 +4,23 @@ const initialState = {
   appCloseTip: false, // 是否显示关闭应用对话框
   autoStart: false, // 是否开机自启动
   autoUpdate: true, // 是否自动更新
+  showDockIcon: true, // 是否显示任务栏/Dock图标
   isDevToolsEnabled: true, // 是否打开开发者工具
   defaultProgram: null as number | null, // 默认上传存储程序
   isMenuCollapsed: false, // 是否折叠菜单
   ignoreVersion: '', // 忽略更新的版本号
   updateAtNext: false, // 是否在下次启动时更新
   updateSource: 'github' as 'github' | 'cn' | 'auto', // 更新源
+  npmRegistry: 'auto' as 'auto' | 'taobao' | 'tencent' | 'npm' | 'custom', // 插件源选择
+  customNpmRegistry: '', // 自定义插件源地址
 
   // 主题
   themeType: 'light' as 'light' | 'dark' | null, // 主题类型 'light' | 'dark' | null
   themeAuto: false, // 是否自动切换主题
+  sidebarWidth: 180, // 侧边栏宽度 160 | 180 | 220
+  enableAnimations: true, // 是否启用动画效果
+  primaryColor: 'default' as 'default' | 'blue' | 'purple' | 'orange' | 'red' | 'custom', // 主题色调
+  customPrimaryColor: '#18a058', // 自定义主题色
 
   isImgListDelDialog: false, // 是否显示图片列表删除对话框
   isUploadRecordDelDialog: false, // 是否显示上传记录删除对话框

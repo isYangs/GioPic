@@ -9,7 +9,9 @@
   "files": [
     "dist",
     "dist-electron",
-    "dist-native"
+    "dist-native",
+    "node_modules/@giopic",
+    "web"
   ],
   "mac": {
     "target": ["dmg", "zip"],

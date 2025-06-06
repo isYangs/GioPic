@@ -3,14 +3,18 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
+import { setPluginDataStore } from '@giopic/core'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from './db'
-import { registerIpc } from './ipc'
+import { registerIpc } from './ipc/index'
 import createAppUpdater from './services/AppUpdater'
+import { pluginManager } from './services/PluginManager'
+import { setupBuiltinPlugins } from './services/PluginSetup'
 import createShortcutService from './services/ShortcutService'
 import createTrayService from './services/TrayService'
 import createWindowService from './services/WindowService'
-import { initStore } from './utils/store'
+import { initStore } from './stores'
+import { createMainPluginDataStoreAdapter } from './stores/plugin-data'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -109,11 +113,17 @@ async function createMainWindow() {
   app.dock?.setIcon(icon)
 
   registerIpc(mainWindow, loadingWindow)
+  initStore()
+  initDB()
   createTrayService(mainWindow)
   createShortcutService(mainWindow)
   createWindowService(mainWindow)
-  initStore()
-  initDB()
+
+  const mainPluginDataStoreAdapter = createMainPluginDataStoreAdapter()
+  setPluginDataStore(mainPluginDataStoreAdapter)
+
+  await setupBuiltinPlugins()
+  await pluginManager.init()
   createAppUpdater(mainWindow)
 }
 

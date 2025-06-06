@@ -50,8 +50,8 @@ export function init(): boolean | null {
       try {
         runMigrations(db, appVersion)
       }
-      catch (error) {
-        logger.error('[db] Migration failed:', error)
+      catch (e) {
+        logger.error('[db] Migration failed:', e)
       }
     }
 

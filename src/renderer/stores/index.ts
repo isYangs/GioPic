@@ -1,6 +1,7 @@
 import { createPersistedStatePlugin } from 'pinia-plugin-persistedstate-2'
 
 export * from './app'
+export * from './plugin'
 export * from './program'
 export * from './record'
 

@@ -1,18 +1,6 @@
-import type { SupportedUploader } from '@/main/services/beds'
-import type { LskyStrategiesResponse, LskyUploadParams, ProgramDetail, ProgramType } from '@/types'
 import type { Program } from '~/stores'
 import { useAppStore, useProgramStore } from '~/stores'
-
-async function callApi<T>(
-  bed: SupportedUploader,
-  method: string,
-  args: any[] = [],
-): Promise<T> {
-  const res = await window.ipcRenderer.invoke('api-call', { bed, method, args })
-  if (res.success)
-    return res.data
-  throw new Error(res.message)
-}
+import { pluginApi } from './plugin'
 
 function getCurrentProgram() {
   const appStore = useAppStore()
@@ -31,30 +19,126 @@ function getProgramAuthParams(program: Program): Record<string, any> {
     throw new Error('请先选择存储程序')
   }
 
-  if (program.type === 'lsky' || program.type === 'lskyPro') {
-    const detail = program.detail as ProgramDetail['lsky']
-    if (!detail.api || !detail.token) {
-      throw new Error('API 地址或 Token 不能为空')
-    }
-    return {
-      api: detail.api,
-      token: detail.token,
-    }
-  }
-  else if (program.type === 's3') {
-    const detail = program.detail as ProgramDetail['s3']
-    if (!detail.accessKeyId || !detail.secretAccessKey || !detail.bucketName) {
-      throw new Error('AccessKey、SecretKey 或存储桶名称不能为空')
-    }
-
-    return { ...detail }
+  if (!program.pluginId) {
+    throw new Error('当前程序不支持，请使用插件')
   }
 
-  throw new Error('不支持的程序类型')
+  return {
+    ...program.detail,
+    pluginId: program.pluginId,
+  }
+}
+
+export const ipcApi = {
+  async insertUploadData(dataString: string) {
+    const res = await window.ipcRenderer.invoke('insert-upload-data', dataString)
+    if (!res.success) {
+      throw new Error(res.message || '插入上传数据失败')
+    }
+    return res.success
+  },
+
+  async fetchUploadDataPaginated(page = 1, pageSize = 20) {
+    const res = await window.ipcRenderer.invoke('fetch-upload-data-paginated', page, pageSize)
+    if (!res.success) {
+      throw new Error(res.message || '获取分页上传数据失败')
+    }
+    return res.data
+  },
+
+  async fetchAllUploadData() {
+    const res = await window.ipcRenderer.invoke('fetch-all-upload-data')
+    if (!res.success) {
+      throw new Error(res.message || '获取所有上传数据失败')
+    }
+    return res.data
+  },
+
+  async getUploadDataCount() {
+    const res = await window.ipcRenderer.invoke('get-upload-data-count')
+    if (!res.success) {
+      throw new Error(res.message || '获取上传数据数量失败')
+    }
+    return res.data
+  },
+
+  async getUploadTotalSize() {
+    const res = await window.ipcRenderer.invoke('get-upload-total-size')
+    if (!res.success) {
+      throw new Error(res.message || '获取上传数据总大小失败')
+    }
+    return res.data
+  },
+
+  async deleteUploadData(key: string) {
+    const res = await window.ipcRenderer.invoke('delete-upload-data', key)
+    if (!res.success) {
+      throw new Error(res.message || '删除上传数据失败')
+    }
+    return true
+  },
+
+  async deleteUploadDataBatch(keys: string[]) {
+    const res = await window.ipcRenderer.invoke('delete-upload-data-batch', keys)
+    if (!res.success) {
+      throw new Error(res.message || '批量删除上传数据失败')
+    }
+    return true
+  },
+
+  // 图片处理
+  async generateImageThumbnail(fileBuffer: ArrayBuffer, maxSize = 200) {
+    const res = await window.ipcRenderer.invoke('generate-image-thumbnail', fileBuffer, maxSize)
+    if (!res.success) {
+      throw new Error(res.message || '生成缩略图失败')
+    }
+    return res.data
+  },
+
+  async getImageMetadata(fileBuffer: ArrayBuffer) {
+    const res = await window.ipcRenderer.invoke('get-image-metadata', fileBuffer)
+    if (!res.success) {
+      throw new Error(res.message || '获取图片元数据失败')
+    }
+    return res.data
+  },
+
+  // 系统设置
+  async setAutoStart(enabled: boolean) {
+    const res = await window.ipcRenderer.invoke('auto-start', enabled)
+    if (!res.success) {
+      throw new Error(res.message || '设置开机自启失败')
+    }
+    return true
+  },
+
+  async setDevTools(enabled: boolean) {
+    const res = await window.ipcRenderer.invoke('reg-dev-tools', enabled)
+    if (!res.success) {
+      throw new Error(res.message || '设置开发者工具快捷键失败')
+    }
+    return true
+  },
+
+  async setDockIconVisible(visible: boolean) {
+    const res = await window.ipcRenderer.invoke('dock-icon-show', visible)
+    if (!res.success) {
+      throw new Error(res.message || '设置任务栏图标失败')
+    }
+    return true
+  },
+
+  async resetSettings() {
+    const res = await window.ipcRenderer.invoke('reset-settings')
+    if (!res.success) {
+      throw new Error(res.message || '重置设置失败')
+    }
+    return true
+  },
 }
 
 export const apiClient = {
-  upload: async (type: ProgramType, params: Partial<LskyUploadParams>) => {
+  upload: async (params: Record<string, any>) => {
     const program = getCurrentProgram()
     const authParams = getProgramAuthParams(program)
 
@@ -63,17 +147,11 @@ export const apiClient = {
       ...JSON.parse(JSON.stringify(authParams)),
     }
 
-    return await window.ipcRenderer.invoke('upload', { type, params: completeParams })
-  },
+    completeParams.pluginId = program.pluginId
 
-  getStrategies: async (program?: Program) => {
-    const targetProgram = program || getCurrentProgram()
-
-    if (targetProgram.type !== 'lsky' && targetProgram.type !== 'lskyPro') {
-      throw new Error('当前存储程序不支持获取存储策略')
-    }
-
-    const authParams = getProgramAuthParams(targetProgram)
-    return await callApi<LskyStrategiesResponse>('lsky', 'getStrategies', [authParams])
+    const result = await pluginApi.uploadWithPlugin(program.pluginId, completeParams)
+    return result
   },
 }
+
+export { pluginApi }

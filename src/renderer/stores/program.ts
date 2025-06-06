@@ -1,52 +1,11 @@
-import type { ProgramType } from '@/types'
-import type { SelectOption } from 'naive-ui'
+import { usePluginStore } from './plugin'
 
 export interface Program {
-  type: ProgramType
-  name: string
   id: number | null
-  detail: typeof programDetailTemplate[ProgramType]
-}
-
-export const programTypeName: Record<ProgramType, string> = {
-  lsky: '兰空图床社区版',
-  lskyPro: '兰空图床企业版V1',
-  s3: 'S3(AWS/腾讯云/阿里云)',
-}
-
-export const programDetailTemplate = {
-  lsky: {
-    api: '',
-    token: '',
-    strategies: [] as ([] | SelectOption[]),
-    activeStrategy: null as (number | null),
-  },
-  lskyPro: {
-    api: '',
-    token: '',
-    strategies: [] as [],
-    activeStrategy: null as (number | null),
-  },
-  s3: {
-    /** accessKeyId */
-    accessKeyId: '',
-    /** secretAccessKey */
-    secretAccessKey: '',
-    /** 存储桶名称 */
-    bucketName: '',
-    /** 上传路径 */
-    pathPrefix: '',
-    /** 区域 */
-    region: '',
-    /** 自定义终端节点 */
-    endpoint: '',
-    /** 自定义域名 */
-    customDomain: '',
-    /** 是否启用S3 Path Style */
-    forcePathStyle: false,
-    /** 权限 */
-    acl: '',
-  },
+  type: string
+  name: string
+  detail: Record<string, any>
+  pluginId: string
 }
 
 export const useProgramStore = defineStore(
@@ -54,46 +13,41 @@ export const useProgramStore = defineStore(
   () => {
     const programs = ref<Program[]>([])
 
-    function createProgram(type: ProgramType = 'lsky') {
+    function createProgram(type: string) {
       const id = Date.now()
       programs.value.push({
         type,
         name: '',
         id,
-        detail: { ...programDetailTemplate[type] },
+        detail: {},
+        pluginId: '',
       })
       return id
     }
 
-    function setProgramDetail(id: number, detail: Partial<typeof programDetailTemplate[ProgramType]>) {
-      Object.assign(getProgram(id).detail, detail)
+    function setProgramDetail(id: number, detail: Record<string, any>) {
+      const program = getProgram(id)
+      // 使用响应式的方式更新 detail
+      program.detail = { ...program.detail, ...detail }
     }
 
     function setProgramName(id: number, name: string) {
       getProgram(id).name = name
     }
 
-    function getProgramTypeName(type: ProgramType) {
-      return programTypeName[type]
-    }
-
     function getProgram(id: number | null): Program {
-      // 考虑 defaultProgram 的id可能为 null 的情况
       const program = programs.value.find(item => item.id === id)
-      // 防止开发过程中异常路由导致程序崩溃
       if (!program) {
-        return { type: 'lsky', name: '', id: null, detail: programDetailTemplate.lsky }
+        return { type: 'unknown', name: '', id: null, detail: {}, pluginId: '' }
       }
       return program
     }
 
     function getProgramList() {
+      const pluginStore = usePluginStore()
       return programs.value.map(item => ({
-        /** 程序名称 */
-        label: item.name || getProgramTypeName(item.type),
-        /** 程序ID */
-        value: item.id as number,
-        /** 程序类型 */
+        label: item.name || pluginStore.getPluginNameByType(item.type),
+        value: item.id,
         type: item.type,
       }))
     }
@@ -105,15 +59,23 @@ export const useProgramStore = defineStore(
       return Math.max(index - 1, 0)
     }
 
+    function getPluginSetting(programId: number, pluginId: string): Record<string, any> {
+      const program = getProgram(programId)
+      if (!program.detail[pluginId]) {
+        program.detail[pluginId] = {}
+      }
+      return program.detail[pluginId]
+    }
+
     return {
       programs,
       createProgram,
       setProgramDetail,
       setProgramName,
-      getProgramTypeName,
       getProgramList,
       getProgram,
       removeProgram,
+      getPluginSetting,
     }
   },
   {

@@ -57,7 +57,6 @@ const windowActions = {
     showCloseTipModal.value = false
   },
   hide: async () => {
-    // FIXME 先关闭弹窗，再隐藏窗口
     await window.ipcRenderer.invoke('window-hide')
     showCloseTipModal.value = false
   },
@@ -72,7 +71,6 @@ function onCloseClick() {
   rememberChoice.value = false
 }
 
-/** 执行关闭主窗口操作 */
 const closeTipModalActions = {
   close: () => {
     if (rememberChoice.value) {

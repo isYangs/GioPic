@@ -1,12 +1,14 @@
 import type { BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import { platform } from '@electron-toolkit/utils'
 import { app, Menu } from 'electron'
+import { getStore } from '../stores'
 import logger from '../utils/logger'
 
 export interface IWindowService {
   init: () => void
   setAutoStart: (val: boolean) => void
   openSetting: (tab?: string) => void
+  setDockIconVisible: (visible: boolean) => void
 }
 
 export class WindowService implements IWindowService {
@@ -19,6 +21,8 @@ export class WindowService implements IWindowService {
 
   public init(): void {
     this.createApplicationMenu()
+    const showDockIcon = getStore('showDockIcon') ?? true
+    this.setDockIconVisible(showDockIcon)
   }
 
   /**
@@ -35,7 +39,6 @@ export class WindowService implements IWindowService {
    * @param val 是否启用自动启动
    */
   public setAutoStart(val: boolean): void {
-    // 使用 setImmediate 进行异步处理，不阻塞主线程
     setImmediate(() => {
       const options = {
         openAtLogin: val,
@@ -90,6 +93,30 @@ export class WindowService implements IWindowService {
     }
     else {
       Menu.setApplicationMenu(null)
+    }
+  }
+
+  /**
+   * 设置Dock/任务栏图标的显示状态
+   * @param visible 是否显示图标
+   */
+  public setDockIconVisible(visible: boolean): void {
+    try {
+      if (platform.isMacOS) {
+        if (visible) {
+          app.dock?.show()
+        }
+        else {
+          app.dock?.hide()
+        }
+      }
+      else {
+        this.win.setSkipTaskbar(!visible)
+      }
+    }
+    catch (e) {
+      logger.error(`[dock] Failed to set dock icon visibility: ${e}`)
+      throw e
     }
   }
 }

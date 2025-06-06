@@ -7,7 +7,29 @@ import { getDB } from '../../index'
  */
 export function createQueryStatement(): Statement<[]> {
   const db = getDB()
-  return db.prepare<[]>(`SELECT * FROM "main"."upload_data"`)
+  return db.prepare<[]>(`SELECT * FROM "main"."upload_data" ORDER BY "time" DESC`)
+}
+
+/**
+ * 创建分页查询语句
+ * @returns 分页查询语句
+ */
+export function createPaginatedQueryStatement(): Statement<[number, number]> {
+  const db = getDB()
+  return db.prepare<[number, number]>(`
+    SELECT * FROM "main"."upload_data" 
+    ORDER BY "time" DESC 
+    LIMIT ? OFFSET ?
+  `)
+}
+
+/**
+ * 创建计数查询语句
+ * @returns 计数查询语句
+ */
+export function createCountStatement(): Statement<[]> {
+  const db = getDB()
+  return db.prepare<[]>(`SELECT COUNT(*) as count FROM "main"."upload_data"`)
 }
 
 /**
@@ -17,8 +39,8 @@ export function createQueryStatement(): Statement<[]> {
 export function createInsertStatement(): Statement<[GP.DB.UploadData]> {
   const db = getDB()
   return db.prepare<[GP.DB.UploadData]>(`
-    INSERT INTO "main"."upload_data" ("key", "name" ,"time", "size", "mimetype", "url", "origin_name")
-    VALUES (@key, @name, @time, @size, @mimetype, @url, @origin_name)
+    INSERT INTO "main"."upload_data" ("key", "name" ,"time", "size", "mimetype", "url", "origin_name", "program_id", "program_type")
+    VALUES (@key, @name, @time, @size, @mimetype, @url, @origin_name, @program_id, @program_type)
   `)
 }
 

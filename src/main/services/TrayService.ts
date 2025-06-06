@@ -35,8 +35,8 @@ export class TrayService implements ITrayService {
         this.mainWindow?.show()
       })
     }
-    catch (error) {
-      logger.error('[tray] Failed to create system tray:', error)
+    catch (e) {
+      logger.error('[tray] Failed to create system tray:', e)
     }
   }
 
@@ -79,8 +79,8 @@ export class TrayService implements ITrayService {
       const stdout = execSync('reg query "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v SystemUsesLightTheme')
       return stdout.toString().includes('0x1')
     }
-    catch (error) {
-      logger.error('[tray] Error fetching Windows mode:', error)
+    catch (e) {
+      logger.error('[tray] Error fetching Windows mode:', e)
       return false
     }
   }
@@ -103,8 +103,8 @@ export class TrayService implements ITrayService {
     try {
       return nativeImage.createFromPath(iconPath)
     }
-    catch (error) {
-      logger.error(`[tray] Failed to load tray icon from ${iconPath}:`, error)
+    catch (e) {
+      logger.error(`[tray] Failed to load tray icon from ${iconPath}:`, e)
       return nativeImage.createEmpty()
     }
   }
@@ -152,12 +152,6 @@ export class TrayService implements ITrayService {
     return Menu.buildFromTemplate(menuTemplate)
   }
 }
-
-/**
- * 创建托盘服务的工厂函数 (提供与原始 API 兼容的方式)
- * @param win 主窗口实例
- * @returns {TrayService} 托盘服务实例
- */
 
 export default function createTrayService(win: BrowserWindow): TrayService {
   return new TrayService(win)

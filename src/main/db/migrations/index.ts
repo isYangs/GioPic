@@ -91,10 +91,10 @@ function applyMigration(db: Database, migration: Migration): void {
     recordMigration(db, migration)
     db.exec('COMMIT;')
   }
-  catch (error) {
+  catch (e) {
     db.exec('ROLLBACK;')
-    logger.error(`[db] Migration failed: ${migration.version} - ${migration.name}`, error)
-    throw error
+    logger.error(`[db] Migration failed: ${migration.version} - ${migration.name}`, e)
+    throw e
   }
 }
 
@@ -159,8 +159,8 @@ export function backupDatabase(dbPath: string, maxBackups: number = 5): string |
           }
         }
       }
-      catch (cleanupError) {
-        logger.error('[db] Failed to cleanup old backups:', cleanupError)
+      catch (e) {
+        logger.error('[db] Failed to cleanup old backups:', e)
       }
     }
 
@@ -169,8 +169,8 @@ export function backupDatabase(dbPath: string, maxBackups: number = 5): string |
     logger.info(`[db] Database backup created: ${backupPath}`)
     return backupPath
   }
-  catch (error) {
-    logger.error('[db] Database backup failed:', error)
+  catch (e) {
+    logger.error('[db] Database backup failed:', e)
     return null
   }
 }

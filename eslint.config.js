@@ -25,12 +25,17 @@ export default antfu(
         registeredComponentsOnly: false,
       }],
     },
-
     ignores: [
       '.vscode/*',
       'dist/*',
       'rebuild.js',
       'vite.config.ts',
     ],
+  },
+  {
+    files: ['packages/**/*.ts', 'packages/**/*.js'],
+    rules: {
+      'no-console': 'off',
+    },
   },
 )

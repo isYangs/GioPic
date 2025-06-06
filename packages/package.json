@@ -1,0 +1,8 @@
+{
+  "name": "@giopic/packages",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --recursive run build",
+    "clean": "rm -rf */dist */node_modules */package-lock.json */pnpm-lock.yaml"
+  }
+}

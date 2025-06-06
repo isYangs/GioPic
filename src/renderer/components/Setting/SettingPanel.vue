@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SettingEntry } from '@/types'
 import { useOsTheme } from 'naive-ui'
+import { ipcApi } from '~/api'
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils/main'
 
@@ -14,10 +15,17 @@ const {
   appCloseType,
   autoStart,
   autoUpdate,
+  showDockIcon,
   updateSource,
   isDevToolsEnabled,
   themeType,
   themeAuto,
+  npmRegistry,
+  customNpmRegistry,
+  sidebarWidth,
+  enableAnimations,
+  primaryColor,
+  customPrimaryColor,
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
@@ -33,9 +41,32 @@ const closeOptions = [
 ]
 
 const updateOptions = [
-  { label: 'Github', value: 'github' },
+  { label: 'GitHub', value: 'github' },
   { label: '国内源', value: 'cn' },
   { label: '自动选择', value: 'auto' },
+]
+
+const npmRegistryOptions = [
+  { label: '自动选择', value: 'auto' },
+  { label: '淘宝镜像', value: 'taobao' },
+  { label: '腾讯镜像', value: 'tencent' },
+  { label: 'npm 官方', value: 'npm' },
+  { label: '自定义', value: 'custom' },
+]
+
+const sidebarWidthOptions = [
+  { label: '紧凑 (160px)', value: 160 },
+  { label: '标准 (180px)', value: 180 },
+  { label: '宽松 (220px)', value: 220 },
+]
+
+const primaryColorOptions = [
+  { label: '默认', value: 'default' },
+  { label: '蓝色', value: 'blue' },
+  { label: '紫色', value: 'purple' },
+  { label: '橙色', value: 'orange' },
+  { label: '红色', value: 'red' },
+  { label: '自定义', value: 'custom' },
 ]
 
 // 重置确认
@@ -101,15 +132,41 @@ function onThemeChange(val?: boolean) {
 }
 
 async function onAutoStartChange(val: boolean) {
-  window.ipcRenderer.invoke('auto-start', val)
+  try {
+    await ipcApi.setAutoStart(val)
+  }
+  catch (e) {
+    console.error('设置开机自启失败:', e)
+    window.$message.error('设置开机自启失败')
+  }
 }
 
 async function onDevToolsChange(val: boolean) {
-  window.ipcRenderer.invoke('reg-dev-tools', val)
+  try {
+    await ipcApi.setDevTools(val)
+  }
+  catch (e) {
+    console.error('设置开发者工具失败:', e)
+    window.$message.error('设置开发者工具失败')
+  }
+}
+
+async function onDockIconChange(val: boolean) {
+  try {
+    await ipcApi.setDockIconVisible(val)
+  }
+  catch (e) {
+    console.error('设置任务栏图标失败:', e)
+    window.$message.error('设置任务栏图标失败')
+  }
 }
 
 watch(updateSource, (newValue) => {
   window.ipcRenderer.send('change-update-source', newValue)
+})
+
+watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
+  window.ipcRenderer.send('change-npm-registry', { registry, custom })
 })
 </script>
 
@@ -122,7 +179,7 @@ watch(updateSource, (newValue) => {
       :indent="22"
       @update:value="activeIndex = $event"
     />
-    <n-scrollbar class="setting-content grow-1" content-class="p6 pt12">
+    <n-scrollbar class="setting-content grow-1" content-class="p8 pt12">
       <template v-if="activeIndex === 0">
         <setting-item title="深浅模式">
           <n-select
@@ -138,6 +195,36 @@ watch(updateSource, (newValue) => {
             @update-value="onThemeChange"
           />
         </setting-item>
+        <setting-item title="主题颜色" desc="修改全局的主题颜色">
+          <n-select
+            v-model:value="primaryColor"
+            :options="primaryColorOptions"
+          />
+        </setting-item>
+        <setting-item
+          v-if="primaryColor === 'custom'"
+          title="自定义颜色"
+          desc="选择你喜欢的主题颜色"
+        >
+          <n-color-picker
+            v-model:value="customPrimaryColor"
+            :show-alpha="false"
+            placement="left"
+            :style="{ width: '150px' }"
+          />
+        </setting-item>
+        <setting-item title="侧边栏宽度" desc="调整左侧导航栏的宽度">
+          <n-select
+            v-model:value="sidebarWidth"
+            :options="sidebarWidthOptions"
+          />
+        </setting-item>
+        <setting-item title="动画效果" desc="开启或关闭界面过渡动画">
+          <n-switch
+            v-model:value="enableAnimations"
+            :round="false"
+          />
+        </setting-item>
       </template>
 
       <template v-else-if="activeIndex === 1">
@@ -148,6 +235,7 @@ watch(updateSource, (newValue) => {
             @update-value="onAutoStartChange"
           />
         </setting-item>
+
         <setting-item title="关闭程序时">
           <n-select
             v-model:value="appCloseType"
@@ -161,14 +249,40 @@ watch(updateSource, (newValue) => {
         <setting-item title="自动检测更新" desc="在启动时检测是否有新版本">
           <n-switch v-model:value="autoUpdate" :round="false" />
         </setting-item>
-        <setting-item title="更新源" desc="当无法访问Github时可切换为国内源">
+        <setting-item title="更新源" desc="当无法访问GitHub时可切换为国内源">
           <n-select
             v-model:value="updateSource"
             :options="updateOptions"
             :style="{ width: '130px' }"
             :consistent-menu-width="false"
             size="medium"
-            placement="top"
+          />
+        </setting-item>
+        <setting-item title="插件源" desc="用于搜索和安装插件的 npm 源">
+          <n-select
+            v-model:value="npmRegistry"
+            :options="npmRegistryOptions"
+            :style="{ width: '130px' }"
+            :consistent-menu-width="false"
+            size="medium"
+          />
+        </setting-item>
+        <setting-item
+          v-if="npmRegistry === 'custom'"
+          title="自定义软件源"
+          desc="输入自定义 NPM 源地址"
+        >
+          <n-input
+            v-model:value="customNpmRegistry"
+            placeholder="https://registry.npmjs.org"
+            :style="{ width: '300px' }"
+          />
+        </setting-item>
+        <setting-item title="显示任务栏图标" desc="是否显示 系统Dock栏/任务栏 应用图标">
+          <n-switch
+            v-model:value="showDockIcon"
+            :round="false"
+            @update-value="onDockIconChange"
           />
         </setting-item>
       </template>
@@ -207,13 +321,13 @@ watch(updateSource, (newValue) => {
 
 <style>
 .setting-panel[class] {
-  --uno: p0 w80vw max-w-1024px h80vh max-h-720px overflow-hidden;
+  --uno: p0 w80vw max-w-1024px h80vh max-h-720px overflow-hidden rounded-2;
 }
 .setting-panel > .n-card-header {
-  --uno: absolute left-0 right-0 z-1 text-4 py4;
+  --uno: absolute left-0 right-0 z-1 text-4 py4 pr4;
 }
 .setting-panel > .n-card__content {
-  --uno: p0 h-full;
+  --uno: p0 h-full rounded-2;
 }
 </style>
 
@@ -221,6 +335,7 @@ watch(updateSource, (newValue) => {
 :deep(.setting-aside) {
   border-right: solid 1px var(--n-border-color);
 }
+
 :deep(.setting-content) {
   background-color: var(--n-color);
 }

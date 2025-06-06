@@ -1,8 +1,10 @@
+import { setPluginDataStore } from '@giopic/core'
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
 import App from './App.vue'
 import store from './stores'
+import { createPluginDataStoreAdapter } from './stores/plugin-data'
 import 'animate.css'
 import './style/main.css'
 import 'virtual:uno.css'
@@ -15,8 +17,12 @@ const router = createRouter({
   routes,
 })
 
+// 初始化插件数据存储
+app.use(store)
+const pluginDataStoreAdapter = createPluginDataStoreAdapter()
+setPluginDataStore(pluginDataStoreAdapter)
+
 app
-  .use(store)
   .use(router)
   .mount('#app')
   .$nextTick(() => {

@@ -21,10 +21,15 @@ export default defineConfig({
     'flex-center': 'flex items-center justify-center',
   },
   rules: [
-    ['object-center', { 'object-position': 'center' }],
     ['font-mono', { 'font-family': 'var(--font-mono)' }],
   ],
   transformers: [
     transformerDirectives(),
   ],
+  theme: {
+    colors: {
+      border: 'var(--n-border-color)',
+      primary: 'var(--n-text-color)',
+    },
+  },
 })

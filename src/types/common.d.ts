@@ -1,5 +1,3 @@
-import type { programDetailTemplate } from '~/stores/program'
-
 export interface TabOption {
   title?: string
   items: {
@@ -19,6 +17,14 @@ export interface SettingEntry {
   icon?: () => import('vue').VNode
 }
 
-export type ProgramType = keyof typeof programDetailTemplate
-
-export type ProgramDetail = typeof programDetailTemplate
+export interface NpmSearchResult {
+  name: string
+  version: string
+  description: string
+  author?: {
+    name: string
+  }
+  date: string
+  keywords?: string[]
+  homepage?: string
+}

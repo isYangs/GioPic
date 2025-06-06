@@ -49,7 +49,4 @@ defineProps<{
 .set-item :deep(.n-input) {
   --uno: w75;
 }
-:deep(.n-form-item) > .n-form-item-feedback-wrapper {
-  --uno: text-xs;
-}
 </style>
