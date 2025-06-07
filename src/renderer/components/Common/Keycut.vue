@@ -5,9 +5,8 @@ const props = defineProps<{
   alt?: boolean
   meta?: boolean
   noMetaMap?: boolean
+  text?: string
 }>()
-
-const slots = defineSlots()
 
 const isMac = computed(() => navigator.userAgent.includes('Mac OS'))
 const delimiter = computed(() => isMac.value ? ' ' : '+')
@@ -16,7 +15,7 @@ const modifierMap = computed(() => ({
   ctrl: isMac.value ? props.noMetaMap ? '⌃' : '⌘' : 'Ctrl',
   shift: isMac.value ? '⇧' : 'Shift',
   alt: isMac.value ? '⌥' : 'Alt',
-  meta: isMac.value ? '⌘' : 'Meta',
+  meta: isMac.value ? '⌘' : 'Win',
 }))
 
 const display = computed(() => {
@@ -29,15 +28,15 @@ const display = computed(() => {
     modifiers.push(modifierMap.value.alt)
   if (props.meta)
     modifiers.push(modifierMap.value.meta)
-  if (slots.default)
-    modifiers.push([])
+
+  modifiers.push(props.text)
   return modifiers.join(delimiter.value)
 })
 </script>
 
 <template>
   <div class="keycut mx.5 inline-block border-rd px1 py.5 text-[.9em] line-height-none tracking-tight">
-    {{ display }}<slot />
+    {{ display }}
   </div>
 </template>
 

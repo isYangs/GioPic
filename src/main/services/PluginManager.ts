@@ -2,6 +2,7 @@ import type { StoragePlugin } from '@giopic/core'
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { platform } from '@electron-toolkit/utils'
 import { app } from 'electron'
 import { getStore } from '../stores'
 import logger from '../utils/logger'
@@ -579,16 +580,22 @@ export class PluginManager {
       if (plugin.isBuiltin && plugin.npmPackage) {
         return await import(plugin.npmPackage)
       }
-      else if (plugin.path) {
-        const mainPath = path.join(plugin.path, 'dist', 'index.js')
-        if (fs.existsSync(mainPath)) {
-          return await import(mainPath)
-        }
-        throw new Error(`插件主文件不存在: ${mainPath}`)
-      }
-      else {
+
+      if (!plugin.path) {
         throw new Error(`插件 ${pluginId} 缺少路径信息`)
       }
+
+      const mainPath = path.join(plugin.path, 'dist', 'index.js')
+
+      if (!fs.existsSync(mainPath)) {
+        throw new Error(`插件主文件不存在: ${mainPath}`)
+      }
+
+      if (platform.isWindows) {
+        return await import(`file://${mainPath.replace(/\\/g, '/')}`)
+      }
+
+      return await import(mainPath)
     }
     catch (e) {
       pluginLogger.error(`插件模块加载失败: ${pluginId}`, e)

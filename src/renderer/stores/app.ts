@@ -1,3 +1,5 @@
+import type { PrimaryColor, ThemeType } from '~/utils/theme'
+
 const initialState = {
   // 基础
   appCloseType: 'hide' as 'close' | 'hide', // 关闭类型 'close' | 'hide'
@@ -15,11 +17,11 @@ const initialState = {
   customNpmRegistry: '', // 自定义插件源地址
 
   // 主题
-  themeType: 'light' as 'light' | 'dark' | null, // 主题类型 'light' | 'dark' | null
+  themeType: 'light' as ThemeType, // 主题类型 'light' | 'dark' | null
   themeAuto: false, // 是否自动切换主题
   sidebarWidth: 180, // 侧边栏宽度 160 | 180 | 220
   enableAnimations: true, // 是否启用动画效果
-  primaryColor: 'default' as 'default' | 'blue' | 'purple' | 'orange' | 'red' | 'custom', // 主题色调
+  primaryColor: 'default' as PrimaryColor, // 主题色调
   customPrimaryColor: '#18a058', // 自定义主题色
 
   isImgListDelDialog: false, // 是否显示图片列表删除对话框
@@ -64,18 +66,6 @@ export const useAppStore = defineStore(
         'isUploadRecordDelDialog',
         'lastCallTimes',
       ],
-      serialize: (state) => {
-        const serialized = JSON.stringify(state)
-        return serialized
-      },
-      deserialize: (serializedState) => {
-        try {
-          return JSON.parse(serializedState)
-        }
-        catch {
-          return {}
-        }
-      },
     },
   },
 )

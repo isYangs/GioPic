@@ -79,7 +79,6 @@ export const usePluginDataStore = defineStore(
   {
     persistedState: {
       key: '__giopic_plugin_data_store__',
-      includePaths: ['pluginData'],
     },
   },
 )

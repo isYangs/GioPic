@@ -2,47 +2,33 @@
 defineProps<{
   title?: string
   desc?: string
-  isDev?: boolean
 }>()
 </script>
 
 <template>
   <n-card class="set-item mb3 wh-full rounded-2">
-    <div class="flex flex-1 flex-col pr text-3.8 font-500 tracking-wider">
-      <div class="flex items-center">
-        <slot name="title">
-          {{ title }}
-        </slot>
-        <n-tag
-          v-if="isDev"
-          :bordered="false"
-          round
-          size="small"
-          type="warning"
-          class="ml1"
-        >
-          开发中
-          <template #icon>
-            <div i-ph-code-bold />
-          </template>
-        </n-tag>
-      </div>
-      <n-text class="text-xs op80">
+    <div class="text-3.8 font-500 tracking-wider">
+      <slot name="title">
+        {{ title }}
+      </slot>
+
+      <n-text class="block text-xs op80">
         <slot name="desc">
           {{ desc }}
         </slot>
       </n-text>
     </div>
+
     <slot />
   </n-card>
 </template>
 
 <style scoped>
 .set-item :deep(.n-card__content) {
-  --uno: flex flex-row items-center justify-between;
+  --uno: flex flex-row gap-4 items-center justify-between;
 }
 
-.set-item :deep(.n-select) {
+.set-item :deep(:is(.n-select, .n-color-picker)) {
   --uno: w50;
 }
 

@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import type { GlobalThemeOverrides } from 'naive-ui'
-import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
+import {
+  darkTheme,
+  dateZhCN as dateLocale,
+  zhCN as locale,
+  useOsTheme,
+} from 'naive-ui'
 import { createTextVNode } from 'vue'
 import { useAppStore } from '~/stores'
 import { openSettingPanel, openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
+import { generateCustomColors, getPrimaryColor } from '~/utils/theme'
 
 const appStore = useAppStore()
 const {
@@ -21,64 +27,11 @@ const {
 const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
 
-function generateCustomColors(baseColor: string) {
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result
-      ? {
-          r: Number.parseInt(result[1], 16),
-          g: Number.parseInt(result[2], 16),
-          b: Number.parseInt(result[3], 16),
-        }
-      : null
-  }
-
-  const rgbToHex = (r: number, g: number, b: number) => {
-    return `#${[r, g, b].map((x) => {
-      const hex = x.toString(16)
-      return hex.length === 1 ? `0${hex}` : hex
-    }).join('')}`
-  }
-
-  const adjustBrightness = (color: string, amount: number) => {
-    const rgb = hexToRgb(color)
-    if (!rgb)
-      return color
-
-    const adjust = (value: number) => Math.min(255, Math.max(0, Math.round(value + amount)))
-    return rgbToHex(adjust(rgb.r), adjust(rgb.g), adjust(rgb.b))
-  }
-
-  return {
-    primaryColor: baseColor,
-    primaryColorHover: adjustBrightness(baseColor, 20),
-    primaryColorPressed: adjustBrightness(baseColor, -20),
-    primaryColorSuppl: adjustBrightness(baseColor, 20),
-  }
-}
-
-const primaryColorPalette = {
-  light: {
-    default: '#3a7',
-    blue: '#27f',
-    purple: '#75e',
-    orange: '#e62',
-    red: '#e33',
-  },
-  dark: {
-    default: '#7fa',
-    blue: '#7bf',
-    purple: '#c8f',
-    orange: '#f83',
-    red: '#f66',
-  },
-}
-
 const themeOverrides = computed((): GlobalThemeOverrides => ({
   common: {
     ...generateCustomColors(primaryColor.value === 'custom'
       ? customPrimaryColor.value
-      : primaryColorPalette[themeType.value || 'light'][primaryColor.value],
+      : getPrimaryColor(themeType.value, primaryColor.value),
     ),
   },
   Typography: {
@@ -172,10 +125,10 @@ window.ipcRenderer.on('open-setting', (_e, tab?: string) => openSettingPanel(tab
 
 <template>
   <n-config-provider
-    :locale="zhCN"
-    :date-locale="dateZhCN"
+    :locale
+    :date-locale
     :theme
-    :theme-overrides="themeOverrides"
+    :theme-overrides
     abstract
     inline-theme-disabled
   >

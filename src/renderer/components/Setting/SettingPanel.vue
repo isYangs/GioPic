@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import type { SelectOption } from 'naive-ui'
+import type { VNodeChild } from 'vue'
 import type { SettingEntry } from '@/types'
+import type { PrimaryColor } from '~/utils/theme'
 import { useOsTheme } from 'naive-ui'
 import { ipcApi } from '~/api'
 import { useAppStore } from '~/stores'
 import { renderIcon } from '~/utils/main'
+import { getPrimaryColor } from '~/utils/theme'
 
 const props = defineProps<{
   tab?: string
@@ -68,6 +72,23 @@ const primaryColorOptions = [
   { label: '红色', value: 'red' },
   { label: '自定义', value: 'custom' },
 ]
+
+function renderThemeLabel(option: SelectOption): VNodeChild {
+  return [
+    h('span', {
+      style: {
+        background: getPrimaryColor(themeType.value, option.value as PrimaryColor),
+        borderRadius: '2px',
+        display: 'inline-block',
+        height: '.75rem',
+        marginRight: '.5rem',
+        verticalAlign: 'middle',
+        width: '.75rem',
+      },
+    }),
+    option.label as string,
+  ]
+}
 
 // 重置确认
 function confirmReset() {
@@ -188,6 +209,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             @update-value="onThemeChange"
           />
         </setting-item>
+
         <setting-item title="跟随系统">
           <n-switch
             v-model:value="themeAuto"
@@ -195,12 +217,15 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             @update-value="onThemeChange"
           />
         </setting-item>
+
         <setting-item title="主题颜色" desc="修改全局的主题颜色">
           <n-select
             v-model:value="primaryColor"
             :options="primaryColorOptions"
+            :render-label="renderThemeLabel"
           />
         </setting-item>
+
         <setting-item
           v-if="primaryColor === 'custom'"
           title="自定义颜色"
@@ -210,15 +235,16 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             v-model:value="customPrimaryColor"
             :show-alpha="false"
             placement="left"
-            :style="{ width: '150px' }"
           />
         </setting-item>
+
         <setting-item title="侧边栏宽度" desc="调整左侧导航栏的宽度">
           <n-select
             v-model:value="sidebarWidth"
             :options="sidebarWidthOptions"
           />
         </setting-item>
+
         <setting-item title="动画效果" desc="开启或关闭界面过渡动画">
           <n-switch
             v-model:value="enableAnimations"
@@ -243,30 +269,33 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             :options="closeOptions"
           />
         </setting-item>
+
         <setting-item title="每次关闭程序时都询问">
           <n-switch v-model:value="appCloseTip" :round="false" />
         </setting-item>
+
         <setting-item title="自动检测更新" desc="在启动时检测是否有新版本">
           <n-switch v-model:value="autoUpdate" :round="false" />
         </setting-item>
+
         <setting-item title="更新源" desc="当无法访问GitHub时可切换为国内源">
           <n-select
             v-model:value="updateSource"
             :options="updateOptions"
-            :style="{ width: '130px' }"
             :consistent-menu-width="false"
             size="medium"
           />
         </setting-item>
+
         <setting-item title="插件源" desc="用于搜索和安装插件的 npm 源">
           <n-select
             v-model:value="npmRegistry"
             :options="npmRegistryOptions"
-            :style="{ width: '130px' }"
             :consistent-menu-width="false"
             size="medium"
           />
         </setting-item>
+
         <setting-item
           v-if="npmRegistry === 'custom'"
           title="自定义软件源"
@@ -278,6 +307,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             :style="{ width: '300px' }"
           />
         </setting-item>
+
         <setting-item title="显示任务栏图标" desc="是否显示 系统Dock栏/任务栏 应用图标">
           <n-switch
             v-model:value="showDockIcon"
@@ -291,9 +321,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
         <setting-item title="开发者工具">
           <template #desc>
             使用快捷键
-            <keycut ctrl shift>
-              D
-            </keycut>
+            <keycut ctrl shift text="D" />
             打开
           </template>
           <n-switch
@@ -302,6 +330,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
             @update-value="onDevToolsChange"
           />
         </setting-item>
+
         <setting-item
           title="程序重置"
           desc="若程序显示异常或出现问题时可尝试此操作"

@@ -39,10 +39,12 @@ onMounted(async () => {
           <side-bar class="no-draggable min-h-0 flex-1" />
         </div>
       </n-layout-sider>
+
       <n-layout content-class="flex flex-col">
         <n-layout-header bordered>
           <title-bar />
         </n-layout-header>
+
         <n-layout class="pr.5" content-class="p6" :native-scrollbar="false">
           <router-view v-slot="{ Component, route }">
             <suspense>
