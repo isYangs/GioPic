@@ -50,8 +50,12 @@ export function registerPluginIpc() {
   ipcMain.handle('install-plugin', async () => {
     try {
       const { canceled, filePaths } = await dialog.showOpenDialog({
-        title: '选择插件文件夹',
+        title: '选择插件文件或文件夹',
         properties: ['openDirectory', 'openFile'],
+        filters: [
+          { name: '插件文件', extensions: ['zip', 'tgz', 'tar.gz'] },
+          { name: '所有文件', extensions: ['*'] },
+        ],
       })
 
       if (canceled || filePaths.length === 0) {
@@ -62,7 +66,7 @@ export function registerPluginIpc() {
       }
 
       const pluginPath = filePaths[0]
-      const plugin = await pluginManager.importPlugin(pluginPath)
+      const plugin = await pluginManager.installPlugin(pluginPath)
 
       if (!plugin) {
         return {
@@ -131,7 +135,7 @@ export function registerPluginIpc() {
       if (!result) {
         return {
           success: false,
-          message: '卸载插件失败',
+          message: '插件卸载失败',
         }
       }
       return {
@@ -139,10 +143,10 @@ export function registerPluginIpc() {
       }
     }
     catch (e) {
-      pluginLogger.error(`卸载插件 ${pluginId} 失败`, e)
+      pluginLogger.error(`插件卸载失败: ${pluginId}`, e)
       return {
         success: false,
-        message: e instanceof Error ? e.message : '卸载插件失败',
+        message: e instanceof Error ? e.message : '插件卸载失败',
       }
     }
   })

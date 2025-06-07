@@ -47,7 +47,7 @@ export const pluginApi = {
   async uninstallPlugin(pluginId: string) {
     const res = await window.ipcRenderer.invoke('uninstall-plugin', pluginId)
     if (!res.success) {
-      throw new Error(res.message || '卸载插件失败')
+      throw new Error(res.message || '插件卸载失败')
     }
     return true
   },

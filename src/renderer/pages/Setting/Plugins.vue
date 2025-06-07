@@ -92,8 +92,14 @@ async function installPlugin() {
     await fetchPlugins()
   }
   catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e)
+
+    if (errorMessage.includes('用户取消操作')) {
+      return
+    }
+
     console.error('安装插件错误:', e)
-    window.$message.error('安装插件时出现错误')
+    window.$message.error(errorMessage.includes('插件安装失败:') ? errorMessage : '安装插件时出现错误')
   }
   finally {
     pluginOperations.value.installing = false
@@ -139,12 +145,12 @@ async function togglePluginState(plugin: StoragePlugin) {
     if (plugin.enabled) {
       await pluginApi.disablePlugin(plugin.id)
       plugin.enabled = false
-      window.$message.success(`禁用插件 ${plugin.name} 成功`)
+      window.$message.success(`已禁用 ${plugin.name} 插件`)
     }
     else {
       await pluginApi.enablePlugin(plugin.id)
       plugin.enabled = true
-      window.$message.success(`启用插件 ${plugin.name} 成功`)
+      window.$message.success(`已启用 ${plugin.name} 插件`)
     }
   }
   catch (e) {
@@ -355,19 +361,12 @@ onMounted(async () => {
                 <div class="flex flex-shrink-0 items-center gap-2">
                   <n-switch
                     v-if="!plugin.isBuiltin"
+                    :round="false"
                     :value="plugin.enabled !== false"
                     :loading="pluginOperations.toggling && pluginOperations.currentPluginId === plugin.id"
                     :disabled="pluginOperations.uninstalling"
-                    size="small"
                     @update:value="() => togglePluginState(plugin)"
-                  >
-                    <template #checked>
-                      启用
-                    </template>
-                    <template #unchecked>
-                      禁用
-                    </template>
-                  </n-switch>
+                  />
                   <n-button
                     type="error"
                     size="small"

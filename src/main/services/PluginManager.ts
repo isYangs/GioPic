@@ -256,16 +256,10 @@ export class PluginManager {
       const extractDir = path.join(tempDir, 'extracted')
       fs.mkdirSync(extractDir, { recursive: true })
 
-      // 解压插件包
       const packageDir = await this.extractPackage(tgzPath, extractDir)
-
-      // 验证插件包
       const { pluginInfo } = this.validatePluginPackage(packageDir)
-
-      // 安装并加载插件
       const installedPlugin = await this.installAndLoadPlugin(packageDir, pluginInfo)
 
-      // 清理临时目录
       fs.rmSync(tempDir, { recursive: true, force: true })
 
       pluginLogger.info(`插件 ${installedPlugin.name} (${installedPlugin.id}) 从插件源安装成功`)
@@ -335,6 +329,7 @@ export class PluginManager {
             ...packageJson.plugin,
             path: pluginPath,
             isBuiltin: false,
+            enabled: packageJson.plugin.enabled !== false,
           }
 
           if (this.validatePlugin(plugin)) {
@@ -388,7 +383,6 @@ export class PluginManager {
       const tempId = Date.now().toString()
       const tempDir = path.join(this.pluginsDir, '.temp', `install_${tempId}`)
 
-      // 确保临时目录存在
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true })
       }
@@ -397,26 +391,19 @@ export class PluginManager {
 
       try {
         if (stat.isDirectory()) {
-          // 如果是目录，直接使用
           packageDir = pluginPath
         }
         else {
-          // 如果是文件，需要解压
           const extractDir = path.join(tempDir, 'extracted')
           fs.mkdirSync(extractDir, { recursive: true })
           packageDir = await this.extractPackage(pluginPath, extractDir)
         }
 
-        // 验证插件包
         const { pluginInfo } = this.validatePluginPackage(packageDir)
-
-        // 安装并加载插件
         const installedPlugin = await this.installAndLoadPlugin(packageDir, pluginInfo)
-
         return installedPlugin
       }
       finally {
-        // 清理临时目录
         if (fs.existsSync(tempDir)) {
           fs.rmSync(tempDir, { recursive: true, force: true })
         }
@@ -425,36 +412,6 @@ export class PluginManager {
     catch (e) {
       pluginLogger.error('插件安装失败', e)
       throw new Error(`插件安装失败: ${e instanceof Error ? e.message : '未知错误'}`)
-    }
-  }
-
-  /**
-   * 导入外部插件
-   * @param externalPath 外部插件路径
-   */
-  async importPlugin(externalPath: string): Promise<StoragePlugin | null> {
-    try {
-      if (!fs.existsSync(externalPath)) {
-        throw new Error('插件路径不存在')
-      }
-
-      const stat = fs.statSync(externalPath)
-      if (!stat.isDirectory()) {
-        throw new Error('仅支持目录形式的插件')
-      }
-
-      // 验证插件包
-      const { pluginInfo } = this.validatePluginPackage(externalPath)
-
-      // 安装并加载插件
-      const installedPlugin = await this.installAndLoadPlugin(externalPath, pluginInfo)
-
-      pluginLogger.info(`插件 ${installedPlugin.name} (${installedPlugin.id}) 导入成功`)
-      return installedPlugin
-    }
-    catch (e) {
-      pluginLogger.error('插件导入失败', e)
-      throw new Error(`插件导入失败: ${e instanceof Error ? e.message : '未知错误'}`)
     }
   }
 
@@ -648,7 +605,6 @@ export class PluginManager {
     const ext = path.extname(packagePath).toLowerCase()
 
     if (ext === '.tgz' || packagePath.endsWith('.tar.gz')) {
-      // 解压 tar.gz 或 tgz 文件
       execSync(`tar -xzf "${packagePath}" -C "${extractDir}"`, {
         encoding: 'utf-8',
         timeout: 30000,
@@ -656,7 +612,6 @@ export class PluginManager {
       return path.join(extractDir, 'package')
     }
     else if (ext === '.zip') {
-      // 解压 zip 文件，使用系统命令
       try {
         execSync(`unzip -q "${packagePath}" -d "${extractDir}"`, {
           encoding: 'utf-8',
@@ -664,7 +619,6 @@ export class PluginManager {
         })
       }
       catch {
-        // 尝试使用 PowerShell (Windows)
         try {
           execSync(`powershell -command "Expand-Archive -Path '${packagePath}' -DestinationPath '${extractDir}'"`, {
             encoding: 'utf-8',
@@ -676,7 +630,6 @@ export class PluginManager {
         }
       }
 
-      // 查找包含 package.json 的目录
       const entries = fs.readdirSync(extractDir, { withFileTypes: true })
       const packageDirEntry = entries.find((entry) => {
         if (entry.isDirectory()) {
@@ -690,7 +643,6 @@ export class PluginManager {
         return path.join(extractDir, packageDirEntry.name)
       }
       else {
-        // 如果没有子目录，检查根目录
         const rootPackageJson = path.join(extractDir, 'package.json')
         if (fs.existsSync(rootPackageJson)) {
           return extractDir
@@ -725,12 +677,10 @@ export class PluginManager {
       throw new Error('插件信息不完整：缺少必要字段 (id, name, version, type)')
     }
 
-    // 检查插件是否已安装
     if (this.plugins.has(pluginInfo.id)) {
       throw new Error(`插件已存在: ${pluginInfo.id}`)
     }
 
-    // 检查是否尝试覆盖内置插件
     if (this.isRealBuiltinPlugin(pluginInfo.id)) {
       throw new Error(`不能安装与内置插件相同ID的插件: ${pluginInfo.id}`)
     }
@@ -746,15 +696,12 @@ export class PluginManager {
   private async installAndLoadPlugin(packageDir: string, pluginInfo: any): Promise<StoragePlugin> {
     const finalPluginDir = path.join(this.pluginsDir, pluginInfo.id)
 
-    // 如果目标目录存在，先删除
     if (fs.existsSync(finalPluginDir)) {
       fs.rmSync(finalPluginDir, { recursive: true, force: true })
     }
 
-    // 复制插件文件
-    this.copyDir(packageDir, finalPluginDir)
+    await this.installPluginViaNpm(packageDir, pluginInfo.id)
 
-    // 加载插件
     await this.loadPlugin(finalPluginDir)
 
     const installedPlugin = this.plugins.get(pluginInfo.id)
@@ -766,6 +713,80 @@ export class PluginManager {
     return installedPlugin
   }
 
+  /**
+   * 通过npm安装插件
+   * @param packageDir 插件包目录
+   * @param pluginId 插件ID
+   */
+  private async installPluginViaNpm(packageDir: string, pluginId: string) {
+    try {
+      const finalPluginDir = path.join(this.pluginsDir, pluginId)
+
+      if (!fs.existsSync(finalPluginDir)) {
+        fs.mkdirSync(finalPluginDir, { recursive: true })
+      }
+
+      const originalPackageJsonPath = path.join(packageDir, 'package.json')
+      const originalPackageJson = JSON.parse(fs.readFileSync(originalPackageJsonPath, 'utf-8'))
+
+      const srcDistDir = path.join(packageDir, 'dist')
+      const destDistDir = path.join(finalPluginDir, 'dist')
+
+      if (fs.existsSync(srcDistDir)) {
+        this.copyDir(srcDistDir, destDistDir)
+      }
+
+      const pluginPackageJson = {
+        name: originalPackageJson.name || `giopic-plugin-${pluginId}`,
+        version: originalPackageJson.version || '1.0.0',
+        main: './dist/index.js',
+        type: 'module',
+        dependencies: {
+          '@giopic/core': '^0.1.0',
+        },
+        plugin: originalPackageJson.plugin,
+      }
+
+      const packageJsonPath = path.join(finalPluginDir, 'package.json')
+      fs.writeFileSync(packageJsonPath, JSON.stringify(pluginPackageJson, null, 2))
+
+      await this.installDependencies(finalPluginDir)
+
+      pluginLogger.info(`插件 ${pluginId} 安装成功`)
+    }
+    catch (e) {
+      pluginLogger.error(`插件安装失败: ${pluginId}`, e)
+      throw new Error(`插件安装失败: ${e instanceof Error ? e.message : '未知错误'}`)
+    }
+  }
+
+  /**
+   * 安装插件依赖
+   */
+  private async installDependencies(pluginDir: string) {
+    try {
+      const appRoot = process.env.APP_ROOT || path.join(__dirname, '../..')
+      const localCorePath = path.join(appRoot, 'packages', 'core')
+
+      if (!fs.existsSync(localCorePath)) {
+        throw new Error('找不到本地@giopic/core包')
+      }
+
+      execSync(`npm install file:${localCorePath} --silent`, {
+        cwd: pluginDir,
+        encoding: 'utf-8',
+        timeout: 60000,
+        stdio: 'pipe',
+      })
+
+      pluginLogger.info('从本地packages/core安装依赖成功')
+    }
+    catch (e) {
+      pluginLogger.error('安装插件依赖失败:', e)
+      throw new Error(`依赖安装失败: ${e instanceof Error ? e.message : '未知错误'}`)
+    }
+  }
+
   private copyDir(src: string, dest: string) {
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(dest, { recursive: true })
@@ -774,14 +795,41 @@ export class PluginManager {
     const entries = fs.readdirSync(src, { withFileTypes: true })
 
     for (const entry of entries) {
+      if (entry.name === 'node_modules'
+        || entry.name === '.git'
+        || entry.name === '.DS_Store'
+        || entry.name.startsWith('.')) {
+        continue
+      }
+
       const srcPath = path.join(src, entry.name)
       const destPath = path.join(dest, entry.name)
 
-      if (entry.isDirectory()) {
-        this.copyDir(srcPath, destPath)
+      try {
+        if (entry.isDirectory()) {
+          this.copyDir(srcPath, destPath)
+        }
+        else if (entry.isSymbolicLink()) {
+          // 处理符号链接
+          const linkTarget = fs.readlinkSync(srcPath)
+          const resolvedTarget = path.resolve(path.dirname(srcPath), linkTarget)
+
+          if (fs.existsSync(resolvedTarget)) {
+            const targetStat = fs.statSync(resolvedTarget)
+            if (targetStat.isFile()) {
+              fs.copyFileSync(resolvedTarget, destPath)
+            }
+            else if (targetStat.isDirectory()) {
+              this.copyDir(resolvedTarget, destPath)
+            }
+          }
+        }
+        else {
+          fs.copyFileSync(srcPath, destPath)
+        }
       }
-      else {
-        fs.copyFileSync(srcPath, destPath)
+      catch (e) {
+        pluginLogger.warn(`复制文件失败: ${srcPath} -> ${destPath}`, e instanceof Error ? e.message : String(e))
       }
     }
   }

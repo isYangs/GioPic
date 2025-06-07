@@ -64,7 +64,7 @@ export function useImageUpload(options: UploadOptions) {
       }
     }
     else {
-      throw new Error('无法获取文件数据')
+      throw new Error('图片文件数据无效，请重新选择文件')
     }
 
     return { fileBuffer, base64Data }
@@ -73,23 +73,23 @@ export function useImageUpload(options: UploadOptions) {
   // 单个图片上传
   async function uploadSingleImage(index: number, shouldGetRecord = true) {
     if (!defaultProgram.value) {
-      window.$message.error('请选择存储程序后再上传')
+      window.$message.error('请先选择存储程序后再上传')
       return
     }
 
     const item = data.value[index]
     if (!item) {
-      window.$message.error('文件数据不存在')
+      window.$message.error('图片文件不存在')
       return
     }
 
     if (item.uploaded) {
-      window.$message.info(`图片 ${index + 1} 已经上传过了，将跳过此图片。`)
+      window.$message.info(`图片 ${index + 1} 已经上传成功，跳过该图片`)
       return
     }
 
     if (!item.file && !item.buffer) {
-      window.$message.error('文件数据无效，无法上传')
+      window.$message.error('图片文件数据无效，请重新选择')
       return
     }
 
@@ -115,10 +115,10 @@ export function useImageUpload(options: UploadOptions) {
         },
         index,
       )
-      window.$message.success('上传成功')
+      window.$message.success('图片上传成功')
     }
     catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '上传失败'
+      const errorMessage = e instanceof Error ? e.message : '图片上传失败，请稍后重试'
       console.error('上传失败:', e)
       window.$message.error(errorMessage)
       uploadDataStore.setData({ uploadFailed: true }, index)
@@ -155,7 +155,7 @@ export function useImageUpload(options: UploadOptions) {
 
         if (!item.file && !item.buffer) {
           const index = data.value.indexOf(item)
-          window.$message.error(`图片 ${index + 1} 文件数据无效，无法上传。`)
+          window.$message.error(`图片 ${index + 1} 文件数据无效，已跳过`)
           return null
         }
 
@@ -173,7 +173,7 @@ export function useImageUpload(options: UploadOptions) {
             .catch((e) => {
               const errorMessage = e instanceof Error ? e.message : '上传失败'
               console.error(`图片 ${originalIndex + 1} 上传失败:`, errorMessage)
-              window.$message.error(`图片 ${originalIndex + 1} 上传失败: ${errorMessage}`)
+              window.$message.error(`图片 ${originalIndex + 1} 上传失败：${errorMessage}`)
             }),
         )
 
@@ -189,7 +189,7 @@ export function useImageUpload(options: UploadOptions) {
       await Promise.all(tasks)
     }
     catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '批量上传过程中发生错误'
+      const errorMessage = e instanceof Error ? e.message : '批量上传过程中出现错误，请稍后重试'
       console.error('批量上传过程中发生错误:', errorMessage)
     }
     finally {

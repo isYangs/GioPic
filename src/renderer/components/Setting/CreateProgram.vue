@@ -15,15 +15,19 @@ const isLoading = ref(true)
 const plugins = ref<StoragePlugin[]>([])
 const selectedPluginId = ref('')
 
+const enabledPlugins = computed(() =>
+  plugins.value.filter(plugin => plugin.enabled !== false),
+)
+
 const options = computed(() =>
-  plugins.value.map(plugin => ({
+  enabledPlugins.value.map(plugin => ({
     label: plugin.name,
     value: plugin.id,
     plugin,
   })),
 )
 
-const selectedPlugin = computed(() => plugins.value.find(p => p.id === selectedPluginId.value))
+const selectedPlugin = computed(() => enabledPlugins.value.find(p => p.id === selectedPluginId.value))
 
 async function finishCreateProgram() {
   if (!selectedPlugin.value) {
@@ -55,11 +59,12 @@ async function finishCreateProgram() {
 
 onMounted(async () => {
   isLoading.value = true
-  await pluginStore.loadPlugins()
+
+  await pluginStore.reloadPlugins()
   plugins.value = pluginStore.plugins
 
-  if (plugins.value.length > 0) {
-    selectedPluginId.value = plugins.value[0].id
+  if (enabledPlugins.value.length > 0) {
+    selectedPluginId.value = enabledPlugins.value[0].id
   }
 
   isLoading.value = false
@@ -70,7 +75,7 @@ onMounted(async () => {
   <div v-if="isLoading" class="flex items-center justify-center py-4">
     <n-spin size="medium" />
   </div>
-  <template v-else-if="plugins.length > 0">
+  <template v-else-if="enabledPlugins.length > 0">
     <n-select v-model:value="selectedPluginId" class="mb6" :options="options" />
     <n-flex align="center" justify="end">
       <n-button type="primary" class="wfull" @click="finishCreateProgram()">

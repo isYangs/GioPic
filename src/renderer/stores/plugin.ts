@@ -28,6 +28,11 @@ export const usePluginStore = defineStore('pluginStore', () => {
     }
   }
 
+  async function reloadPlugins() {
+    state.loaded = false
+    await loadPlugins()
+  }
+
   function getAllPlugins() {
     return state.plugins
   }
@@ -95,6 +100,7 @@ export const usePluginStore = defineStore('pluginStore', () => {
   return {
     ...toRefs(state),
     loadPlugins,
+    reloadPlugins,
     getAllPlugins,
     getPlugin,
     getPluginsByType,
