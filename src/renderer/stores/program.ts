@@ -1,4 +1,5 @@
 import { usePluginStore } from './plugin'
+import { usePluginDataStore } from './plugin-data'
 
 export interface Program {
   id: number | null
@@ -27,7 +28,6 @@ export const useProgramStore = defineStore(
 
     function setProgramDetail(id: number, detail: Record<string, any>) {
       const program = getProgram(id)
-      // 使用响应式的方式更新 detail
       program.detail = { ...program.detail, ...detail }
     }
 
@@ -54,9 +54,27 @@ export const useProgramStore = defineStore(
 
     function removeProgram(id: number) {
       const index = programs.value.findIndex(item => item.id === id)
-      if (index !== -1)
+      if (index !== -1) {
+        const pluginDataStore = usePluginDataStore()
+        pluginDataStore.removeProgramData(id)
+
         programs.value.splice(index, 1)
+      }
       return Math.max(index - 1, 0)
+    }
+
+    function removeProgramsByPluginId(pluginId: string) {
+      const removedPrograms = programs.value.filter(program => program.pluginId === pluginId)
+      const pluginDataStore = usePluginDataStore()
+
+      removedPrograms.forEach((program) => {
+        if (program.id !== null) {
+          pluginDataStore.removeProgramData(program.id)
+        }
+      })
+
+      programs.value = programs.value.filter(program => program.pluginId !== pluginId)
+      return removedPrograms
     }
 
     function getPluginSetting(programId: number, pluginId: string): Record<string, any> {
@@ -75,6 +93,7 @@ export const useProgramStore = defineStore(
       getProgramList,
       getProgram,
       removeProgram,
+      removeProgramsByPluginId,
       getPluginSetting,
     }
   },

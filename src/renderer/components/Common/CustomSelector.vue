@@ -149,6 +149,7 @@ async function fetchOptions() {
 
 onMounted(async () => {
   await loadCachedOptions()
+  console.warn(`CustomSelector mounted - field: ${props.field}, multiple: ${props.multiple}, pluginId: ${props.pluginId}`)
 })
 
 defineExpose({

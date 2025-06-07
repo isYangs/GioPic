@@ -27,7 +27,26 @@ export const usePluginDataStore = defineStore(
       return pluginData.value[pluginId] || {}
     }
 
-    // 从主进程同步数据（异步）
+    const removeProgramData = (programId: number): void => {
+      const programKey = `program-${programId}`
+
+      Object.keys(pluginData.value).forEach((pluginId) => {
+        const pluginDataObj = pluginData.value[pluginId]
+        if (pluginDataObj) {
+          Object.keys(pluginDataObj).forEach((key) => {
+            if (key.startsWith(programKey)) {
+              delete pluginDataObj[key]
+              console.warn(`删除插件数据: ${pluginId}.${key}`)
+            }
+          })
+
+          if (Object.keys(pluginDataObj).length === 0) {
+            delete pluginData.value[pluginId]
+          }
+        }
+      })
+    }
+
     const syncFromMain = async (pluginId: string): Promise<void> => {
       try {
         const data = await pluginApi.getAllPluginData(pluginId)
@@ -36,14 +55,13 @@ export const usePluginDataStore = defineStore(
         }
       }
       catch (e) {
-        console.warn(`同步插件数据失败: ${pluginId}`, e)
+        console.error(`同步插件数据失败: ${pluginId}`, e)
       }
     }
 
-    // 后台同步到主进程（不阻塞）
     const syncToMain = (pluginId: string, key: string, data: any): void => {
       pluginApi.setPluginData(pluginId, key, data).catch((e) => {
-        console.warn(`同步数据到主进程失败: ${pluginId}.${key}`, e)
+        console.error(`同步数据到主进程失败: ${pluginId}.${key}`, e)
       })
     }
 
@@ -53,6 +71,7 @@ export const usePluginDataStore = defineStore(
       getData,
       removeData,
       getAllData,
+      removeProgramData,
       syncFromMain,
       syncToMain,
     }
@@ -65,21 +84,16 @@ export const usePluginDataStore = defineStore(
   },
 )
 
-// 创建适配器，将 pinia store 适配为 PluginDataStore 接口
 export function createPluginDataStoreAdapter(): PluginDataStore {
   const store = usePluginDataStore()
 
   return {
     setData: (pluginId: string, key: string, data: any): void => {
-      // 保存到本地 store
       store.setData(pluginId, key, data)
-
-      // 后台同步到主进程（不阻塞）
       store.syncToMain(pluginId, key, data)
     },
 
     getData: (pluginId: string, key: string): any => {
-      // 从本地获取（如果需要从主进程获取，需要手动调用 syncFromMain）
       return store.getData(pluginId, key)
     },
 
@@ -93,7 +107,6 @@ export function createPluginDataStoreAdapter(): PluginDataStore {
   }
 }
 
-// 手动同步数据的辅助函数
 export async function syncPluginDataFromMain(pluginId: string): Promise<void> {
   const store = usePluginDataStore()
   await store.syncFromMain(pluginId)

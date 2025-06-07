@@ -104,4 +104,6 @@ export interface PluginDataStore {
   removeData: (pluginId: string, key: string) => void
   /** 获取插件的所有数据 */
   getAllData: (pluginId: string) => Record<string, any>
+  /** 清理指定程序的所有相关数据 */
+  removeProgramData?: (programId: number) => void
 }

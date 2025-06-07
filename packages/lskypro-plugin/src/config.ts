@@ -71,6 +71,7 @@ export const lskyproSettingSchema: SettingSchema = {
       type: 'custom-selector',
       customMethod: 'getStrategies',
       required: true,
+      multiple: true,
     },
     {
       field: 'useDefaultPermission',
@@ -91,8 +92,7 @@ export const lskyproSettingSchema: SettingSchema = {
   ],
   defaultValues: {
     api: '',
-    email: '',
-    password: '',
+    token: '',
     strategies: null,
     useDefaultPermission: false,
     defaultPermission: 1,

@@ -3,6 +3,7 @@ import type { StoragePlugin } from '@giopic/core'
 import type { NpmSearchResult } from '@/types'
 import { onMounted, ref } from 'vue'
 import { pluginApi } from '~/api/plugin'
+import { useProgramStore } from '~/stores'
 
 defineOptions({
   name: 'Plugins',
@@ -19,6 +20,8 @@ const pluginOperations = ref({
   installing: false,
   currentPluginId: '',
 })
+
+const programStore = useProgramStore()
 
 function setDefaultEnabledState(plugin: StoragePlugin) {
   if (plugin.enabled === undefined) {
@@ -88,7 +91,7 @@ async function installPlugin() {
   pluginOperations.value.installing = true
   try {
     const plugin = await pluginApi.installPlugin()
-    window.$message.success(`安装插件 ${plugin.name} 成功`)
+    window.$message.success(`${plugin.name} 插件安装成功`)
     await fetchPlugins()
   }
   catch (e) {
@@ -107,9 +110,18 @@ async function installPlugin() {
 }
 
 async function uninstallPlugin(pluginId: string, pluginName: string) {
+  const relatedPrograms = programStore.programs.filter(program => program.pluginId === pluginId)
+  const hasRelatedPrograms = relatedPrograms.length > 0
+
+  let content = `确定要卸载插件 ${pluginName} 吗？此操作不可恢复。`
+  if (hasRelatedPrograms) {
+    const programNames = relatedPrograms.map(p => p.name || '未命名存储').join('、')
+    content += `\n\n注意：这将同时删除以下使用此插件的存储程序：${programNames}`
+  }
+
   window.$dialog.warning({
     title: '卸载插件',
-    content: `确定要卸载插件 ${pluginName} 吗？此操作不可恢复。`,
+    content,
     positiveText: '确定',
     negativeText: '取消',
     autoFocus: false,
@@ -118,7 +130,15 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
       pluginOperations.value.currentPluginId = pluginId
       try {
         await pluginApi.uninstallPlugin(pluginId)
-        window.$message.success('卸载插件成功')
+
+        if (hasRelatedPrograms) {
+          const removedPrograms = programStore.removeProgramsByPluginId(pluginId)
+          if (removedPrograms.length > 0) {
+            window.$message.info(`同时删除了 ${removedPrograms.length} 个相关存储程序`)
+          }
+        }
+
+        window.$message.success('插件卸载成功')
         await fetchPlugins()
       }
       catch (e) {
