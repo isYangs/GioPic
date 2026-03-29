@@ -1,5 +1,3 @@
-import type { PrimaryColor, ThemeType } from '~/utils/theme'
-
 const initialState = {
   // 基础
   appCloseType: 'hide' as 'close' | 'hide', // 关闭类型 'close' | 'hide'
@@ -20,6 +18,7 @@ const initialState = {
   themeType: 'light' as ThemeType, // 主题类型 'light' | 'dark' | null
   themeAuto: false, // 是否自动切换主题
   sidebarWidth: 180, // 侧边栏宽度 160 | 180 | 220
+  borderRadius: 8, // 全局圆角 4 | 8 | 12 | 16
   enableAnimations: true, // 是否启用动画效果
   primaryColor: 'default' as PrimaryColor, // 主题色调
   customPrimaryColor: '#18a058', // 自定义主题色
@@ -46,9 +45,10 @@ export const useAppStore = defineStore(
     }
 
     /** 重置所有状态到初始值 */
-    function resetState() {
+    async function resetState() {
       const copiedState = { ...initialState }
       Object.assign(state, copiedState)
+      await window.ipcRenderer.invoke('reset-settings')
     }
 
     return {

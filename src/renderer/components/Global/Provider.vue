@@ -7,9 +7,6 @@ import {
   useOsTheme,
 } from 'naive-ui'
 import { createTextVNode } from 'vue'
-import { useAppStore } from '~/stores'
-import { openSettingPanel, openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
-import { generateCustomColors, getPrimaryColor } from '~/utils/theme'
 
 const appStore = useAppStore()
 const {
@@ -18,6 +15,7 @@ const {
   themeType,
   themeAuto,
   sidebarWidth,
+  borderRadius,
   enableAnimations,
   primaryColor,
   customPrimaryColor,
@@ -33,6 +31,10 @@ const themeOverrides = computed((): GlobalThemeOverrides => ({
       ? customPrimaryColor.value
       : getPrimaryColor(themeType.value, primaryColor.value),
     ),
+    borderRadius: `${borderRadius.value}px`,
+    borderRadiusSmall: `${Math.max(2, borderRadius.value - 2)}px`,
+    borderRadiusMedium: `${borderRadius.value}px`,
+    borderRadiusLarge: `${borderRadius.value + 2}px`,
   },
   Typography: {
     // headerBarColor: 'currentColor',
@@ -97,8 +99,12 @@ watch(sidebarWidth, (val) => {
   document.documentElement.style.setProperty('--sidebar-width', `${val}px`)
 }, { immediate: true })
 
+watch(borderRadius, (val) => {
+  document.documentElement.style.setProperty('--giopic-border-radius', `${val}px`)
+}, { immediate: true })
+
 watch(showDockIcon, (val) => {
-  window.ipcRenderer.invoke('dock-icon-show', val)
+  callIpc('dock-icon-show', val)
 }, { immediate: true })
 
 // 监听更新提示信息

@@ -3,6 +3,7 @@
   --sidebar-width: 180px;
   --sidebar-collapsed-width: 64px;
   --animation-duration: 0.3s;
+  --giopic-border-radius: 8px;
 }
 
 html,
@@ -78,11 +79,11 @@ img {
   width: 50vw;
   max-width: 700px;
   min-width: min(24rem, 100vw);
-  border-radius: 8px;
+  border-radius: var(--giopic-border-radius);
 }
 
 .n-card {
-  border-radius: 8px;
+  border-radius: var(--giopic-border-radius);
 }
 
 .n-modal-mask {
@@ -90,7 +91,7 @@ img {
 }
 
 .n-image-preview-toolbar {
-  border-radius: 6px;
+  border-radius: calc(var(--giopic-border-radius) - 2px);
   background: rgba(0, 0, 0, 0.75);
   bottom: 50px;
 }
@@ -108,7 +109,7 @@ img {
 }
 
 .n-message-container .n-message-wrapper .n-message {
-  border-radius: 12px;
+  border-radius: calc(var(--giopic-border-radius) + 4px);
 }
 
 .n-scrollbar > .n-scrollbar-rail {

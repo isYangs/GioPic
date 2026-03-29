@@ -2,12 +2,7 @@
 import type { SelectOption } from 'naive-ui'
 import type { VNodeChild } from 'vue'
 import type { SettingEntry } from '@/types'
-import type { PrimaryColor } from '~/utils/theme'
 import { useOsTheme } from 'naive-ui'
-import { ipcApi } from '~/api'
-import { useAppStore } from '~/stores'
-import { renderIcon } from '~/utils/main'
-import { getPrimaryColor } from '~/utils/theme'
 
 const props = defineProps<{
   tab?: string
@@ -27,6 +22,7 @@ const {
   npmRegistry,
   customNpmRegistry,
   sidebarWidth,
+  borderRadius,
   enableAnimations,
   primaryColor,
   customPrimaryColor,
@@ -62,6 +58,13 @@ const sidebarWidthOptions = [
   { label: '紧凑 (160px)', value: 160 },
   { label: '标准 (180px)', value: 180 },
   { label: '宽松 (220px)', value: 220 },
+]
+
+const borderRadiusOptions = [
+  { label: '方正 (4px)', value: 4 },
+  { label: '默认 (8px)', value: 8 },
+  { label: '圆润 (12px)', value: 12 },
+  { label: '更圆 (16px)', value: 16 },
 ]
 
 const primaryColorOptions = [
@@ -153,33 +156,15 @@ function onThemeChange(val?: boolean) {
 }
 
 async function onAutoStartChange(val: boolean) {
-  try {
-    await ipcApi.setAutoStart(val)
-  }
-  catch (e) {
-    console.error('设置开机自启失败:', e)
-    window.$message.error('设置开机自启失败')
-  }
+  await callIpc('auto-start', val)
 }
 
 async function onDevToolsChange(val: boolean) {
-  try {
-    await ipcApi.setDevTools(val)
-  }
-  catch (e) {
-    console.error('设置开发者工具失败:', e)
-    window.$message.error('设置开发者工具失败')
-  }
+  await callIpc('reg-dev-tools', val)
 }
 
 async function onDockIconChange(val: boolean) {
-  try {
-    await ipcApi.setDockIconVisible(val)
-  }
-  catch (e) {
-    console.error('设置任务栏图标失败:', e)
-    window.$message.error('设置任务栏图标失败')
-  }
+  await callIpc('dock-icon-show', val)
 }
 
 watch(updateSource, (newValue) => {
@@ -245,6 +230,13 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
           />
         </setting-item>
 
+        <setting-item title="界面圆角" desc="调整界面组件的圆角大小">
+          <n-select
+            v-model:value="borderRadius"
+            :options="borderRadiusOptions"
+          />
+        </setting-item>
+
         <setting-item title="动画效果" desc="开启或关闭界面过渡动画">
           <n-switch
             v-model:value="enableAnimations"
@@ -287,7 +279,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
           />
         </setting-item>
 
-        <setting-item title="插件源" desc="用于搜索和安装插件的 npm 源">
+        <setting-item title="插件源" desc="用于搜索和安装插件的包管理源">
           <n-select
             v-model:value="npmRegistry"
             :options="npmRegistryOptions"
@@ -298,8 +290,8 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
 
         <setting-item
           v-if="npmRegistry === 'custom'"
-          title="自定义软件源"
-          desc="输入自定义 NPM 源地址"
+          title="自定义插件源"
+          desc="输入自定义插件源地址"
         >
           <n-input
             v-model:value="customNpmRegistry"
