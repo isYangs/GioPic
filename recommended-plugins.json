@@ -1,0 +1,17 @@
+{
+  "updatedAt": "2026-03-28T00:00:00.000Z",
+  "recommendedPlugins": [
+    {
+      "name": "@giopic/lsky-plugin",
+      "reason": "官方推荐，适合快速接入 Lsky 图床"
+    },
+    {
+      "name": "@giopic/s3-plugin",
+      "reason": "官方推荐，适合 S3 / R2 / COS 等对象存储"
+    },
+    {
+      "name": "@giopic/lskypro-plugin",
+      "reason": "官方推荐，适合 Lsky Pro 用户"
+    }
+  ]
+}

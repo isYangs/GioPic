@@ -1,7 +1,7 @@
 {
   "name": "@giopic/core",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "GioPic 核心工具包，提供插件所需的通用功能",
   "author": "isYangs",
   "license": "AGPL-3.0",

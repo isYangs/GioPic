@@ -1,7 +1,7 @@
 {
   "name": "@giopic/s3-plugin",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "兼容S3协议的存储服务插件(如AWS/腾讯云/阿里云)",
   "author": "isYangs",
   "license": "AGPL-3.0",

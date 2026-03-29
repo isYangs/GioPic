@@ -1,7 +1,7 @@
 {
   "name": "@giopic/lsky-plugin",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "兰空插件，同时支持社区版和企业版v1",
   "author": "isYangs",
   "license": "AGPL-3.0",

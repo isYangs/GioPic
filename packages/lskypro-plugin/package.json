@@ -1,7 +1,7 @@
 {
   "name": "@giopic/lskypro-plugin",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "兰空插件，仅支持企业版v2",
   "author": "isYangs",
   "license": "AGPL-3.0",
