@@ -24,3 +24,11 @@ release
 *.njsproj
 *.sln
 *.sw?
+
+# Test artifacts
+coverage/
+.vitest/
+test-results/
+
+# AI generated files
+.claude
