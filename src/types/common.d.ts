@@ -27,4 +27,6 @@ export interface NpmSearchResult {
   date: string
   keywords?: string[]
   homepage?: string
+  downloadCount?: number
+  recommendScore?: number
 }
