@@ -1,26 +1,43 @@
 import { getPluginDataStore } from '@giopic/core'
 import { dialog, ipcMain } from 'electron'
+import { pluginDevTools } from '../services/PluginDevTools'
 import { pluginManager } from '../services/PluginManager'
 import { setStore } from '../stores'
 import logger from '../utils/logger'
 
 const pluginLogger = logger.scope('PluginIPC')
 
+interface PluginMethodParams {
+  pluginId: string
+  methodName: string
+  params: any
+}
+
+interface PluginDataParams {
+  pluginId: string
+  key: string
+  data?: any
+}
+
+interface PermissionSelectParams {
+  pluginId: string
+  config: Record<string, any>
+}
+
+interface UploadWithPluginParams {
+  pluginId: string
+  params: any
+}
+
 export function registerPluginIpc() {
   ipcMain.handle('get-all-plugins', async () => {
     try {
       const data = pluginManager.getAllPlugins()
-      return {
-        success: true,
-        data,
-      }
+      return data
     }
     catch (e) {
-      pluginLogger.error('获取插件列表失败', e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '获取插件列表失败',
-      }
+      pluginLogger.error('[plugin] get all plugins error', e)
+      throw new Error('获取插件列表失败')
     }
   })
 
@@ -28,22 +45,13 @@ export function registerPluginIpc() {
     try {
       const plugin = pluginManager.getPlugin(pluginId)
       if (!plugin) {
-        return {
-          success: false,
-          message: '插件不存在',
-        }
+        throw new Error('插件不存在')
       }
-      return {
-        success: true,
-        data: plugin,
-      }
+      return plugin
     }
     catch (e) {
-      pluginLogger.error(`获取插件 ${pluginId} 详情失败`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '获取插件详情失败',
-      }
+      pluginLogger.error(`[plugin] get plugin ${pluginId} error`, e)
+      throw new Error('获取插件详情失败')
     }
   })
 
@@ -59,50 +67,32 @@ export function registerPluginIpc() {
       })
 
       if (canceled || filePaths.length === 0) {
-        return {
-          success: false,
-          message: '用户取消操作',
-        }
+        return null
       }
 
       const pluginPath = filePaths[0]
       const plugin = await pluginManager.installPlugin(pluginPath)
 
       if (!plugin) {
-        return {
-          success: false,
-          message: '插件安装失败',
-        }
+        throw new Error('插件安装失败')
       }
 
-      return {
-        success: true,
-        data: plugin,
-      }
+      return plugin
     }
     catch (e) {
-      pluginLogger.error('插件安装失败', e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '插件安装失败',
-      }
+      pluginLogger.error('[plugin] install plugin error', e)
+      throw new Error('插件安装失败')
     }
   })
 
   ipcMain.handle('search-npm-plugins', async (_event, query: string) => {
     try {
       const results = await pluginManager.searchNpmPlugins(query)
-      return {
-        success: true,
-        data: results,
-      }
+      return results
     }
     catch (e) {
-      pluginLogger.error(`搜索插件失败: ${query}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '搜索插件失败',
-      }
+      pluginLogger.error(`[plugin] search npm plugins error: ${query}`, e)
+      throw new Error('搜索插件失败')
     }
   })
 
@@ -110,22 +100,13 @@ export function registerPluginIpc() {
     try {
       const plugin = await pluginManager.installNpmPlugin(packageName)
       if (!plugin) {
-        return {
-          success: false,
-          message: '插件安装失败',
-        }
+        throw new Error('插件安装失败')
       }
-      return {
-        success: true,
-        data: plugin,
-      }
+      return plugin
     }
     catch (e) {
-      pluginLogger.error(`插件安装失败: ${packageName}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '插件安装失败',
-      }
+      pluginLogger.error(`[plugin] install npm plugin error: ${packageName}`, e)
+      throw new Error('插件安装失败')
     }
   })
 
@@ -133,21 +114,13 @@ export function registerPluginIpc() {
     try {
       const result = await pluginManager.uninstallPlugin(pluginId)
       if (!result) {
-        return {
-          success: false,
-          message: '插件卸载失败',
-        }
+        throw new Error('插件卸载失败')
       }
-      return {
-        success: true,
-      }
+      return result
     }
     catch (e) {
-      pluginLogger.error(`插件卸载失败: ${pluginId}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '插件卸载失败',
-      }
+      pluginLogger.error(`[plugin] uninstall plugin error: ${pluginId}`, e)
+      throw new Error('插件卸载失败')
     }
   })
 
@@ -155,56 +128,39 @@ export function registerPluginIpc() {
     try {
       const settingSchema = await pluginManager.getPluginSettingSchema(pluginId)
       if (!settingSchema) {
-        return {
-          success: false,
-          message: '获取插件设置模式失败',
-        }
+        throw new Error('获取插件设置模式失败')
       }
-      return {
-        success: true,
-        data: settingSchema,
-      }
+      return settingSchema
     }
     catch (e) {
-      pluginLogger.error(`获取插件 ${pluginId} 设置模式失败`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '获取插件设置模式失败',
-      }
+      pluginLogger.error(`[plugin] get plugin setting schema error: ${pluginId}`, e)
+      throw new Error('获取插件设置模式失败')
     }
   })
 
-  ipcMain.handle('upload-with-plugin', async (_event, pluginId: string, params: any) => {
+  ipcMain.handle('upload-with-plugin', async (_event, params: UploadWithPluginParams) => {
     try {
-      const result = await pluginManager.uploadWithPlugin(pluginId, params)
-      return {
-        success: true,
-        data: result,
-      }
+      const { pluginId, params: uploadParams } = params
+      const result = await pluginManager.uploadWithPlugin(pluginId, uploadParams)
+      return result
     }
     catch (e) {
-      pluginLogger.error(`使用插件 ${pluginId} 上传失败`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '上传失败',
-      }
+      const pluginId = params?.pluginId || 'unknown'
+      pluginLogger.error(`[plugin] upload with plugin error: ${pluginId}`, e)
+      throw new Error('上传失败')
     }
   })
 
-  ipcMain.handle('should-disable-permission-select', async (_event, pluginId: string, config: Record<string, any>) => {
+  ipcMain.handle('should-disable-permission-select', async (_event, params: PermissionSelectParams) => {
     try {
+      const { pluginId, config } = params
       const result = await pluginManager.shouldDisablePermissionSelect(pluginId, config)
-      return {
-        success: true,
-        data: result,
-      }
+      return result
     }
     catch (e) {
-      pluginLogger.error(`检查插件权限禁用状态失败: ${pluginId}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '检查插件权限禁用状态失败',
-      }
+      const pluginId = params?.pluginId || 'unknown'
+      pluginLogger.error(`[plugin] should disable permission select error: ${pluginId}`, e)
+      throw new Error('检查插件权限禁用状态失败')
     }
   })
 
@@ -212,21 +168,13 @@ export function registerPluginIpc() {
     try {
       const result = await pluginManager.enablePlugin(pluginId)
       if (!result) {
-        return {
-          success: false,
-          message: '启用插件失败',
-        }
+        throw new Error('启用插件失败')
       }
-      return {
-        success: true,
-      }
+      return result
     }
     catch (e) {
-      pluginLogger.error(`启用插件 ${pluginId} 失败`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '启用插件失败',
-      }
+      pluginLogger.error(`[plugin] enable plugin error: ${pluginId}`, e)
+      throw new Error('启用插件失败')
     }
   })
 
@@ -234,94 +182,295 @@ export function registerPluginIpc() {
     try {
       const result = await pluginManager.disablePlugin(pluginId)
       if (!result) {
-        return {
-          success: false,
-          message: '禁用插件失败',
-        }
+        throw new Error('禁用插件失败')
       }
-      return {
-        success: true,
-      }
+      return result
     }
     catch (e) {
-      pluginLogger.error(`禁用插件 ${pluginId} 失败`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '禁用插件失败',
-      }
+      pluginLogger.error(`[plugin] disable plugin error: ${pluginId}`, e)
+      throw new Error('禁用插件失败')
     }
   })
 
-  ipcMain.handle('call-plugin-custom-method', async (_event, pluginId: string, methodName: string, params: any) => {
+  ipcMain.handle('call-plugin-custom-method', async (_event, params: PluginMethodParams) => {
     try {
-      const result = await pluginManager.callPluginCustomMethod(pluginId, methodName, params)
-      return {
-        success: true,
-        data: result,
-      }
+      const { pluginId, methodName, params: methodParams } = params
+      const result = await pluginManager.callPluginCustomMethod(pluginId, methodName, methodParams)
+      return result
     }
     catch (e) {
-      pluginLogger.error(`调用插件自定义方法失败: ${pluginId}.${methodName}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '调用插件自定义方法失败',
-      }
+      const pluginId = params?.pluginId || 'unknown'
+      const methodName = params?.methodName || 'unknown'
+      pluginLogger.error(`[plugin] call plugin custom method error: ${pluginId}.${methodName}`, e)
+      throw new Error('调用插件自定义方法失败')
     }
   })
 
-  ipcMain.handle('get-plugin-data', async (_event, pluginId: string, key: string) => {
+  ipcMain.handle('get-plugin-data', async (_event, params: PluginDataParams) => {
     try {
+      const { pluginId, key } = params
       const data = getPluginDataStore().getData(pluginId, key)
-      return {
-        success: true,
-        data,
-      }
+      return data
     }
     catch (e) {
-      pluginLogger.error(`获取插件数据失败: ${pluginId}.${key}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '获取插件数据失败',
-      }
+      const pluginId = params?.pluginId || 'unknown'
+      const key = params?.key || 'unknown'
+      pluginLogger.error(`[plugin] get plugin data error: ${pluginId}.${key}`, e)
+      throw new Error('获取插件数据失败')
     }
   })
 
   ipcMain.handle('get-all-plugin-data', async (_event, pluginId: string) => {
     try {
       const data = getPluginDataStore().getAllData(pluginId)
-      return {
-        success: true,
-        data,
-      }
+      return data
     }
     catch (e) {
-      pluginLogger.error(`获取插件所有数据失败: ${pluginId}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '获取插件所有数据失败',
-      }
+      pluginLogger.error(`[plugin] get all plugin data error: ${pluginId}`, e)
+      throw new Error('获取插件所有数据失败')
     }
   })
 
-  ipcMain.handle('set-plugin-data', async (_event, pluginId: string, key: string, data: any) => {
+  ipcMain.handle('set-plugin-data', async (_event, params: PluginDataParams) => {
     try {
+      const { pluginId, key, data } = params
       getPluginDataStore().setData(pluginId, key, data)
-      return {
-        success: true,
-      }
     }
     catch (e) {
-      pluginLogger.error(`设置插件数据失败: ${pluginId}.${key}`, e)
-      return {
-        success: false,
-        message: e instanceof Error ? e.message : '设置插件数据失败',
-      }
+      const pluginId = params?.pluginId || 'unknown'
+      const key = params?.key || 'unknown'
+      pluginLogger.error(`[plugin] set plugin data error: ${pluginId}.${key}`, e)
+      throw new Error('设置插件数据失败')
     }
   })
 
-  ipcMain.on('change-npm-registry', (_e, { registry, custom }: { registry: string, custom: string }) => {
-    setStore('npmRegistry', registry)
-    setStore('customNpmRegistry', custom)
-    pluginManager.updateNpmRegistryConfig()
+  ipcMain.handle('remove-plugin-data', async (_event, params: PluginDataParams) => {
+    try {
+      const { pluginId, key } = params
+      getPluginDataStore().removeData(pluginId, key)
+    }
+    catch (e) {
+      const pluginId = params?.pluginId || 'unknown'
+      const key = params?.key || 'unknown'
+      pluginLogger.error(`[plugin] remove plugin data error: ${pluginId}.${key}`, e)
+      throw new Error('删除插件数据失败')
+    }
+  })
+
+  ipcMain.handle('change-npm-registry', (_event, params: { registry: string, custom: string }) => {
+    try {
+      const { registry, custom } = params
+      setStore('npmRegistry', registry)
+      setStore('customNpmRegistry', custom)
+      pluginManager.updateNpmRegistryConfig()
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] change npm registry error: ${params.registry}`, e)
+      throw new Error('切换 npm 源失败')
+    }
+  })
+
+  ipcMain.handle('check-plugin-update', async (_event, pluginId: string) => {
+    try {
+      const result = await pluginManager.checkPluginUpdate(pluginId)
+      return result
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] check plugin update error: ${pluginId}`, e)
+      throw new Error('检查插件更新失败')
+    }
+  })
+
+  ipcMain.handle('update-plugin', async (_event, pluginId: string) => {
+    try {
+      const plugin = await pluginManager.updatePlugin(pluginId)
+      if (!plugin) {
+        throw new Error('插件更新失败')
+      }
+      return plugin
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] update plugin error: ${pluginId}`, e)
+      throw new Error('插件更新失败')
+    }
+  })
+
+  ipcMain.handle('check-all-plugins-update', async () => {
+    try {
+      const results = await pluginManager.checkAllPluginsUpdate()
+      return results
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] check all plugins update error', e)
+      throw new Error('批量检查更新失败')
+    }
+  })
+
+  ipcMain.handle('update-all-plugins', async () => {
+    try {
+      const results = await pluginManager.updateAllPlugins()
+      return results
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] update all plugins error', e)
+      throw new Error('批量更新插件失败')
+    }
+  })
+
+  ipcMain.handle('install-from-github', async (_event, repoUrl: string) => {
+    try {
+      const plugin = await pluginManager.installFromGitHub(repoUrl)
+      if (!plugin) {
+        throw new Error('从 GitHub 安装插件失败')
+      }
+      return plugin
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] install from github error: ${repoUrl}`, e)
+      throw new Error('从 GitHub 安装失败')
+    }
+  })
+
+  ipcMain.handle('get-recommended-plugins', async () => {
+    try {
+      const results = await pluginManager.getRecommendedPlugins()
+      return results
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] get recommended plugins error', e)
+      throw new Error('获取推荐插件失败')
+    }
+  })
+
+  ipcMain.handle('generate-plugin-template', async (_event, options: any) => {
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: '选择插件生成目录',
+        properties: ['openDirectory', 'createDirectory'],
+      })
+
+      if (canceled || filePaths.length === 0) {
+        return null
+      }
+
+      const outputDir = filePaths[0]
+      const pluginDir = await pluginDevTools.generatePluginTemplate({
+        ...options,
+        outputDir,
+      })
+
+      return pluginDir
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] generate plugin template error', e)
+      throw new Error('生成插件模板失败')
+    }
+  })
+
+  ipcMain.handle('build-plugin', async (_event, pluginDir: string) => {
+    try {
+      await pluginDevTools.buildPlugin(pluginDir)
+      return true
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] build plugin error: ${pluginDir}`, e)
+      throw new Error('构建插件失败')
+    }
+  })
+
+  ipcMain.handle('pack-plugin', async (_event, pluginDir: string) => {
+    try {
+      const tgzPath = await pluginDevTools.packPlugin(pluginDir)
+      return tgzPath
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] pack plugin error: ${pluginDir}`, e)
+      throw new Error('打包插件失败')
+    }
+  })
+
+  ipcMain.handle('validate-plugin', async (_event, pluginDir: string) => {
+    try {
+      const result = await pluginDevTools.validatePlugin(pluginDir)
+      return result
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] validate plugin error: ${pluginDir}`, e)
+      throw new Error('验证插件失败')
+    }
+  })
+
+  ipcMain.handle('export-plugins-backup', async () => {
+    try {
+      const backupJson = await pluginManager.exportPluginsBackup()
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: '导出插件备份',
+        defaultPath: `giopic-plugins-backup-${Date.now()}.json`,
+        filters: [
+          { name: 'JSON 文件', extensions: ['json'] },
+        ],
+      })
+
+      if (canceled || !filePath) {
+        return null
+      }
+
+      const fs = await import('node:fs')
+      fs.writeFileSync(filePath, backupJson, 'utf-8')
+
+      return filePath
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] export plugins backup error', e)
+      throw new Error('导出插件备份失败')
+    }
+  })
+
+  ipcMain.handle('import-plugins-backup', async () => {
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: '导入插件备份',
+        properties: ['openFile'],
+        filters: [
+          { name: 'JSON 文件', extensions: ['json'] },
+        ],
+      })
+
+      if (canceled || filePaths.length === 0) {
+        return null
+      }
+
+      const fs = await import('node:fs')
+      const backupJson = fs.readFileSync(filePaths[0], 'utf-8')
+
+      const result = await pluginManager.importPluginsBackup(backupJson)
+      return result
+    }
+    catch (e) {
+      pluginLogger.error('[plugin] import plugins backup error', e)
+      throw new Error('导入插件备份失败')
+    }
+  })
+
+  ipcMain.handle('get-plugin-dependencies', async (_event, pluginId: string) => {
+    try {
+      const result = await pluginManager.getPluginDependencies(pluginId)
+      return result
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] get plugin dependencies error: ${pluginId}`, e)
+      throw new Error('获取插件依赖失败')
+    }
+  })
+
+  ipcMain.handle('check-plugin-compatibility', async (_event, pluginId: string) => {
+    try {
+      const result = await pluginManager.checkPluginCompatibility(pluginId)
+      return result
+    }
+    catch (e) {
+      pluginLogger.error(`[plugin] check plugin compatibility error: ${pluginId}`, e)
+      throw new Error('检查插件兼容性失败')
+    }
   })
 }

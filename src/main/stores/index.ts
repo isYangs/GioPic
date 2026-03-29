@@ -19,7 +19,8 @@ export function initStore() {
     return store.get(key)
   })
 
-  ipcMain.handle('set-store', (_event, key, value) => {
+  ipcMain.handle('set-store', (_event, params: { key: string, value: string }) => {
+    const { key, value } = params
     const valueToStore = typeof value === 'string' ? JSON.parse(value) : value
     store.set(key, valueToStore)
   })

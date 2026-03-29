@@ -97,13 +97,6 @@ async function createMainWindow() {
     icon,
   })
 
-  if (VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(VITE_DEV_SERVER_URL)
-  }
-  else {
-    mainWindow.loadFile(indexHtml)
-  }
-
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:'))
       shell.openExternal(url)
@@ -112,9 +105,17 @@ async function createMainWindow() {
 
   app.dock?.setIcon(icon)
 
+  // 先注册 IPC 处理程序，再加载页面，避免渲染进程调用时 handler 未注册
   registerIpc(mainWindow, loadingWindow)
   initStore()
   initDB()
+
+  if (VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(VITE_DEV_SERVER_URL)
+  }
+  else {
+    mainWindow.loadFile(indexHtml)
+  }
   createTrayService(mainWindow)
   createShortcutService(mainWindow)
   createWindowService(mainWindow)

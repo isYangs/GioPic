@@ -47,14 +47,14 @@ export function createMainPluginDataStoreAdapter(): PluginDataStore {
 
     removeProgramData: (programId: number): void => {
       const currentData = pluginDataStore.get('pluginData', {}) as Record<string, Record<string, any>>
-      const programKey = `program-${programId}`
+      const programKey = `${programId}`
       let hasChanges = false
 
       Object.keys(currentData).forEach((pluginId) => {
         const pluginDataObj = currentData[pluginId]
         if (pluginDataObj) {
           Object.keys(pluginDataObj).forEach((key) => {
-            if (key.startsWith(programKey)) {
+            if (key.startsWith(`${programKey}-`)) {
               delete pluginDataObj[key]
               hasChanges = true
               console.warn(`删除插件数据: ${pluginId}.${key}`)
