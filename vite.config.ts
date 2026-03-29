@@ -1,5 +1,4 @@
 import fs from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -10,12 +9,11 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
 import VueRouter from 'unplugin-vue-router/vite'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig } from 'vite'
 import electron from 'vite-plugin-electron/simple'
 import VueDevTools from 'vite-plugin-vue-devtools'
 import pkg from './package.json'
 
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig(({ command }) => {
@@ -52,6 +50,10 @@ export default defineConfig(({ command }) => {
       AutoImport({
         dts: 'src/renderer/typings/auto-imports.d.ts',
         include: [/\.[tj]s?$/, /\.vue$/, /\.vue\?vue/],
+        dirs: [
+          'src/renderer/stores',
+          'src/renderer/utils',
+        ],
         imports: [
           'vue',
           '@vueuse/core',
@@ -117,7 +119,6 @@ export default defineConfig(({ command }) => {
           },
         },
       }),
-      bindingSqlite3(),
     ],
     server: process.env.VSCODE_DEBUG
       ? (() => {
@@ -131,45 +132,3 @@ export default defineConfig(({ command }) => {
     clearScreen: false,
   }
 })
-
-function bindingSqlite3(options: {
-  output?: string
-  better_sqlite3_node?: string
-  command?: string
-} = {}): Plugin {
-  const TAG = '[vite-plugin-binding-sqlite3]'
-  options.output ??= 'dist-native'
-  options.better_sqlite3_node ??= 'better_sqlite3.node'
-  options.command ??= 'build'
-
-  return {
-    name: 'vite-plugin-binding-sqlite3',
-    config(config) {
-      const pathUtils = process.platform === 'win32' ? path.win32 : path.posix
-      const rootDir = pathUtils.resolve(config.root || process.cwd())
-      const outputDir = pathUtils.join(rootDir, options.output || 'dist-native')
-
-      const bs3NodePath = path.posix.join(
-        require.resolve('better-sqlite3').replace(/node_modules.*/, 'node_modules/better-sqlite3'),
-        'build/Release',
-        options.better_sqlite3_node || 'better_sqlite3.node',
-      )
-
-      if (!fs.existsSync(bs3NodePath)) {
-        throw new Error(`${TAG} Cannot find "${bs3NodePath}".`)
-      }
-
-      const bs3OutputPath = pathUtils.join(outputDir, options.better_sqlite3_node || 'better_sqlite3.node')
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true })
-      }
-
-      fs.copyFileSync(bs3NodePath, bs3OutputPath)
-
-      fs.writeFileSync(
-        pathUtils.join(rootDir, '.env'),
-        `VITE_BETTER_SQLITE3_BINDING=${bs3OutputPath.replace(`${rootDir}${pathUtils.sep}`, '')}`,
-      )
-    },
-  }
-}
