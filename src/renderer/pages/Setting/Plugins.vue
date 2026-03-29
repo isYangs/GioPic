@@ -1,85 +1,152 @@
 <script setup lang="ts">
-import type { StoragePlugin } from '@giopic/core'
 import type { NpmSearchResult } from '@/types'
-import { onMounted, ref } from 'vue'
-import { pluginApi } from '~/api/plugin'
-import { useProgramStore } from '~/stores'
+import StorageIcon from '~/components/Common/StorageIcon.vue'
 
 defineOptions({
   name: 'Plugins',
 })
 
-const plugins = ref<StoragePlugin[]>([])
-const npmSearchLoading = ref(false)
-const npmSearchResults = ref<NpmSearchResult[]>([])
-const npmSearchKeyword = ref('')
+const pluginStore = usePluginStore()
+const plugins = computed(() => pluginStore.plugins)
+
+const recommendedPlugins = ref<NpmSearchResult[]>([])
+const modalSearchKeyword = ref('')
+const modalSearchLoading = ref(false)
+const modalSearchResults = ref<NpmSearchResult[]>([])
+const githubRepoUrl = ref('')
+const showNpmInstallModal = ref(false)
+const showGithubInstallModal = ref(false)
+const recommendedLoading = ref(false)
+
 const pluginOperations = ref({
   loading: false,
   toggling: false,
   uninstalling: false,
   installing: false,
+  updating: false,
   currentPluginId: '',
 })
 
+const sortBy = ref<'name' | 'date' | 'type'>('name')
+const filterType = ref<'all' | 'enabled' | 'disabled'>('all')
+
 const programStore = useProgramStore()
 
-function setDefaultEnabledState(plugin: StoragePlugin) {
-  if (plugin.enabled === undefined) {
-    plugin.enabled = plugin.isBuiltin || true
-  }
-  return plugin
-}
+const filteredAndSortedPlugins = computed(() => {
+  let result = [...plugins.value]
 
-async function fetchPlugins() {
+  if (filterType.value === 'enabled') {
+    result = result.filter(p => p.enabled !== false)
+  }
+  else if (filterType.value === 'disabled') {
+    result = result.filter(p => p.enabled === false)
+  }
+
+  result.sort((a, b) => {
+    if (sortBy.value === 'name') {
+      return a.name.localeCompare(b.name)
+    }
+    else if (sortBy.value === 'type') {
+      return (a.type || '').localeCompare(b.type || '')
+    }
+    return 0
+  })
+
+  return result
+})
+
+async function reloadPlugins() {
   pluginOperations.value.loading = true
   try {
-    const pluginList = await pluginApi.getAllPlugins()
-    plugins.value = pluginList.map((p: StoragePlugin) => setDefaultEnabledState(p))
-  }
-  catch (e) {
-    console.error('获取插件列表错误:', e)
-    window.$message.error('获取插件列表时出现错误')
+    await pluginStore.reloadPlugins()
   }
   finally {
     pluginOperations.value.loading = false
   }
 }
 
-async function searchNpmPlugins() {
-  if (!npmSearchKeyword.value.trim()) {
-    npmSearchResults.value = []
+async function fetchRecommendedPlugins() {
+  recommendedLoading.value = true
+  try {
+    const results = await window.ipcRenderer.invoke('get-recommended-plugins') as NpmSearchResult[]
+    recommendedPlugins.value = results
+  }
+  catch {
+    recommendedPlugins.value = []
+  }
+  finally {
+    recommendedLoading.value = false
+  }
+}
+
+async function modalSearchNpmPlugins() {
+  if (!modalSearchKeyword.value.trim()) {
+    modalSearchResults.value = []
     return
   }
 
   try {
-    npmSearchLoading.value = true
-    npmSearchResults.value = await pluginApi.searchNpmPlugins(npmSearchKeyword.value.trim())
+    modalSearchLoading.value = true
+    modalSearchResults.value = await window.ipcRenderer.invoke('search-npm-plugins', modalSearchKeyword.value.trim()) as NpmSearchResult[]
   }
-  catch (error) {
-    window.$message.error(error instanceof Error ? error.message : String(error))
-    npmSearchResults.value = []
+  catch {
+    modalSearchResults.value = []
+    window.$message.error('搜索失败，请检查网络连接')
   }
   finally {
-    npmSearchLoading.value = false
+    modalSearchLoading.value = false
   }
 }
 
-async function installFromNpm(packageName: string, pluginName: string) {
+function openNpmInstallModal() {
+  showNpmInstallModal.value = true
+  modalSearchKeyword.value = ''
+  modalSearchResults.value = []
+}
+
+async function installFromModalResult(packageName: string, pluginName: string) {
   try {
     pluginOperations.value.installing = true
     pluginOperations.value.currentPluginId = packageName
 
-    const installedPlugin = await pluginApi.installNpmPlugin(packageName)
+    const installedPlugin = await window.ipcRenderer.invoke('install-npm-plugin', packageName)
 
     if (installedPlugin) {
       window.$message.success(`插件 ${pluginName} 安装成功`)
-      await fetchPlugins()
-      npmSearchKeyword.value = ''
-      npmSearchResults.value = []
+      await reloadPlugins()
     }
   }
-  catch (error) {
-    window.$message.error(error instanceof Error ? error.message : String(error))
+  catch (e: any) {
+    window.$message.error(e?.message || '安装失败')
+  }
+  finally {
+    pluginOperations.value.installing = false
+    pluginOperations.value.currentPluginId = ''
+  }
+}
+
+async function installFromGitHub() {
+  const repoUrl = githubRepoUrl.value.trim()
+  if (!repoUrl) {
+    window.$message.warning('请输入GitHub仓库地址')
+    return
+  }
+
+  try {
+    pluginOperations.value.installing = true
+    pluginOperations.value.currentPluginId = repoUrl
+
+    const installedPlugin = await window.ipcRenderer.invoke('install-from-github', repoUrl)
+
+    if (installedPlugin) {
+      window.$message.success(`插件 ${installedPlugin.name} 安装成功`)
+      await reloadPlugins()
+      githubRepoUrl.value = ''
+      showGithubInstallModal.value = false
+    }
+  }
+  catch (e: any) {
+    window.$message.error(e?.message || '安装失败')
   }
   finally {
     pluginOperations.value.installing = false
@@ -90,19 +157,14 @@ async function installFromNpm(packageName: string, pluginName: string) {
 async function installPlugin() {
   pluginOperations.value.installing = true
   try {
-    const plugin = await pluginApi.installPlugin()
-    window.$message.success(`${plugin.name} 插件安装成功`)
-    await fetchPlugins()
-  }
-  catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e)
-
-    if (errorMessage.includes('用户取消操作')) {
-      return
+    const plugin = await window.ipcRenderer.invoke('install-plugin')
+    if (plugin) {
+      window.$message.success(`${plugin.name} 插件安装成功`)
+      await reloadPlugins()
     }
-
-    console.error('安装插件错误:', e)
-    window.$message.error(errorMessage.includes('插件安装失败:') ? errorMessage : '安装插件时出现错误')
+  }
+  catch (e: any) {
+    window.$message.error(e?.message || '安装失败')
   }
   finally {
     pluginOperations.value.installing = false
@@ -129,7 +191,7 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
       pluginOperations.value.uninstalling = true
       pluginOperations.value.currentPluginId = pluginId
       try {
-        await pluginApi.uninstallPlugin(pluginId)
+        await pluginStore.uninstallPlugin(pluginId)
 
         if (hasRelatedPrograms) {
           const removedPrograms = programStore.removeProgramsByPluginId(pluginId)
@@ -139,11 +201,6 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
         }
 
         window.$message.success('插件卸载成功')
-        await fetchPlugins()
-      }
-      catch (e) {
-        console.error('卸载插件错误:', e)
-        window.$message.error('卸载插件时出现错误')
       }
       finally {
         pluginOperations.value.uninstalling = false
@@ -153,29 +210,23 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
   })
 }
 
-async function togglePluginState(plugin: StoragePlugin) {
-  if (plugin.isBuiltin) {
+async function togglePluginState(pluginId: string, pluginName: string, isBuiltin?: boolean, isEnabled?: boolean) {
+  if (isBuiltin) {
     window.$message.warning('内置插件不能被禁用')
     return
   }
 
   pluginOperations.value.toggling = true
-  pluginOperations.value.currentPluginId = plugin.id
+  pluginOperations.value.currentPluginId = pluginId
   try {
-    if (plugin.enabled) {
-      await pluginApi.disablePlugin(plugin.id)
-      plugin.enabled = false
-      window.$message.success(`已禁用 ${plugin.name} 插件`)
+    if (isEnabled) {
+      await pluginStore.disablePlugin(pluginId)
+      window.$message.success(`已禁用 ${pluginName} 插件`)
     }
     else {
-      await pluginApi.enablePlugin(plugin.id)
-      plugin.enabled = true
-      window.$message.success(`已启用 ${plugin.name} 插件`)
+      await pluginStore.enablePlugin(pluginId)
+      window.$message.success(`已启用 ${pluginName} 插件`)
     }
-  }
-  catch (e) {
-    console.error(`${plugin.enabled ? '禁用' : '启用'}插件错误:`, e)
-    window.$message.error(`${plugin.enabled ? '禁用' : '启用'}插件时出现错误`)
   }
   finally {
     pluginOperations.value.toggling = false
@@ -183,128 +234,242 @@ async function togglePluginState(plugin: StoragePlugin) {
   }
 }
 
+async function updatePlugin(pluginId: string, pluginName: string) {
+  window.$dialog.info({
+    title: '更新插件',
+    content: `确定要更新插件 ${pluginName} 吗？`,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      pluginOperations.value.updating = true
+      pluginOperations.value.currentPluginId = pluginId
+      try {
+        await window.ipcRenderer.invoke('update-plugin', pluginId)
+        window.$message.success('插件更新成功')
+        await reloadPlugins()
+      }
+      catch (e: any) {
+        window.$message.error(e?.message || '更新失败')
+      }
+      finally {
+        pluginOperations.value.updating = false
+        pluginOperations.value.currentPluginId = ''
+      }
+    },
+  })
+}
+
+async function checkAllUpdates() {
+  try {
+    const results = await window.ipcRenderer.invoke('check-all-plugins-update')
+    const hasUpdates = results.filter((r: any) => r.hasUpdate)
+
+    if (hasUpdates.length === 0) {
+      window.$message.success('所有插件都是最新版本')
+    }
+    else {
+      window.$message.info(`发现 ${hasUpdates.length} 个插件有更新`)
+    }
+
+    return results
+  }
+  catch (e: any) {
+    window.$message.error(e?.message || '检查更新失败')
+    return []
+  }
+}
+
+async function updateAllPlugins() {
+  window.$dialog.warning({
+    title: '批量更新',
+    content: '确定要更新所有有新版本的插件吗？',
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        const results = await window.ipcRenderer.invoke('update-all-plugins')
+        const success = results.filter((r: any) => r.success).length
+        const failed = results.filter((r: any) => !r.success).length
+
+        if (failed === 0) {
+          window.$message.success(`成功更新 ${success} 个插件`)
+        }
+        else {
+          window.$message.warning(`更新完成：成功 ${success} 个，失败 ${failed} 个`)
+        }
+
+        await reloadPlugins()
+      }
+      catch (e: any) {
+        window.$message.error(e?.message || '批量更新失败')
+      }
+    },
+  })
+}
+
+async function exportBackup() {
+  try {
+    const filePath = await window.ipcRenderer.invoke('export-plugins-backup')
+    if (filePath) {
+      window.$message.success(`备份已导出到: ${filePath}`)
+    }
+  }
+  catch (e: any) {
+    window.$message.error(e?.message || '导出失败')
+  }
+}
+
+async function importBackup() {
+  try {
+    const result = await window.ipcRenderer.invoke('import-plugins-backup')
+
+    if (!result) {
+      return
+    }
+
+    if (result.failed === 0 && result.skipped === 0) {
+      window.$message.success(`成功导入 ${result.success} 个插件`)
+    }
+    else if (result.failed === 0) {
+      window.$message.success(`导入完成：成功 ${result.success} 个，跳过 ${result.skipped} 个已存在的插件`)
+    }
+    else {
+      window.$message.warning(`导入完成：成功 ${result.success} 个，失败 ${result.failed} 个，跳过 ${result.skipped} 个`)
+    }
+
+    await reloadPlugins()
+  }
+  catch (e: any) {
+    window.$message.error(e?.message || '导入失败')
+  }
+}
+
 onMounted(async () => {
-  await fetchPlugins()
+  await reloadPlugins()
+  await fetchRecommendedPlugins()
 })
 </script>
 
 <template>
   <div class="w-full">
-    <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-xl font-medium">
-        存储插件管理
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="flex-shrink-0 text-base font-medium">
+        存储插件
       </h2>
-      <div class="flex items-center gap-3">
-        <n-input-group>
-          <n-input
-            v-model:value="npmSearchKeyword"
-            placeholder="搜索GioPic插件..."
-            clearable
-            style="width: 220px"
-            @keyup.enter="searchNpmPlugins"
-          >
-            <template #prefix>
-              <div i-ph-magnifying-glass class="opacity-70" />
-            </template>
-          </n-input>
+      <div class="flex items-center gap-2">
+        <n-dropdown
+          :options="[
+            { label: '从插件源安装', key: 'npm' },
+            { label: '从 GitHub 安装', key: 'github' },
+            { label: '导入本地插件', key: 'local' },
+            { type: 'divider' },
+            { label: '检查全部更新', key: 'check-updates' },
+            { label: '更新全部插件', key: 'update-all' },
+            { type: 'divider' },
+            { label: '导出备份', key: 'export' },
+            { label: '导入备份', key: 'import' },
+          ]" @select="(key) => {
+            if (key === 'npm') openNpmInstallModal()
+            else if (key === 'github') showGithubInstallModal = true
+            else if (key === 'local') installPlugin()
+            else if (key === 'check-updates') checkAllUpdates()
+            else if (key === 'update-all') updateAllPlugins()
+            else if (key === 'export') exportBackup()
+            else if (key === 'import') importBackup()
+          }"
+        >
           <n-button
             type="primary"
-            ghost
-            class="flex-center"
-            :disabled="npmSearchLoading"
-            :loading="npmSearchLoading"
-            @click="searchNpmPlugins"
+            size="small"
+            :disabled="pluginOperations.installing"
           >
-            搜索
+            <template #icon>
+              <div i-ph-plus />
+            </template>
+            安装插件
           </n-button>
-        </n-input-group>
-        <n-button
-          type="primary"
-          :disabled="pluginOperations.installing"
-          :loading="pluginOperations.installing"
-          class="flex-center"
-          @click="installPlugin"
-        >
-          导入插件
-        </n-button>
+        </n-dropdown>
       </div>
     </div>
 
-    <div v-if="npmSearchKeyword && (npmSearchResults.length > 0 || npmSearchLoading)" class="mb-6">
-      <h3 class="mb-3 text-lg font-medium">
-        搜索结果
+    <!-- 推荐插件 -->
+    <div v-if="recommendedPlugins.length > 0" class="mb-5">
+      <h3 class="mb-2 text-sm font-medium op-70">
+        推荐插件
       </h3>
-      <n-spin :show="npmSearchLoading">
-        <div v-if="npmSearchResults.length === 0 && !npmSearchLoading" class="py-6">
-          <n-empty description="暂无搜索结果" />
-        </div>
-        <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 p-2">
-          <n-card
-            v-for="pkg in npmSearchResults"
+      <n-spin :show="recommendedLoading">
+        <div class="flex flex-col gap-2">
+          <div
+            v-for="pkg in recommendedPlugins"
             :key="pkg.name"
-            class="rounded-2"
-            content-class="!p-5"
+            class="group flex cursor-pointer items-center gap-3 border border-gray-200/60 rounded-lg bg-white px-4 py-3.5 shadow-sm transition-all dark:border-white/8 hover:border-primary/40 dark:bg-white/5 hover:shadow-md dark:hover:border-primary/30"
           >
-            <div class="flex items-start gap-4">
-              <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-                <div class="wh-full flex-center rounded-lg bg-gray-100/80 text-2xl dark:bg-white/10">
-                  <div i-carbon-box />
-                </div>
-              </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="mb-2 flex items-center gap-2">
-                  <n-tooltip trigger="hover" :disabled="pkg.name.length <= 25">
-                    <template #trigger>
-                      <h3 class="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold leading-normal" style="max-width: 200px;">
-                        {{ pkg.name }}
-                      </h3>
-                    </template>
-                    {{ pkg.name }}
-                  </n-tooltip>
-                </div>
-
-                <div class="line-clamp-3 mb-3 text-sm text-gray-700 dark:text-gray-300">
-                  {{ pkg.description || '暂无描述' }}
-                </div>
-
-                <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                  <div class="flex items-center">
-                    <div i-ph-tag class="mr-1" />
-                    v{{ pkg.version }}
-                  </div>
-                  <div v-if="pkg.author?.name" class="flex items-center">
-                    <div i-ph-user class="mr-1" />
-                    {{ pkg.author.name }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-shrink-0 items-center gap-2">
-                <n-button
-                  type="primary"
-                  size="small"
-                  :disabled="pluginOperations.installing"
-                  :loading="pluginOperations.installing && pluginOperations.currentPluginId === pkg.name"
-                  @click="installFromNpm(pkg.name, pkg.name)"
-                >
-                  安装
-                </n-button>
+            <div class="h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg">
+              <div class="wh-full flex-center rounded-lg bg-gray-200/60 text-lg dark:bg-white/8">
+                <div i-ph-star class="op-60" />
               </div>
             </div>
-          </n-card>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">{{ pkg.name }}</span>
+                <span class="text-xs op-40">v{{ pkg.version }}</span>
+                <span v-if="pkg.author?.name" class="text-xs op-40">· {{ pkg.author.name }}</span>
+              </div>
+              <div class="mt-0.5 truncate text-xs op-50">
+                {{ pkg.description || '暂无描述' }}
+              </div>
+            </div>
+
+            <n-button
+              type="primary"
+              size="small"
+              :disabled="pluginOperations.installing || plugins.some(p => p.id === pkg.name)"
+              :loading="pluginOperations.installing && pluginOperations.currentPluginId === pkg.name"
+              @click="installFromModalResult(pkg.name, pkg.name)"
+            >
+              <template #icon>
+                <div i-ph-download-simple />
+              </template>
+              {{ plugins.some(p => p.id === pkg.name) ? '已安装' : '安装' }}
+            </n-button>
+          </div>
         </div>
       </n-spin>
     </div>
 
+    <!-- 已安装插件 -->
     <div>
-      <h3 class="mb-3 text-lg font-medium">
-        已安装插件
-      </h3>
-      <div class="min-h-[300px]">
+      <div class="mb-2 flex items-center justify-between">
+        <h3 class="text-sm font-medium op-70">
+          已安装
+        </h3>
+        <div class="flex items-center gap-2">
+          <n-select
+            v-model:value="filterType"
+            size="small"
+            style="width: 100px"
+            :options="[
+              { label: '全部', value: 'all' },
+              { label: '已启用', value: 'enabled' },
+              { label: '已禁用', value: 'disabled' },
+            ]"
+          />
+          <n-select
+            v-model:value="sortBy"
+            size="small"
+            style="width: 100px"
+            :options="[
+              { label: '按名称', value: 'name' },
+              { label: '按类型', value: 'type' },
+            ]"
+          />
+        </div>
+      </div>
+      <div class="min-h-[200px]">
         <n-spin :show="pluginOperations.loading" description="加载插件中...">
           <n-empty
-            v-if="plugins.length === 0"
+            v-if="filteredAndSortedPlugins.length === 0"
             description="暂无存储插件"
             class="py-12"
           >
@@ -326,102 +491,212 @@ onMounted(async () => {
             v-else
             name="plugin-list"
             tag="div"
-            class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 p-2"
+            class="flex flex-col gap-2"
           >
-            <n-card
-              v-for="plugin in plugins"
+            <div
+              v-for="plugin in filteredAndSortedPlugins"
               :key="plugin.id"
-              :class="{ disabled: plugin.enabled === false }"
-              class="rounded-2"
-              content-class="!p-5"
+              :class="{ 'op-50': plugin.enabled === false }"
+              class="group plugin-item flex cursor-pointer items-center gap-3 border border-gray-200/60 rounded-lg bg-white px-4 py-3.5 shadow-sm transition-all dark:border-white/8 hover:border-primary/40 dark:bg-white/5 hover:shadow-md dark:hover:border-primary/30"
             >
-              <div class="flex items-start gap-4">
-                <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-                  <div
-                    v-if="plugin.icon"
-                    class="wh-full bg-contain bg-center bg-no-repeat"
-                    :style="{ backgroundImage: `url(${plugin.icon})` }"
-                  />
-                  <div v-else class="wh-full flex-center rounded-lg bg-gray-100/80 text-2xl dark:bg-white/10">
-                    <div i-carbon-box />
-                  </div>
-                </div>
-
-                <div class="min-w-0 flex-1">
-                  <div class="mb-2 flex items-center gap-2">
-                    <n-tooltip trigger="hover" :disabled="plugin.name.length <= 25">
-                      <template #trigger>
-                        <h3 class="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold leading-normal" style="max-width: 200px;">
-                          {{ plugin.name }}
-                        </h3>
-                      </template>
-                      {{ plugin.name }}
-                    </n-tooltip>
-                    <n-tag v-if="plugin.isBuiltin" type="info" size="small">
-                      内置
-                    </n-tag>
-                  </div>
-
-                  <div class="line-clamp-3 mb-3 text-sm text-gray-700 dark:text-gray-300">
-                    {{ plugin.description }}
-                  </div>
-
-                  <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                    <div class="flex items-center">
-                      <div i-ph-tag class="mr-1" />
-                      v{{ plugin.version }}
-                    </div>
-                    <div class="flex items-center">
-                      <div i-ph-user class="mr-1" />
-                      {{ plugin.author || '未知作者' }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex flex-shrink-0 items-center gap-2">
-                  <n-switch
-                    v-if="!plugin.isBuiltin"
-                    :round="false"
-                    :value="plugin.enabled !== false"
-                    :loading="pluginOperations.toggling && pluginOperations.currentPluginId === plugin.id"
-                    :disabled="pluginOperations.uninstalling"
-                    @update:value="() => togglePluginState(plugin)"
-                  />
-                  <n-button
-                    type="error"
-                    size="small"
-                    tertiary
-                    :disabled="plugin.isBuiltin || pluginOperations.uninstalling"
-                    :loading="pluginOperations.uninstalling && pluginOperations.currentPluginId === plugin.id"
-                    @click="uninstallPlugin(plugin.id, plugin.name)"
-                  >
-                    <template #icon>
-                      <div i-ph-trash />
-                    </template>
-                  </n-button>
+              <div class="h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg">
+                <div class="wh-full flex-center rounded-lg bg-gray-200/60 text-lg dark:bg-white/8">
+                  <storage-icon :icon="plugin.icon" default-icon="ph:puzzle-piece-bold" :size="20" alt="plugin icon" />
                 </div>
               </div>
-            </n-card>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium">{{ plugin.name }}</span>
+                  <span class="text-xs op-40">v{{ plugin.version }}</span>
+                  <n-tag v-if="plugin.isBuiltin" size="tiny" :bordered="false">
+                    内置
+                  </n-tag>
+                  <n-tag v-if="plugin.type" size="tiny" :bordered="false" type="info">
+                    {{ plugin.type }}
+                  </n-tag>
+                </div>
+                <div class="mt-0.5 truncate text-xs op-50">
+                  {{ plugin.description || '暂无描述' }}
+                </div>
+              </div>
+
+              <div class="flex flex-shrink-0 items-center gap-2">
+                <n-button
+                  v-if="!plugin.isBuiltin && plugin.installSource !== 'local'"
+                  quaternary
+                  size="tiny"
+                  :disabled="pluginOperations.updating"
+                  :loading="pluginOperations.updating && pluginOperations.currentPluginId === plugin.id"
+                  class="op-40 hover:op-100"
+                  @click="updatePlugin(plugin.id, plugin.name)"
+                >
+                  <template #icon>
+                    <div i-ph-arrows-clockwise class="text-xs" />
+                  </template>
+                </n-button>
+                <n-switch
+                  v-if="!plugin.isBuiltin"
+                  size="small"
+                  :value="plugin.enabled !== false"
+                  :loading="pluginOperations.toggling && pluginOperations.currentPluginId === plugin.id"
+                  :disabled="pluginOperations.uninstalling"
+                  @update:value="() => togglePluginState(plugin.id, plugin.name, plugin.isBuiltin, plugin.enabled)"
+                />
+                <n-button
+                  v-if="!plugin.isBuiltin"
+                  quaternary
+                  size="tiny"
+                  :disabled="pluginOperations.uninstalling"
+                  :loading="pluginOperations.uninstalling && pluginOperations.currentPluginId === plugin.id"
+                  class="op-40 hover:op-100 hover:text-red-500!"
+                  @click="uninstallPlugin(plugin.id, plugin.name)"
+                >
+                  <template #icon>
+                    <div i-ph-trash class="text-xs" />
+                  </template>
+                </n-button>
+              </div>
+            </div>
           </transition-group>
         </n-spin>
       </div>
     </div>
+
+    <!-- npm安装模态框 -->
+    <n-modal
+      v-model:show="showNpmInstallModal"
+      preset="card"
+      title="从插件源安装"
+      style="width: 520px"
+      :auto-focus="false"
+    >
+      <div class="flex flex-col gap-4">
+        <div class="flex gap-2">
+          <n-input
+            v-model:value="modalSearchKeyword"
+            placeholder="搜索插件，如 giopic-plugin-xxx"
+            clearable
+            @keyup.enter="modalSearchNpmPlugins"
+          >
+            <template #prefix>
+              <div i-ph-magnifying-glass class="op-50" />
+            </template>
+          </n-input>
+          <n-button
+            :disabled="modalSearchLoading || !modalSearchKeyword.trim()"
+            :loading="modalSearchLoading"
+            @click="modalSearchNpmPlugins"
+          >
+            搜索
+          </n-button>
+        </div>
+
+        <div v-if="modalSearchResults.length > 0" class="max-h-[360px] flex flex-col gap-2 overflow-y-auto">
+          <div
+            v-for="pkg in modalSearchResults"
+            :key="pkg.name"
+            class="flex items-center gap-3 border border-gray-200/60 rounded-lg bg-white px-3 py-2.5 transition-all dark:border-white/8 hover:border-primary/40 dark:bg-white/5 dark:hover:border-primary/30"
+          >
+            <div class="h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg">
+              <div class="wh-full flex-center rounded-lg bg-gray-200/60 text-base dark:bg-white/8">
+                <div i-ph-package class="op-60" />
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">{{ pkg.name }}</span>
+                <span class="text-xs op-40">v{{ pkg.version }}</span>
+              </div>
+              <div class="mt-0.5 truncate text-xs op-50">
+                {{ pkg.description || '暂无描述' }}
+              </div>
+            </div>
+
+            <n-button
+              type="primary"
+              size="small"
+              :disabled="pluginOperations.installing || plugins.some(p => p.npmPackage === pkg.name)"
+              :loading="pluginOperations.installing && pluginOperations.currentPluginId === pkg.name"
+              @click="installFromModalResult(pkg.name, pkg.name)"
+            >
+              <template #icon>
+                <div i-ph-download-simple />
+              </template>
+              {{ plugins.some(p => p.npmPackage === pkg.name) ? '已安装' : '安装' }}
+            </n-button>
+          </div>
+        </div>
+
+        <n-empty
+          v-else-if="modalSearchKeyword && !modalSearchLoading && modalSearchResults.length === 0"
+          description="暂无搜索结果"
+          class="py-4"
+        />
+
+        <div v-else class="py-4 text-center text-xs op-40">
+          输入关键词搜索插件源上的 GioPic 插件
+        </div>
+      </div>
+    </n-modal>
+
+    <!-- GitHub安装模态框 -->
+    <n-modal
+      v-model:show="showGithubInstallModal"
+      preset="card"
+      title="从 GitHub 安装插件"
+      style="width: 420px"
+      :auto-focus="false"
+    >
+      <div class="flex flex-col gap-4">
+        <n-input
+          v-model:value="githubRepoUrl"
+          placeholder="输入仓库地址，如 username/repo"
+          clearable
+          @keyup.enter="installFromGitHub"
+        >
+          <template #prefix>
+            <div i-ph-github-logo class="op-50" />
+          </template>
+        </n-input>
+        <div class="text-xs op-50">
+          支持从 GitHub Release 安装插件，需要仓库有发布的 .tgz 文件
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <n-button size="small" @click="showGithubInstallModal = false">
+            取消
+          </n-button>
+          <n-button
+            type="primary"
+            size="small"
+            :disabled="!githubRepoUrl.trim() || pluginOperations.installing"
+            :loading="pluginOperations.installing"
+            @click="installFromGitHub"
+          >
+            安装
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
   </div>
 </template>
 
 <style scoped>
-.disabled {
-  opacity: 0.6;
-}
-
 .plugin-list-enter-active,
 .plugin-list-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .plugin-list-enter-from,
 .plugin-list-leave-to {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(12px) scale(0.98);
+}
+
+.plugin-list-enter-active {
+  transition-delay: 0.05s;
 }
 </style>

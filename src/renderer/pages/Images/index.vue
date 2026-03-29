@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ipcApi } from '~/api'
-import { useProgramStore } from '~/stores'
 import { convertFileSize, generateLink, getLinkTypeOptions } from '~/utils/main'
 
 const programStore = useProgramStore()
@@ -61,12 +59,8 @@ const sortOptions = [
 async function loadUploadData() {
   loading.value = true
   try {
-    uploadData.value = await ipcApi.fetchAllUploadData() || []
+    uploadData.value = await window.ipcRenderer.invoke('fetch-all-upload-data')
     applyFilters()
-  }
-  catch (e) {
-    console.error('加载图片数据失败:', e)
-    window.$message.error('加载图片数据失败')
   }
   finally {
     loading.value = false
@@ -145,15 +139,9 @@ function onPageSizeChange(size: number) {
 }
 
 async function delImage(key: string) {
-  try {
-    await ipcApi.deleteUploadData(key)
-    window.$message.success('删除成功')
-    await loadUploadData()
-  }
-  catch (e) {
-    console.error('删除图片失败:', e)
-    window.$message.error('删除失败')
-  }
+  await window.ipcRenderer.invoke('delete-upload-data', key)
+  window.$message.success('删除成功')
+  await loadUploadData()
 }
 
 function copyLink(type: string, key: string) {

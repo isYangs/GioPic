@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { debounce } from 'radash'
-import { pluginApi } from '~/api'
 import { useDragAndDrop } from '~/composables/useDragAndDrop'
 import { useFileProcessor } from '~/composables/useFileProcessor'
 import { useImageUpload } from '~/composables/useImageUpload'
@@ -12,75 +11,65 @@ definePage({
   path: '/',
 })
 
-// Store管理
 const appStore = useAppStore()
 const programStore = useProgramStore()
 const uploadDataStore = useUploadDataStore()
 const { defaultProgram } = storeToRefs(appStore)
 const { data } = storeToRefs(uploadDataStore)
 
-// 页面状态
 const dropZone = useTemplateRef('dropZoneRef')
 const isProcessing = ref(false)
 const isAllPublic = ref(1)
 const isResetting = ref(false)
 const isPermissionSelectDisabled = ref(false)
 
-// 计算属性
 const programs = computed(() =>
   programStore.getProgramList()
     .filter(p => p.value !== null)
     .map(p => ({ ...p, value: p.value as number })),
 )
-
 const isProgramValid = computed(() => {
   return defaultProgram.value && programStore.getProgram(defaultProgram.value)?.id
 })
-
 const hasUploadableImages = computed(() => {
   return data.value.some(item => !item.url && !item.uploadFailed && !item.uploaded)
 })
-
 const hasUrls = computed(() => {
   return data.value.some(item => item?.url)
 })
 
-// 程序验证
 if (!isProgramValid.value) {
   defaultProgram.value = null
 }
 
-// 上传功能
 const { isUpload, uploadSingleImage, uploadBatchImages } = useImageUpload({
   isAllPublic,
   defaultProgram,
 })
 
-// 文件处理
-const { processFiles } = useFileProcessor({
-  onProcessStart: () => { isProcessing.value = true },
-  onProcessEnd: () => { isProcessing.value = false },
-  onSuccess: (count: number) => window.$message.success(`成功添加 ${count} 个图片文件`),
-  onError: (e: string) => window.$message.error(e),
-  onWarning: (message: string) => window.$message.warning(message),
-})
+const { processFiles } = useFileProcessor()
 
-// 文件上传处理
 async function processUploadFiles(files: File[] | FileList | null) {
   if (!files || isProcessing.value)
     return
-  await processFiles(files, uploadDataStore)
+
+  isProcessing.value = true
+  try {
+    const count = await processFiles(files, uploadDataStore)
+    window.$message.success(`成功处理 ${count} 张图片`)
+  }
+  finally {
+    isProcessing.value = false
+  }
 }
 
-// 拖拽功能
-const { isOverDropZone, setupDragAndDrop } = useDragAndDrop({
-  onDrop: processUploadFiles,
-  onError: (message: string) => window.$message.warning(message),
-})
+const { isOverDropZone, onDragEnter, onDragOver, onDragLeave, onDrop } = useDragAndDrop()
 
-// 粘贴功能
+const isPageActive = ref(true)
+
 usePasteUpload({
   onPaste: processUploadFiles,
+  enabled: isPageActive,
 })
 
 // 文件选择对话框
@@ -91,7 +80,6 @@ const { open: openFileDialog, onChange } = useFileDialog({
 
 onChange(processUploadFiles)
 
-// 业务逻辑函数
 function selectFiles() {
   if (!isProcessing.value) {
     openFileDialog()
@@ -160,7 +148,6 @@ function updateDefaultProgram(value: number | null) {
   checkPermissionSelectDisabled()
 }
 
-// 防抖批量上传
 const debouncedBatchUpload = debounce({ delay: 300 }, async () => {
   if (isUpload.value) {
     window.$message.info('上传正在进行中，请稍候...')
@@ -169,7 +156,6 @@ const debouncedBatchUpload = debounce({ delay: 300 }, async () => {
   await uploadBatchImages()
 })
 
-// 权限检查
 async function checkPermissionSelectDisabled() {
   if (!defaultProgram.value) {
     isPermissionSelectDisabled.value = false
@@ -182,47 +168,62 @@ async function checkPermissionSelectDisabled() {
     return
   }
 
-  try {
-    let cleanConfig
-    try {
-      cleanConfig = JSON.parse(JSON.stringify(program.detail))
-    }
-    catch {
-      cleanConfig = {}
-    }
+  const cleanConfig = program.detail ? JSON.parse(JSON.stringify(program.detail)) : {}
 
-    const res = await pluginApi.shouldDisablePermissionSelect(program.pluginId, cleanConfig)
-    isPermissionSelectDisabled.value = res
-  }
-  catch (e) {
-    console.error('检查权限禁用状态失败:', e)
-    isPermissionSelectDisabled.value = false
-  }
+  const permissionSelectStatus = await window.ipcRenderer.invoke('should-disable-permission-select', { pluginId: program.pluginId, config: cleanConfig })
+  isPermissionSelectDisabled.value = Boolean(permissionSelectStatus)
 }
 
-// 生命周期钩子
+// 处理拖拽放置
+async function handleDrop(e: DragEvent) {
+  const files = await onDrop(e)
+  await processUploadFiles(files)
+}
+
 onMounted(() => {
   const element = dropZone.value
   if (element) {
-    setupDragAndDrop(element)
+    element.addEventListener('dragenter', onDragEnter)
+    element.addEventListener('dragover', onDragOver)
+    element.addEventListener('dragleave', onDragLeave)
+    element.addEventListener('drop', handleDrop)
+
+    onUnmounted(() => {
+      element.removeEventListener('dragenter', onDragEnter)
+      element.removeEventListener('dragover', onDragOver)
+      element.removeEventListener('dragleave', onDragLeave)
+      element.removeEventListener('drop', handleDrop)
+    })
   }
   checkPermissionSelectDisabled()
 })
 
-// 监听器
 watch(defaultProgram, () => {
   checkPermissionSelectDisabled()
 })
 
-// 监听快捷键上传
-window.ipcRenderer.on('upload-shortcut', () => {
-  debouncedBatchUpload()
+const uploadShortcutHandler = () => debouncedBatchUpload()
+window.ipcRenderer.on('upload-shortcut', uploadShortcutHandler)
+
+onActivated(() => {
+  isPageActive.value = true
 })
+
+onDeactivated(() => {
+  isPageActive.value = false
+})
+
+onUnmounted(() => {
+  window.ipcRenderer.off('upload-shortcut', uploadShortcutHandler)
+})
+
+async function handleSingleImageUpload(index: number) {
+  await uploadSingleImage(index)
+}
 </script>
 
 <template>
   <div ref="dropZoneRef" class="h-full flex flex-col overflow-hidden">
-    <!-- 上传区域 -->
     <div class="flex-shrink-0">
       <upload-area
         :is-processing="isProcessing"
@@ -232,7 +233,6 @@ window.ipcRenderer.on('upload-shortcut', () => {
       />
     </div>
 
-    <!-- 图片列表和控制区域 -->
     <template v-if="data.length">
       <upload-controls
         :has-uploadable-images="hasUploadableImages"
@@ -251,7 +251,7 @@ window.ipcRenderer.on('upload-shortcut', () => {
 
       <image-grid
         @remove-image="removeImage"
-        @upload-single="uploadSingleImage"
+        @upload-single="handleSingleImageUpload"
       />
     </template>
   </div>
