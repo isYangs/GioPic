@@ -34,7 +34,7 @@ async function getStrategies(params: { api: string, token: string, programId?: n
     }))
 
     const dataKey = params.programId
-      ? `program-${params.programId}`
+      ? `${params.programId}`
       : `api-${params.api.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}`
 
     pluginDataStore.setData('giopic-lskypro', `${dataKey}-strategiesOptions`, strategies)
