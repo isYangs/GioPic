@@ -17,8 +17,7 @@ export interface RequestOptions {
   logOptions?: LoggerOptions
   /** 是否返回原始响应体文本，默认为false（解析为JSON） */
   rawResponse?: boolean
-  /** 是否启用详细日志，默认为false */
-  verbose?: boolean
+
   /** 超时时间（毫秒），默认为10000 */
   timeout?: number
   /** 其他 axios 配置选项 */
@@ -44,9 +43,6 @@ const axiosInstance: AxiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use(
-  (config) => {
-    return config
-  },
   (error) => {
     const { config, message } = error
     logger.error(`[request] Failed - Method: ${config?.method}, URL: ${config?.url}, Error: ${message}`)
@@ -55,9 +51,6 @@ axiosInstance.interceptors.request.use(
 )
 
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response
-  },
   (error) => {
     if (error.response) {
       const { config, response, message } = error
@@ -71,17 +64,10 @@ axiosInstance.interceptors.response.use(
 )
 
 export async function request<T = any>(options: RequestOptions): Promise<RequestResult<T>> {
-  const { url, method, headers = {}, data, verbose = false, timeout = 10000 } = options
+  const { url, method, headers = {}, data, timeout = 10000 } = options
   const customLogger = options.logOptions ? createLogger(options.logOptions.name || 'http-custom') : logger
 
   try {
-    if (verbose) {
-      customLogger.info(`${method} ${url}`)
-      if (headers && Object.keys(headers).length > 0) {
-        customLogger.info(`Headers: ${JSON.stringify(headers)}`)
-      }
-    }
-
     const config: AxiosRequestConfig = {
       url,
       method,
@@ -97,17 +83,9 @@ export async function request<T = any>(options: RequestOptions): Promise<Request
           ...config.headers,
           ...data.getHeaders(),
         }
-
-        if (verbose) {
-          customLogger.info('Sending form data')
-        }
       }
       else {
         config.data = data
-
-        if (verbose) {
-          customLogger.info(`Request data: ${JSON.stringify(data)}`)
-        }
       }
     }
 
@@ -115,11 +93,6 @@ export async function request<T = any>(options: RequestOptions): Promise<Request
 
     const responseData = response.data
     const rawText = typeof responseData === 'string' ? responseData : JSON.stringify(responseData)
-
-    if (verbose) {
-      customLogger.info(`Response status: ${response.status}`)
-      customLogger.info(`Response text: ${rawText}`)
-    }
 
     if (options.rawResponse && typeof responseData === 'string') {
       return {

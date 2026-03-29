@@ -17,10 +17,14 @@ export interface StoragePlugin {
   isBuiltin?: boolean
   /** 插件本地路径 */
   path?: string
-  /** NPM包名称 (用于内置插件) */
+  /** NPM包名称 (用于内置插件或从 npm 安装的插件) */
   npmPackage?: string
   /** 插件是否启用 */
   enabled?: boolean
+  /** 插件安装来源: 'local' 本地导入, 'npm' 从插件源安装, 'github' 从 GitHub 安装 */
+  installSource?: 'local' | 'npm' | 'github'
+  /** GitHub 仓库信息 (格式: owner/repo) */
+  githubRepo?: string
 }
 
 export interface SettingItem {

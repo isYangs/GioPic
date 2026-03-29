@@ -21,7 +21,8 @@ export function safeJsonParse<T = any>(text: string, defaultValue: T): T {
  */
 export function safeJsonStringify(data: any, defaultValue = '{}'): string {
   try {
-    return JSON.stringify(data)
+    const result = JSON.stringify(data)
+    return result === undefined ? defaultValue : result
   }
   catch {
     return defaultValue
@@ -80,7 +81,7 @@ function isObject(value: any): value is object {
  * @param error 错误对象
  * @returns 错误消息字符串
  */
-export function getErrorMessage(error: unknown): string {
+export function extractErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message
   }

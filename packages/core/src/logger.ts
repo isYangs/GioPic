@@ -72,9 +72,11 @@ export function setGlobalLogLevel(level: LogLevel) {
  * @returns 日志器实例
  */
 export function createLogger(optionsOrName: LoggerOptions | string): Logger {
+  const hasCustomLevel = typeof optionsOrName !== 'string' && optionsOrName.level !== undefined
   const options = typeof optionsOrName === 'string'
     ? { ...defaultOptions, name: optionsOrName }
     : { ...defaultOptions, ...optionsOrName }
+  let currentLevel = hasCustomLevel ? (options.level ?? LogLevel.Info) : globalLogLevel
 
   // 创建格式化函数
   const format = options.formatter || ((level, message, timestamp, name) => {
@@ -99,7 +101,7 @@ export function createLogger(optionsOrName: LoggerOptions | string): Logger {
    * @param args 日志参数
    */
   const log = (level: LogLevel, levelName: string, ...args: any[]) => {
-    if (level < (options.level ?? globalLogLevel)) {
+    if (level < currentLevel) {
       return
     }
 
@@ -145,7 +147,7 @@ export function createLogger(optionsOrName: LoggerOptions | string): Logger {
     warn: (...args) => log(LogLevel.Warn, 'WARN', ...args),
     error: (...args) => log(LogLevel.Error, 'ERROR', ...args),
     setLevel: (level) => {
-      options.level = level
+      currentLevel = level
     },
   }
 }
