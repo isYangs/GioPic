@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { SettingItem } from '@giopic/core'
-import { pluginApi } from '~/api'
-import { useProgramStore } from '~/stores'
+import type { SettingItem, SettingSchema } from '@giopic/core'
 
 const props = defineProps<{
   programId: number
@@ -22,22 +20,16 @@ const setting = computed({
 })
 
 async function initializeSettings() {
-  try {
-    const res = await pluginApi.getPluginSettingSchema(props.pluginId)
-    settings.value = res.items || []
+  const settingSchema = await callIpc<SettingSchema>('get-plugin-setting-schema', props.pluginId)
+  settings.value = settingSchema?.items || []
 
-    if (res.defaultValues) {
-      const program = programStore.getProgram(id.value)
-      const hasExistingConfig = Object.keys(program.detail).length > 0
+  if (settingSchema?.defaultValues) {
+    const program = programStore.getProgram(id.value)
+    const hasExistingConfig = Object.keys(program.detail).length > 0
 
-      if (!hasExistingConfig) {
-        setting.value = { ...res.defaultValues }
-      }
+    if (!hasExistingConfig) {
+      setting.value = { ...settingSchema.defaultValues }
     }
-  }
-  catch (e) {
-    console.error('加载插件设置失败:', e)
-    window.$message.error('加载插件设置失败')
   }
 }
 

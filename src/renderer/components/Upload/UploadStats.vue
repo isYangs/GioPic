@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUploadDataStore } from '~/stores'
+import { convertFileSize } from '~/utils/main'
 
 const uploadDataStore = useUploadDataStore()
 const { data } = storeToRefs(uploadDataStore)
@@ -25,15 +25,6 @@ const uploadStats = computed(() => {
     totalSize,
   }
 })
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0)
-    return '0B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / k ** i).toFixed(1)}${sizes[i]}`
-}
 </script>
 
 <template>
@@ -50,7 +41,7 @@ function formatFileSize(bytes: number): string {
 
       <div class="flex items-center gap-2 py-0.75">
         <span class="flex-1 text-xs text-primary">总大小</span>
-        <span class="text-xs text-primary font-medium">{{ formatFileSize(uploadStats.totalSize) }}</span>
+        <span class="text-xs text-primary font-medium">{{ convertFileSize(uploadStats.totalSize) }}</span>
       </div>
 
       <div v-if="uploadStats.pending > 0" class="flex items-center gap-2 py-0.75">

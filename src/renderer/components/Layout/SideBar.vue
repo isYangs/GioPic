@@ -1,15 +1,45 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
-import { useAppStore, useProgramStore } from '~/stores'
-import { renderIcon } from '~/utils/main'
-import { openCreateProgram } from '~/utils/modal'
+import StorageIcon from '~/components/Common/StorageIcon.vue'
+
+const DEFAULT_STORAGE_ICON = 'ph:database-bold'
 
 const router = useRouter()
 const appStore = useAppStore()
 const programStore = useProgramStore()
+const pluginStore = usePluginStore()
 const { isMenuCollapsed } = storeToRefs(appStore)
 const menuActiveKey = ref(router.currentRoute.value.path ?? '/')
 const expandedKeys = ref<string[]>(['user-storage'])
+
+function getProgramIcon(programId: number): string {
+  const currentProgram = programStore.getProgram(programId)
+  const customIcon = currentProgram?.icon?.trim()
+  if (customIcon) {
+    return customIcon
+  }
+
+  const pluginIcon = currentProgram?.pluginId
+    ? pluginStore.getPlugin(currentProgram.pluginId)?.icon?.trim()
+    : ''
+  if (pluginIcon) {
+    return pluginIcon
+  }
+
+  return DEFAULT_STORAGE_ICON
+}
+
+function getProgramMenuIcon(programId: number) {
+  const icon = getProgramIcon(programId)
+  return () => h('div', { class: 'h4 w4 flex-center overflow-hidden rounded-sm' }, [
+    h(StorageIcon, {
+      icon,
+      defaultIcon: DEFAULT_STORAGE_ICON,
+      size: 16,
+      alt: 'storage icon',
+    }),
+  ])
+}
 
 function openRemoveDialog(programId: number, programName: string, event: Event) {
   event.stopPropagation()
@@ -70,7 +100,7 @@ const storageList = ref({
         }),
       ]),
       key: `/Setting/${value}`,
-      icon: renderIcon('i-ph-database-bold w16px h16px'),
+      icon: getProgramMenuIcon(value as number),
     })),
   ),
 })
@@ -123,6 +153,17 @@ function updateValue(value: string) {
 function expandedKeysChange(keys: string[]) {
   expandedKeys.value = keys
 }
+
+onMounted(async () => {
+  if (!pluginStore.loaded) {
+    try {
+      await pluginStore.loadPlugins()
+    }
+    catch (e) {
+      console.error('加载插件失败:', e)
+    }
+  }
+})
 </script>
 
 <template>

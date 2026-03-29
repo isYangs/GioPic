@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useUploadDataStore } from '~/stores'
-
 defineEmits<{
   (e: 'removeImage', index: number): void
   (e: 'uploadSingle', index: number): void

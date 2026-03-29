@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { pluginApi } from '~/api'
-import { syncPluginDataFromMain, usePluginDataStore } from '~/stores/plugin-data'
-
 interface Props {
   modelValue: string | number | Array<string | number> | null
   pluginId: string
@@ -113,38 +110,32 @@ async function loadCachedOptions() {
 }
 
 async function fetchOptions() {
-  try {
-    const result = await pluginApi.callPluginCustomMethod(
-      props.pluginId,
-      props.customMethod,
-      {
-        api: props.config.api,
-        token: props.config.token,
-        programId: props.programId,
-      },
-    )
+  const result = await callIpc('call-plugin-custom-method', {
+    pluginId: props.pluginId,
+    methodName: props.customMethod,
+    params: {
+      api: props.config.api,
+      token: props.config.token,
+      programId: props.programId,
+    },
+  })
 
-    let newOptions: Array<{ label: string, value: any }> = []
+  let newOptions: Array<{ label: string, value: any }> = []
 
-    if (result && typeof result === 'object' && result.options) {
-      newOptions = result.options || []
-    }
-    else if (Array.isArray(result)) {
-      newOptions = result
-    }
-
-    options.value = newOptions
-
-    await syncPluginDataFromMain(props.pluginId)
-
-    getPluginRawData(actualDataKey.value)
-
-    window.$message.success(`获取${props.label || '选项'}成功`)
+  if (result && typeof result === 'object' && 'options' in result) {
+    newOptions = (result as any).options || []
   }
-  catch (error) {
-    console.error('获取选项失败:', error)
-    window.$message.error(error instanceof Error ? error.message : `获取${props.label || '选项'}失败`)
+  else if (Array.isArray(result)) {
+    newOptions = result
   }
+
+  options.value = newOptions
+
+  await syncPluginDataFromMain(props.pluginId)
+
+  getPluginRawData(actualDataKey.value)
+
+  window.$message.success(`获取${props.label || '选项'}成功`)
 }
 
 onMounted(async () => {

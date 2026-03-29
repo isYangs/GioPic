@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useUploadDataStore } from '~/stores'
-import { generateLink, getLinkTypeOptions } from '~/utils/main'
+import { getLinkTypeOptions } from '~/utils/main'
 
 const props = defineProps<{
   index: number
