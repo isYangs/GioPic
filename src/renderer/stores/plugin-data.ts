@@ -1,5 +1,4 @@
 import type { PluginDataStore } from '@giopic/core'
-import { pluginApi } from '~/api'
 
 export const usePluginDataStore = defineStore(
   'pluginDataStore',
@@ -28,13 +27,13 @@ export const usePluginDataStore = defineStore(
     }
 
     const removeProgramData = (programId: number): void => {
-      const programKey = `program-${programId}`
+      const programKey = `${programId}`
 
       Object.keys(pluginData.value).forEach((pluginId) => {
         const pluginDataObj = pluginData.value[pluginId]
         if (pluginDataObj) {
           Object.keys(pluginDataObj).forEach((key) => {
-            if (key.startsWith(programKey)) {
+            if (key.startsWith(`${programKey}-`)) {
               delete pluginDataObj[key]
               console.warn(`删除插件数据: ${pluginId}.${key}`)
             }
@@ -48,20 +47,21 @@ export const usePluginDataStore = defineStore(
     }
 
     const syncFromMain = async (pluginId: string): Promise<void> => {
-      try {
-        const data = await pluginApi.getAllPluginData(pluginId)
-        if (data && Object.keys(data).length > 0) {
-          pluginData.value[pluginId] = data
-        }
-      }
-      catch (e) {
-        console.error(`同步插件数据失败: ${pluginId}`, e)
+      const data = await window.ipcRenderer.invoke('get-all-plugin-data', pluginId)
+      if (data && Object.keys(data).length > 0) {
+        pluginData.value[pluginId] = data
       }
     }
 
     const syncToMain = (pluginId: string, key: string, data: any): void => {
-      pluginApi.setPluginData(pluginId, key, data).catch((e) => {
+      window.ipcRenderer.invoke('set-plugin-data', { pluginId, key, data }).catch((e) => {
         console.error(`同步数据到主进程失败: ${pluginId}.${key}`, e)
+      })
+    }
+
+    const syncRemoveToMain = (pluginId: string, key: string): void => {
+      window.ipcRenderer.invoke('remove-plugin-data', { pluginId, key }).catch((e) => {
+        console.error(`同步删除数据到主进程失败: ${pluginId}.${key}`, e)
       })
     }
 
@@ -74,6 +74,7 @@ export const usePluginDataStore = defineStore(
       removeProgramData,
       syncFromMain,
       syncToMain,
+      syncRemoveToMain,
     }
   },
   {
@@ -98,6 +99,7 @@ export function createPluginDataStoreAdapter(): PluginDataStore {
 
     removeData: (pluginId: string, key: string): void => {
       store.removeData(pluginId, key)
+      store.syncRemoveToMain(pluginId, key)
     },
 
     getAllData: (pluginId: string): Record<string, any> => {

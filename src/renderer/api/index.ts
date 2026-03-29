@@ -1,5 +1,4 @@
 import type { Program } from '~/stores'
-import { useAppStore, useProgramStore } from '~/stores'
 import { pluginApi } from './plugin'
 
 function getCurrentProgram() {
@@ -31,108 +30,63 @@ function getProgramAuthParams(program: Program): Record<string, any> {
 
 export const ipcApi = {
   async insertUploadData(dataString: string) {
-    const res = await window.ipcRenderer.invoke('insert-upload-data', dataString)
-    if (!res.success) {
-      throw new Error(res.message || '插入上传数据失败')
-    }
-    return res.success
+    await callIpc('insert-upload-data', dataString)
+    return true
   },
 
   async fetchUploadDataPaginated(page = 1, pageSize = 20) {
-    const res = await window.ipcRenderer.invoke('fetch-upload-data-paginated', page, pageSize)
-    if (!res.success) {
-      throw new Error(res.message || '获取分页上传数据失败')
-    }
-    return res.data
+    return callIpc('fetch-upload-data-paginated', { page, pageSize })
   },
 
   async fetchAllUploadData() {
-    const res = await window.ipcRenderer.invoke('fetch-all-upload-data')
-    if (!res.success) {
-      throw new Error(res.message || '获取所有上传数据失败')
-    }
-    return res.data
+    return callIpc('fetch-all-upload-data')
   },
 
   async getUploadDataCount() {
-    const res = await window.ipcRenderer.invoke('get-upload-data-count')
-    if (!res.success) {
-      throw new Error(res.message || '获取上传数据数量失败')
-    }
-    return res.data
+    return callIpc('get-upload-data-count')
   },
 
   async getUploadTotalSize() {
-    const res = await window.ipcRenderer.invoke('get-upload-total-size')
-    if (!res.success) {
-      throw new Error(res.message || '获取上传数据总大小失败')
-    }
-    return res.data
+    return callIpc('get-upload-total-size')
   },
 
   async deleteUploadData(key: string) {
-    const res = await window.ipcRenderer.invoke('delete-upload-data', key)
-    if (!res.success) {
-      throw new Error(res.message || '删除上传数据失败')
-    }
+    await callIpc('delete-upload-data', key)
     return true
   },
 
   async deleteUploadDataBatch(keys: string[]) {
-    const res = await window.ipcRenderer.invoke('delete-upload-data-batch', keys)
-    if (!res.success) {
-      throw new Error(res.message || '批量删除上传数据失败')
-    }
+    await callIpc('delete-upload-data-batch', keys)
     return true
   },
 
   // 图片处理
   async generateImageThumbnail(fileBuffer: ArrayBuffer, maxSize = 200) {
-    const res = await window.ipcRenderer.invoke('generate-image-thumbnail', fileBuffer, maxSize)
-    if (!res.success) {
-      throw new Error(res.message || '生成缩略图失败')
-    }
-    return res.data
+    return callIpc('generate-image-thumbnail', { fileBuffer, maxSize })
   },
 
   async getImageMetadata(fileBuffer: ArrayBuffer) {
-    const res = await window.ipcRenderer.invoke('get-image-metadata', fileBuffer)
-    if (!res.success) {
-      throw new Error(res.message || '获取图片元数据失败')
-    }
-    return res.data
+    return callIpc('get-image-metadata', fileBuffer)
   },
 
   // 系统设置
   async setAutoStart(enabled: boolean) {
-    const res = await window.ipcRenderer.invoke('auto-start', enabled)
-    if (!res.success) {
-      throw new Error(res.message || '设置开机自启失败')
-    }
+    await callIpc('auto-start', enabled)
     return true
   },
 
   async setDevTools(enabled: boolean) {
-    const res = await window.ipcRenderer.invoke('reg-dev-tools', enabled)
-    if (!res.success) {
-      throw new Error(res.message || '设置开发者工具快捷键失败')
-    }
+    await callIpc('reg-dev-tools', enabled)
     return true
   },
 
   async setDockIconVisible(visible: boolean) {
-    const res = await window.ipcRenderer.invoke('dock-icon-show', visible)
-    if (!res.success) {
-      throw new Error(res.message || '设置任务栏图标失败')
-    }
+    await callIpc('dock-icon-show', visible)
     return true
   },
 
   async resetSettings() {
-    const res = await window.ipcRenderer.invoke('reset-settings')
-    if (!res.success) {
-      throw new Error(res.message || '重置设置失败')
-    }
+    await callIpc('reset-settings')
     return true
   },
 }

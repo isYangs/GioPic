@@ -1,5 +1,4 @@
 import type { StoragePlugin } from '@giopic/core'
-import { pluginApi } from '~/api'
 
 interface PluginState {
   plugins: StoragePlugin[]
@@ -17,14 +16,22 @@ export const usePluginStore = defineStore('pluginStore', () => {
       return
 
     try {
-      const plugins = await pluginApi.getAllPlugins()
-      state.plugins = plugins || []
+      const plugins = await window.ipcRenderer.invoke('get-all-plugins')
+      if (!Array.isArray(plugins)) {
+        console.error('插件列表不是数组类型')
+        state.plugins = []
+        return
+      }
+      state.plugins = plugins.map((p: StoragePlugin) => {
+        if (p.enabled === undefined)
+          p.enabled = true
+        return p
+      })
       state.loaded = true
     }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '加载插件时出现错误'
-      console.error('加载插件错误:', errorMessage)
-      window.$message.error(errorMessage)
+    catch (error) {
+      console.error('加载插件失败:', error)
+      state.plugins = []
     }
   }
 
@@ -51,49 +58,28 @@ export const usePluginStore = defineStore('pluginStore', () => {
   }
 
   async function uninstallPlugin(pluginId: string) {
-    try {
-      const success = await pluginApi.uninstallPlugin(pluginId)
-      if (success)
-        state.plugins = state.plugins.filter(p => p.id !== pluginId)
-    }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '卸载插件时出现错误'
-      console.error('卸载插件错误:', errorMessage)
-      window.$message.error(errorMessage)
-    }
+    const success = await window.ipcRenderer.invoke('uninstall-plugin', pluginId)
+    if (success)
+      state.plugins = state.plugins.filter(p => p.id !== pluginId)
   }
 
   async function enablePlugin(pluginId: string) {
-    try {
-      const success = await pluginApi.enablePlugin(pluginId)
-      if (success) {
-        const plugin = state.plugins.find(p => p.id === pluginId)
-        if (plugin) {
-          plugin.enabled = true
-        }
+    const success = await window.ipcRenderer.invoke('enable-plugin', pluginId)
+    if (success) {
+      const plugin = state.plugins.find(p => p.id === pluginId)
+      if (plugin) {
+        plugin.enabled = true
       }
-    }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '启用插件时出现错误'
-      console.error('启用插件错误:', errorMessage)
-      window.$message.error(errorMessage)
     }
   }
 
   async function disablePlugin(pluginId: string) {
-    try {
-      const success = await pluginApi.disablePlugin(pluginId)
-      if (success) {
-        const plugin = state.plugins.find(p => p.id === pluginId)
-        if (plugin) {
-          plugin.enabled = false
-        }
+    const success = await window.ipcRenderer.invoke('disable-plugin', pluginId)
+    if (success) {
+      const plugin = state.plugins.find(p => p.id === pluginId)
+      if (plugin) {
+        plugin.enabled = false
       }
-    }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '禁用插件时出现错误'
-      console.error('禁用插件错误:', errorMessage)
-      window.$message.error(errorMessage)
     }
   }
 

@@ -1,10 +1,7 @@
-import { ipcApi } from '~/api'
-
 interface State {
   data: UploadData[]
 }
 
-// 扩展自上传器响应的文件数据
 interface BaseData {
   key?: string
   name?: string
@@ -81,22 +78,17 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     const promises = state.data
       .filter(item => item.url && item.key)
       .map(async ({ key, name, time, size, mimetype, url, origin_name, program_id, program_type }: UploadData) => {
-        try {
-          await ipcApi.insertUploadData(JSON.stringify({
-            key,
-            name,
-            time,
-            size,
-            mimetype,
-            url,
-            origin_name,
-            program_id,
-            program_type,
-          }))
-        }
-        catch (e) {
-          console.error('Error inserting upload data:', e instanceof Error ? e.message : String(e))
-        }
+        await window.ipcRenderer.invoke('insert-upload-data', JSON.stringify({
+          key,
+          name,
+          time,
+          size,
+          mimetype,
+          url,
+          origin_name,
+          program_id,
+          program_type,
+        }))
       })
 
     await Promise.all(promises)
@@ -108,4 +100,8 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
     delData,
     getUploadData,
   }
+}, {
+  persistedState: {
+    persist: false,
+  },
 })

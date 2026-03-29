@@ -1,6 +1,4 @@
 import pLimit from 'p-limit'
-import { apiClient } from '~/api'
-import { useProgramStore, useUploadDataStore } from '~/stores'
 
 export interface UploadOptions {
   isAllPublic: Ref<number>
@@ -74,80 +72,99 @@ export function useImageUpload(options: UploadOptions) {
   async function uploadSingleImage(index: number, shouldGetRecord = true) {
     if (!defaultProgram.value) {
       window.$message.error('请先选择存储程序后再上传')
-      return
+      throw new Error('请先选择存储程序后再上传')
     }
 
     const item = data.value[index]
     if (!item) {
       window.$message.error('图片文件不存在')
-      return
+      throw new Error('图片文件不存在')
     }
 
     if (item.uploaded) {
-      window.$message.info(`图片 ${index + 1} 已经上传成功，跳过该图片`)
       return
     }
 
     if (!item.file && !item.buffer) {
       window.$message.error('图片文件数据无效，请重新选择')
-      return
+      throw new Error('图片文件数据无效，请重新选择')
+    }
+
+    const program = programStore.getProgram(defaultProgram.value)
+    if (!program || !program.id) {
+      window.$message.error('请先选择存储程序')
+      throw new Error('请先选择存储程序')
+    }
+
+    if (!program.pluginId) {
+      window.$message.error('当前程序不支持，请使用插件')
+      throw new Error('当前程序不支持，请使用插件')
+    }
+
+    const fileName = item.file?.name || 'unknown'
+    const { fileBuffer, base64Data } = await getFileData(item)
+    const params = prepareUploadParams(item, fileName, fileBuffer, base64Data)
+
+    const completeParams: Record<string, any> = {
+      ...JSON.parse(JSON.stringify(params)),
+      ...JSON.parse(JSON.stringify(program.detail)),
+      pluginId: program.pluginId,
     }
 
     uploadDataStore.setData({ isLoading: true }, index)
 
     try {
-      const program = programStore.getProgram(defaultProgram.value)
-      const fileName = item.file?.name || 'unknown'
-
-      const { fileBuffer, base64Data } = await getFileData(item)
-      const params = prepareUploadParams(item, fileName, fileBuffer, base64Data)
-
-      const res = await apiClient.upload(params)
+      const uploadResult = await window.ipcRenderer.invoke('upload-with-plugin', {
+        pluginId: program.pluginId,
+        params: completeParams,
+      })
 
       uploadDataStore.setData(
         {
-          ...res,
+          ...uploadResult,
           uploadFailed: false,
+          isLoading: false,
           time: new Date().toISOString(),
           uploaded: true,
-          program_id: program.id,
+          program_id: program.id || undefined,
           program_type: program.type,
         },
         index,
       )
-      window.$message.success('图片上传成功')
-    }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '图片上传失败，请稍后重试'
-      console.error('上传失败:', e)
-      window.$message.error(errorMessage)
-      uploadDataStore.setData({ uploadFailed: true }, index)
-    }
-    finally {
-      uploadDataStore.setData({ isLoading: false }, index)
-      if (shouldGetRecord)
+
+      if (shouldGetRecord) {
         uploadDataStore.getUploadData()
+      }
+    }
+    catch (error) {
+      uploadDataStore.setData(
+        {
+          ...item,
+          uploadFailed: true,
+          uploaded: false,
+          isLoading: false,
+        },
+        index,
+      )
+      throw error
     }
   }
 
   // 批量上传
   async function uploadBatchImages() {
+    const uploadList = data.value.filter(item => !item.url && !item.uploadFailed && !item.uploaded)
+
+    if (!uploadList.length) {
+      window.$message.error('没有需要上传的图片')
+      throw new Error('没有需要上传的图片')
+    }
+
     isUpload.value = true
 
-    await nextTick()
+    const limit = pLimit(3)
+    const errors: Error[] = []
 
     try {
-      const uploadList = data.value.filter(item => !item.url && !item.uploadFailed && !item.uploaded)
-
-      if (!uploadList.length) {
-        window.$message.info('没有需要上传的图片')
-        isUpload.value = false
-        return
-      }
-
-      const limit = pLimit(3)
-      const uploadingTasks = new Set()
-
       const tasks = uploadList.map((item) => {
         if (item.url || item.uploadFailed || item.uploaded) {
           return null
@@ -155,46 +172,37 @@ export function useImageUpload(options: UploadOptions) {
 
         if (!item.file && !item.buffer) {
           const index = data.value.indexOf(item)
-          window.$message.error(`图片 ${index + 1} 文件数据无效，已跳过`)
+          const error = new Error(`图片 ${index + 1} 文件数据无效`)
+          errors.push(error)
           return null
         }
 
         const originalIndex = data.value.indexOf(item)
-
-        const task = limit(() =>
-          uploadSingleImage(originalIndex, false)
-            .then(() => {
-              uploadingTasks.delete(task)
-              if (uploadingTasks.size === 0) {
-                isUpload.value = false
-                uploadDataStore.getUploadData()
-              }
-            })
-            .catch((e) => {
-              const errorMessage = e instanceof Error ? e.message : '上传失败'
-              console.error(`图片 ${originalIndex + 1} 上传失败:`, errorMessage)
-              window.$message.error(`图片 ${originalIndex + 1} 上传失败：${errorMessage}`)
-            }),
-        )
-
-        uploadingTasks.add(task)
-        return task
+        return limit(() => uploadSingleImage(originalIndex, false).catch((error) => {
+          errors.push(error instanceof Error ? error : new Error(String(error)))
+          return null
+        }))
       }).filter(Boolean)
 
       if (tasks.length === 0) {
-        isUpload.value = false
-        return
+        if (errors.length > 0) {
+          window.$message.error(`上传失败: ${errors[0].message}${errors.length > 1 ? ` 等${errors.length}个错误` : ''}`)
+        }
+        else {
+          window.$message.error('没有有效的图片可上传')
+        }
+        throw new Error('没有有效的图片可上传')
       }
 
       await Promise.all(tasks)
-    }
-    catch (e) {
-      const errorMessage = e instanceof Error ? e.message : '批量上传过程中出现错误，请稍后重试'
-      console.error('批量上传过程中发生错误:', errorMessage)
+      uploadDataStore.getUploadData()
+
+      if (errors.length > 0) {
+        window.$message.error(`部分图片上传失败: ${errors[0].message}${errors.length > 1 ? ` 等${errors.length}个错误` : ''}`)
+      }
     }
     finally {
       isUpload.value = false
-      uploadDataStore.getUploadData()
     }
   }
 

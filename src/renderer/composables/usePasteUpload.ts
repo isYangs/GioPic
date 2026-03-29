@@ -1,11 +1,15 @@
 export interface PasteUploadOptions {
   onPaste?: (files: File[]) => void
+  enabled?: Ref<boolean>
 }
 
 export function usePasteUpload(options: PasteUploadOptions = {}) {
-  const { onPaste } = options
+  const { onPaste, enabled } = options
 
   useEventListener('paste', async (e) => {
+    if (enabled && !enabled.value)
+      return
+
     const items = e.clipboardData?.items
     if (!items)
       return

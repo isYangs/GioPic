@@ -1,42 +1,37 @@
 export function useFileExtractor() {
   // 递归获取文件夹中的所有文件
   async function extractFilesFromEntry(entry: FileSystemEntry): Promise<File[]> {
-    try {
-      if (entry.isFile) {
-        return [await new Promise<File>((resolve, reject) => {
-          (entry as FileSystemFileEntry).file(resolve, reject)
-        })]
-      }
+    if (entry.isFile) {
+      return [await new Promise<File>((resolve, reject) => {
+        (entry as FileSystemFileEntry).file(resolve, reject)
+      })]
+    }
 
-      if (entry.isDirectory) {
-        const dirReader = (entry as FileSystemDirectoryEntry).createReader()
+    if (entry.isDirectory) {
+      const dirReader = (entry as FileSystemDirectoryEntry).createReader()
 
-        // 递归读取目录中的所有文件
-        const readAllEntries = async (): Promise<FileSystemEntry[]> => {
-          const allEntries: FileSystemEntry[] = []
+      // 递归读取目录中的所有文件
+      const readAllEntries = async (): Promise<FileSystemEntry[]> => {
+        const allEntries: FileSystemEntry[] = []
 
-          const readBatch = (): Promise<FileSystemEntry[]> => {
-            return new Promise((resolve, reject) => {
-              dirReader.readEntries(resolve, reject)
-            })
-          }
-
-          let entries = await readBatch()
-          while (entries.length > 0) {
-            allEntries.push(...entries)
-            entries = await readBatch()
-          }
-
-          return allEntries
+        const readBatch = (): Promise<FileSystemEntry[]> => {
+          return new Promise((resolve, reject) => {
+            dirReader.readEntries(resolve, reject)
+          })
         }
 
-        const entries = await readAllEntries()
-        const fileArrays = await Promise.all(entries.map(extractFilesFromEntry))
-        return fileArrays.flat()
+        let entries = await readBatch()
+        while (entries.length > 0) {
+          allEntries.push(...entries)
+          entries = await readBatch()
+        }
+
+        return allEntries
       }
-    }
-    catch (e) {
-      console.error('提取文件失败:', e)
+
+      const entries = await readAllEntries()
+      const fileArrays = await Promise.all(entries.map(extractFilesFromEntry))
+      return fileArrays.flat()
     }
 
     return []
@@ -46,33 +41,28 @@ export function useFileExtractor() {
   async function extractFilesFromDragEvent(e: DragEvent): Promise<File[]> {
     const items = e.dataTransfer?.items
     if (items && items.length > 0) {
-      try {
-        const allFiles: File[] = []
+      const allFiles: File[] = []
 
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i]
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
 
-          if (item.kind === 'file') {
-            const entry = item.webkitGetAsEntry()
-            if (entry) {
-              const files = await extractFilesFromEntry(entry)
-              allFiles.push(...files)
-            }
-            else {
-              const file = item.getAsFile()
-              if (file) {
-                allFiles.push(file)
-              }
+        if (item.kind === 'file') {
+          const entry = item.webkitGetAsEntry()
+          if (entry) {
+            const files = await extractFilesFromEntry(entry)
+            allFiles.push(...files)
+          }
+          else {
+            const file = item.getAsFile()
+            if (file) {
+              allFiles.push(file)
             }
           }
         }
-
-        if (allFiles.length > 0) {
-          return allFiles
-        }
       }
-      catch (e) {
-        console.error('处理失败:', e)
+
+      if (allFiles.length > 0) {
+        return allFiles
       }
     }
 

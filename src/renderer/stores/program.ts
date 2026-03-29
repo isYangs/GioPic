@@ -7,6 +7,7 @@ export interface Program {
   name: string
   detail: Record<string, any>
   pluginId: string
+  icon?: string
 }
 
 export const useProgramStore = defineStore(
@@ -22,6 +23,7 @@ export const useProgramStore = defineStore(
         id,
         detail: {},
         pluginId: '',
+        icon: '',
       })
       return id
     }
@@ -35,10 +37,14 @@ export const useProgramStore = defineStore(
       getProgram(id).name = name
     }
 
+    function setProgramIcon(id: number, icon: string) {
+      getProgram(id).icon = icon
+    }
+
     function getProgram(id: number | null): Program {
       const program = programs.value.find(item => item.id === id)
       if (!program) {
-        return { type: 'unknown', name: '', id: null, detail: {}, pluginId: '' }
+        return { type: 'unknown', name: '', id: null, detail: {}, pluginId: '', icon: '' }
       }
       return program
     }
@@ -85,16 +91,32 @@ export const useProgramStore = defineStore(
       return program.detail[pluginId]
     }
 
+    function exportProgram(id: number) {
+      const program = getProgram(id)
+      if (!program || !program.id)
+        return null
+      return {
+        version: 1,
+        type: program.type,
+        name: program.name,
+        pluginId: program.pluginId,
+        detail: { ...program.detail },
+        icon: program.icon || '',
+      }
+    }
+
     return {
       programs,
       createProgram,
       setProgramDetail,
       setProgramName,
+      setProgramIcon,
       getProgramList,
       getProgram,
       removeProgram,
       removeProgramsByPluginId,
       getPluginSetting,
+      exportProgram,
     }
   },
   {

@@ -1,12 +1,6 @@
 import { useFileExtractor } from './useFileExtractor'
 
-export interface DragAndDropOptions {
-  onDrop?: (files: File[]) => void
-  onError?: (message: string) => void
-}
-
-export function useDragAndDrop(options: DragAndDropOptions = {}) {
-  const { onDrop, onError } = options
+export function useDragAndDrop() {
   const { extractFilesFromDragEvent } = useFileExtractor()
 
   const isOverDropZone = ref(false)
@@ -42,24 +36,17 @@ export function useDragAndDrop(options: DragAndDropOptions = {}) {
       updateDragState(false)
   }
 
-  const processDrop = async (e: DragEvent) => {
+  const processDrop = async (e: DragEvent): Promise<File[]> => {
     preventDefaults(e)
     dragCounter.value = 0
     updateDragState(false)
 
-    try {
-      const files = await extractFilesFromDragEvent(e)
-      if (files.length > 0) {
-        onDrop?.(files)
-      }
-      else {
-        onError?.('未找到有效文件')
-      }
+    const files = await extractFilesFromDragEvent(e)
+    if (files.length === 0) {
+      throw new Error('未找到有效文件')
     }
-    catch (e) {
-      console.error('拖拽文件处理失败:', e)
-      onError?.('拖拽文件处理失败')
-    }
+
+    return files
   }
 
   const setupDragAndDrop = (element: HTMLElement) => {
