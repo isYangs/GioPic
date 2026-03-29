@@ -1,19 +1,29 @@
-name: Changeset Version
+name: Release Packages
 
 on:
   push:
     branches:
       - plugin
     paths:
-      - '.changeset/*.md'
+      - ".changeset/**"
+      - "packages/core/**"
+      - "packages/lsky-plugin/**"
+      - "packages/lskypro-plugin/**"
+      - "packages/s3-plugin/**"
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
 
 jobs:
-  version:
+  release:
+    name: Release Packages
+    if: github.repository == 'isYangs/GioPic' && github.ref == 'refs/heads/plugin'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@v6
@@ -21,6 +31,19 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - uses: actions/setup-node@v6
         with:
@@ -36,7 +59,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset:publish
+          publish: pnpm exec node scripts/publish-packages.sh
           version: pnpm changeset:version
           commit: "chore: version packages"
           title: "chore: version packages"

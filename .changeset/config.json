@@ -8,7 +8,7 @@
   "changelog": ["@changesets/changelog-github", { "repo": "isYangs/GioPic" }],
   "commit": false,
   "fixed": [],
-  "ignore": [],
+  "ignore": ["@giopic/test-suite"],
   "linked": [],
   "updateInternalDependencies": "patch"
 }
