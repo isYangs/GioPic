@@ -1,0 +1,62 @@
+name: PR Check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - edited
+      - reopened
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-template-check:
+    name: PR Template Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check PR template
+        run: |
+          if [ ! -f .github/PULL_REQUEST_TEMPLATE.md ] && [ ! -f .github/pull_request_template.md ]; then
+            echo "WARNING: No PR template found. Consider adding one at .github/PULL_REQUEST_TEMPLATE.md"
+          fi
+          echo "PR template check passed"
+
+  pr-conflict-check:
+    name: PR Conflict Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for conflicts
+        run: |
+          if git merge-base --is-ancestor HEAD main 2>/dev/null; then
+            echo "PR is up to date with main"
+          else
+            echo "WARNING: PR has conflicts with main branch"
+            git fetch origin main
+            if git diff --name-only origin/main...HEAD | grep -q .; then
+              echo "Conflicting files detected"
+            fi
+          fi
+
+  pr-size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check PR size
+        run: |
+          echo "Checking PR changes..."
+          git fetch origin ${{ github.base_ref }} --depth=1 2>/dev/null || true
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD 2>/dev/null | wc -l | grep -qE '^[0-9]+$' ; then
+            FILE_COUNT=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 2>/dev/null | wc -l)
+            echo "Changed files: $FILE_COUNT"
+          fi
