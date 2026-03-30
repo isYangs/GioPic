@@ -5,7 +5,7 @@ export default antfu(
     vue: true,
     typescript: true,
     unocss: true,
-    formatters: true,
+    formatters: false,
 
     rules: {
       'unused-imports/no-unused-imports': 'error',
