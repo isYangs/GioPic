@@ -1,0 +1,86 @@
+name: Issue Management
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - labeled
+      - unlabeled
+      - closed
+      - reopened
+  schedule:
+    - cron: '0 0 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  issue-labeled-check:
+    name: Issue Label Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Check issue has labels
+        run: |
+          if [ -z "${{ github.event.issue.labels }}" ] || [ "${{ github.event.issue.labels }}" == "[]" ]; then
+            echo "WARNING: New issue has no labels"
+            echo "Please add appropriate labels (bug, feature, question, etc.)"
+          fi
+
+  issue-auto-close-inactive:
+    name: Auto Close Inactive Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Close inactive issues
+        uses: actions-cool/close-inactive@v1
+        with:
+          inactive-day: 30
+          close-issue: true
+          exclude-labels: 'pinned,security'
+          comment: |
+            This issue has been automatically closed because it has not had recent activity for a while. If this issue is still valid, please feel free to open a new one.
+
+  issue-welcome:
+    name: Issue Welcome
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Welcome message
+        run: |
+          echo "Thanks for opening an issue!"
+          echo "Please provide as much detail as possible, including:"
+          echo "- Version of GioPic"
+          echo "- Operating system"
+          echo "- Steps to reproduce"
+          echo "- Expected vs actual behavior"
+
+  issue-add-reply:
+    name: Auto Reply
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Add initial reply
+        uses: actions-cool/maintain-comment@v1
+        with:
+          type: issue
+          action: created
+          body: |
+            Thank you for opening an issue! 
+
+            Before submitting a new issue, please search existing issues to avoid duplicates.
+
+            If this is a bug report, please include:
+            - GioPic version
+            - OS and version
+            - Steps to reproduce
+            - Actual vs expected behavior
+
+            If this is a feature request, please describe the feature and its use case.
+
+            ---
+            *This is an automated response*
