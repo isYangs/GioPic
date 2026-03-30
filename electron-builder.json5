@@ -15,11 +15,14 @@
   ],
   "mac": {
     "target": ["dmg", "zip"],
-    "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "arch": ["x64", "arm64"],
+    "icon": "public/icon-mac.png"
   },
   "dmg": {
     "icon": "public/icon-mac.png",
     "iconSize": 100,
+    "background": "public/dmg-background.png",
     "contents": [
       {
         "x": 380,
@@ -34,19 +37,19 @@
       }
     ],
     "window": {
-      "width": 500,
-      "height": 500
+      "width": 540,
+      "height": 400
     }
   },
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64"]
+        "arch": ["x64", "arm64"]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
-    "icon": "public/icon.png"
+    "artifactName": "${productName}-${version}-${arch}-setup.${ext}",
+    "icon": "public/icon.ico"
   },
   "nsis": {
     "oneClick": false,
