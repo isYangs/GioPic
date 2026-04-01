@@ -1,5 +1,5 @@
 {
-  "name": "@giopic/test-suite",
+  "name": "@giopic/integration-tests",
   "type": "module",
   "private": true,
   "scripts": {

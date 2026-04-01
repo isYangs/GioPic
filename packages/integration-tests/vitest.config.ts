@@ -1,8 +1,10 @@
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 
-const repoRoot = resolve(__dirname, '../..')
+const workspaceRoot = dirname(fileURLToPath(import.meta.url))
+const repoRoot = resolve(workspaceRoot, '../..')
 
 export default defineConfig({
   plugins: [vue()],
@@ -34,8 +36,8 @@ export default defineConfig({
       '@pkg-lsky': resolve(repoRoot, 'packages/lsky-plugin/src'),
       '@pkg-lskypro': resolve(repoRoot, 'packages/lskypro-plugin/src'),
       '@pkg-s3': resolve(repoRoot, 'packages/s3-plugin/src'),
-      'electron': resolve(__dirname, './test-support/mocks/electron.ts'),
-      '@electron-toolkit/utils': resolve(__dirname, './test-support/mocks/electron-toolkit-utils.ts'),
+      'electron': resolve(workspaceRoot, './test-support/mocks/electron.ts'),
+      '@electron-toolkit/utils': resolve(workspaceRoot, './test-support/mocks/electron-toolkit-utils.ts'),
     },
   },
 })

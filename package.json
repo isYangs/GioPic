@@ -44,10 +44,14 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "pnpm --filter @giopic/test-suite test",
-    "test:run": "pnpm --filter @giopic/test-suite test:run",
-    "test:ui": "pnpm --filter @giopic/test-suite test:ui",
-    "test:coverage": "pnpm --filter @giopic/test-suite test:coverage"
+    "test": "vitest --config vitest.config.ts",
+    "test:run": "vitest run --config vitest.config.ts",
+    "test:ui": "vitest --ui --config vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config vitest.config.ts",
+    "test:integration": "pnpm --filter @giopic/integration-tests test",
+    "test:integration:run": "pnpm --filter @giopic/integration-tests test:run",
+    "test:integration:ui": "pnpm --filter @giopic/integration-tests test:ui",
+    "test:integration:coverage": "pnpm --filter @giopic/integration-tests test:coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",
