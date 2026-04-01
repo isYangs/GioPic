@@ -347,7 +347,7 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
 .setting-panel > .n-card-header {
   --uno: absolute left-0 right-0 z-1 text-4 py4 pr4;
 }
-.setting-panel > .n-card__content {
+.setting-panel > :is(.n-card-content, .n-card__content) {
   --uno: p0 h-full rounded-2;
 }
 </style>

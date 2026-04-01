@@ -21,6 +21,8 @@ interface NpmSearchResult {
   date: string
   keywords?: string[]
   homepage?: string
+  downloadCount?: number
+  recommendScore?: number
 }
 
 interface RemoteRecommendedPluginConfigItem {
@@ -759,7 +761,7 @@ export class PluginManager {
       }
 
       if (plugin.isBuiltin && plugin.npmPackage) {
-        return await import(plugin.npmPackage)
+        return await import(/* @vite-ignore */ plugin.npmPackage)
       }
 
       if (!plugin.path) {
@@ -772,11 +774,11 @@ export class PluginManager {
         throw new Error(`插件主文件不存在: ${mainPath}`)
       }
 
-      if (platform.isWindows) {
-        return await import(`file://${mainPath.replace(/\\/g, '/')}`)
-      }
+      const moduleUrl = platform.isWindows
+        ? pathToFileURL(mainPath).href
+        : pathToFileURL(mainPath).href
 
-      return await import(mainPath)
+      return await import(/* @vite-ignore */ moduleUrl)
     }
     catch (e) {
       pluginLogger.error(`插件模块加载失败: ${pluginId}`, e)

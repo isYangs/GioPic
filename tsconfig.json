@@ -4,15 +4,15 @@
     "jsx": "preserve",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "useDefineForClassFields": true,
-    "baseUrl": ".",
     "rootDir": ".",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "paths": {
-      "~/*": ["src/renderer/*"],
-      "@/*": ["src/*"]
+      "~/*": ["./src/renderer/*"],
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
+    "types": ["node"],
     "strict": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,

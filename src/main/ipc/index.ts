@@ -223,7 +223,7 @@ export function registerIpc(win: BrowserWindow, loadingWindow: BrowserWindow | n
   ipcMain.handle('export-program-config', async (_event, params: { name: string, data: any }) => {
     try {
       const { name, data } = params
-      const safeName = (name || 'untitled').replace(/[^a-z0-9\u4e00-\u9fa5_-]/gi, '_').substring(0, 50)
+      const safeName = (name || 'untitled').replace(/[^\w\u4E00-\u9FA5-]/g, '_').substring(0, 50)
       const { canceled, filePath } = await dialog.showSaveDialog({
         title: '导出存储配置',
         defaultPath: `giopic-config-${safeName}.json`,

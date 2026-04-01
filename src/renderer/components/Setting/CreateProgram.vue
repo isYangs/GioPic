@@ -280,7 +280,7 @@ onMounted(async () => {
 
       <n-tab-pane name="import" tab="从文件导入">
         <div class="flex flex-col items-center gap-4 py-4">
-          <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-100/80 dark:bg-white/5">
+          <div class="h-20 w-20 flex items-center justify-center rounded-2xl bg-gray-100/80 dark:bg-white/5">
             <div i-ph-file-arrow-down class="text-3xl op-40" />
           </div>
           <div class="text-center">

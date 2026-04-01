@@ -33,8 +33,6 @@ const themeOverrides = computed((): GlobalThemeOverrides => ({
     ),
     borderRadius: `${borderRadius.value}px`,
     borderRadiusSmall: `${Math.max(2, borderRadius.value - 2)}px`,
-    borderRadiusMedium: `${borderRadius.value}px`,
-    borderRadiusLarge: `${borderRadius.value + 2}px`,
   },
   Typography: {
     // headerBarColor: 'currentColor',

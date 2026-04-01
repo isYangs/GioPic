@@ -1,11 +1,16 @@
+import type { SQLInputValue, SQLOutputValue } from 'node:sqlite'
 import { createCountStatement, createDeleteStatement, createInsertStatement, createPaginatedQueryStatement, createQueryByKeyStatement, createQueryStatement } from './statements'
+
+function toUploadData(row: Record<string, SQLOutputValue>): GP.DB.UploadData {
+  return row as unknown as GP.DB.UploadData
+}
 
 /**
  * 查询上传数据
  */
 export function queryUploadData() {
   const queryStatement = createQueryStatement()
-  return queryStatement.all() as GP.DB.UploadData[]
+  return queryStatement.all().map(toUploadData)
 }
 
 /**
@@ -16,7 +21,7 @@ export function queryUploadData() {
 export function queryUploadDataPaginated(page: number = 1, pageSize: number = 20) {
   const offset = (page - 1) * pageSize
   const queryStatement = createPaginatedQueryStatement()
-  return queryStatement.all(pageSize, offset) as GP.DB.UploadData[]
+  return queryStatement.all(pageSize, offset).map(toUploadData)
 }
 
 /**
@@ -42,7 +47,17 @@ export function insertUploadData(data: GP.DB.UploadData): boolean {
   }
 
   const insertStatement = createInsertStatement()
-  insertStatement.run(data)
+  insertStatement.run({
+    key: data.key,
+    name: data.name,
+    time: data.time,
+    size: data.size,
+    mimetype: data.mimetype,
+    url: data.url,
+    origin_name: data.origin_name,
+    program_id: data.program_id ?? null,
+    program_type: data.program_type ?? null,
+  } satisfies Record<string, SQLInputValue>)
   return true
 }
 

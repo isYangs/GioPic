@@ -24,7 +24,7 @@ defineProps<{
 </template>
 
 <style scoped>
-.set-item :deep(.n-card__content) {
+.set-item :deep(:is(.n-card-content, .n-card__content)) {
   --uno: flex flex-row gap-4 items-center justify-between;
 }
 

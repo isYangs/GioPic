@@ -1,6 +1,6 @@
-import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
 import { platform } from '@electron-toolkit/utils'
 import { app } from 'electron'
 import logger from '../utils/logger'
