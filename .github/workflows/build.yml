@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v0.0.1)"
+        description: Release tag (e.g. v0.0.1)
         required: true
-        default: "v0.0.1"
+        default: v0.0.1
       platform:
-        description: "Build platform"
+        description: Build platform
         required: true
-        default: "all"
+        default: all
         type: choice
         options:
           - all
@@ -41,13 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(
-          github.event_name == 'push' && '["macos-latest", "windows-latest"]' ||
-          github.event.inputs.platform == 'all' && '["macos-latest", "windows-latest"]' ||
-          github.event.inputs.platform == 'windows' && '["windows-latest"]' ||
-          github.event.inputs.platform == 'mac' && '["macos-latest"]' ||
-          '["macos-latest", "windows-latest"]'
-        )}}
+        os: ${{ fromJSON(github.event_name == 'push' && '["macos-latest", "windows-latest"]' || github.event.inputs.platform == 'all' && '["macos-latest", "windows-latest"]' || github.event.inputs.platform == 'windows' && '["windows-latest"]' || github.event.inputs.platform == 'mac' && '["macos-latest"]' || '["macos-latest", "windows-latest"]') }}
 
     steps:
       - name: Check out git repository
@@ -146,11 +140,11 @@ jobs:
         run: |
           TAG="${{ github.ref_name }}"
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
+
           BODY=$(cat .github/release-template.md)
           BODY="${BODY//\{\{tag\}\}/$TAG}"
           BODY="${BODY//\{\{prevTag\}\}/$PREV_TAG}"
-          
+
           echo "body=$BODY" >> $GITHUB_OUTPUT
 
       - name: Release

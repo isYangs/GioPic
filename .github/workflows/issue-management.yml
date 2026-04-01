@@ -70,7 +70,7 @@ jobs:
           type: issue
           action: created
           body: |
-            Thank you for opening an issue! 
+            Thank you for opening an issue!
 
             Before submitting a new issue, please search existing issues to avoid duplicates.
 
