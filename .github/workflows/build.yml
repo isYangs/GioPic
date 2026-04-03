@@ -94,15 +94,13 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: pnpm run build:mac
         env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: pnpm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Cleanup Mac artifacts
         if: matrix.os == 'macos-latest'
@@ -160,7 +158,12 @@ jobs:
     name: Sync update files to CN server
     needs: release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      secrets.CN_SERVER_HOST != '' &&
+      secrets.CN_SERVER_USERNAME != '' &&
+      secrets.CN_SERVER_PASSWORD != '' &&
+      secrets.CN_SERVER_PORT != ''
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -183,59 +186,3 @@ jobs:
           source: './update-files/*'
           target: /wwwroot/update.isyangs.cn
           strip_components: 1
-
-  publish-npm:
-    name: Publish to npm
-    needs: release
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get release tag
-        id: get-tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Set package.json version
-        run: |
-          TAG="${{ steps.get-tag.outputs.tag }}"
-          VERSION="${TAG#v}"
-          npm version "$VERSION" --no-git-tag-version --allow-same-version
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install pnpm
-        run: npm i -g pnpm
-
-      - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-
-      - name: Cache pnpm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Build Plugins
-        run: pnpm run build:plugins
-
-      - name: Publish to npm
-        run: pnpm publish -r --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
