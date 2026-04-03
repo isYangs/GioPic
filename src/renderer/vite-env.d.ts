@@ -2,6 +2,9 @@
 /// <reference types="unplugin-vue-router/client" />
 
 interface Window {
+  giopicRuntime: {
+    e2e: boolean
+  }
   ipcRenderer: {
     on: (channel: string, listener: (...args: any[]) => void) => void
     off: (channel: string, listener: (...args: any[]) => void) => void

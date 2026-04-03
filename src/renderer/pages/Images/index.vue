@@ -186,13 +186,14 @@ onMounted(loadUploadData)
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full flex flex-col" data-testid="images-page">
     <div class="flex-shrink-0">
       <div class="space-y-2">
         <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div class="min-w-0 flex flex-1 flex-col gap-4 lg:flex-row lg:items-center">
             <n-input
               v-model:value="searchKeyword"
+              data-testid="images-search-input"
               placeholder="搜索图片..."
               class="w-full lg:w-72"
               clearable
@@ -226,7 +227,7 @@ onMounted(loadUploadData)
                 </n-button>
               </n-button-group>
 
-              <n-button size="small" ghost :loading="loading" @click="loadUploadData">
+              <n-button data-testid="images-refresh-button" size="small" ghost :loading="loading" @click="loadUploadData">
                 <template #icon>
                   <div i-ph-arrow-clockwise />
                 </template>
@@ -303,6 +304,7 @@ onMounted(loadUploadData)
               <n-card
                 v-for="item in paginatedData"
                 :key="item.key"
+                :data-testid="`images-card-${item.key}`"
                 bordered
                 class="rounded-2"
                 content-class="!p-2"
@@ -361,6 +363,7 @@ onMounted(loadUploadData)
             <n-card
               v-for="item in paginatedData"
               :key="item.key"
+              :data-testid="`images-list-row-${item.key}`"
               bordered
               class="rounded-2"
               content-class="!p-3"
@@ -433,7 +436,7 @@ onMounted(loadUploadData)
           </div>
         </template>
 
-        <n-empty v-else-if="!loading" class="mt-20" description="没有找到图片">
+        <n-empty v-else-if="!loading" class="mt-20" description="没有找到图片" data-testid="images-empty-state">
           <template #extra>
             <n-button ghost @click="clearFilters">
               清空筛选

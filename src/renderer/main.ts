@@ -28,5 +28,5 @@ app
   .$nextTick(() => {
     setTimeout(() => {
       window.ipcRenderer.send('win-loaded')
-    }, 3000)
+    }, window.giopicRuntime?.e2e ? 50 : 3000)
   })

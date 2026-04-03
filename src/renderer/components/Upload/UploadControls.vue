@@ -55,6 +55,7 @@ function handleUploadClick(e: MouseEvent) {
   <div class="upload-toolbar">
     <div class="flex items-center gap-2">
       <n-button
+        data-testid="upload-batch-button"
         type="primary"
         :loading="localIsUpload"
         :disabled="!hasUploadableImages || localIsUpload"
@@ -62,10 +63,10 @@ function handleUploadClick(e: MouseEvent) {
       >
         {{ localIsUpload ? '上传中...' : '全部上传' }}
       </n-button>
-      <n-button :disabled="!hasUrls" @click="$emit('copyAllUrls')">
+      <n-button data-testid="copy-all-links-button" :disabled="!hasUrls" @click="$emit('copyAllUrls')">
         复制链接
       </n-button>
-      <n-button type="error" secondary @click="$emit('clearAll')">
+      <n-button data-testid="clear-all-images-button" type="error" secondary @click="$emit('clearAll')">
         清空
       </n-button>
     </div>
@@ -74,6 +75,7 @@ function handleUploadClick(e: MouseEvent) {
       <div class="flex items-center gap-1.5">
         <span class="whitespace-nowrap text-sm text-primary">存储程序:</span>
         <n-select
+          data-testid="default-program-select"
           :value="defaultProgram"
           class="min-w-30"
           :options="programs"
@@ -91,6 +93,7 @@ function handleUploadClick(e: MouseEvent) {
         >
           <template #trigger>
             <n-select
+              data-testid="permission-select"
               :value="isAllPublic"
               class="min-w-30"
               :options="isPublicOptions"
@@ -102,6 +105,7 @@ function handleUploadClick(e: MouseEvent) {
         </n-tooltip>
         <n-select
           v-else
+          data-testid="permission-select"
           :value="isAllPublic"
           class="min-w-30"
           :options="isPublicOptions"

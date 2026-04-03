@@ -53,7 +53,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <n-form>
+  <n-form data-testid="program-settings-page">
     <setting-item
       title="存储备注"
       :desc="plugin ? `存储类型：${plugin.name}` : `存储类型：${programType || '未知类型'}`"

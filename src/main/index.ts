@@ -6,6 +6,7 @@ import { platform } from '@electron-toolkit/utils'
 import { setPluginDataStore } from '@giopic/core'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from './db'
+import { registerE2EIpc } from './ipc/e2e'
 import { registerIpc } from './ipc/index'
 import createAppUpdater from './services/AppUpdater'
 import { pluginManager } from './services/PluginManager'
@@ -15,11 +16,14 @@ import createTrayService from './services/TrayService'
 import createWindowService from './services/WindowService'
 import { initStore } from './stores'
 import { createMainPluginDataStoreAdapter } from './stores/plugin-data'
+import { configureRuntimePaths } from './utils/runtime-paths'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '../..')
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+
+configureRuntimePaths()
 
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
@@ -109,6 +113,7 @@ async function createMainWindow() {
   registerIpc(mainWindow, loadingWindow)
   initStore()
   initDB()
+  registerE2EIpc()
 
   if (VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(VITE_DEV_SERVER_URL)

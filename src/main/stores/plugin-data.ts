@@ -1,7 +1,9 @@
 import type { PluginDataStore } from '@giopic/core'
 import Store from 'electron-store'
+import { getStorePath } from '../utils/runtime-paths'
 
 const pluginDataStore = new Store({
+  cwd: getStorePath(),
   name: 'plugin-data',
   serialize: (data) => {
     const parsed = typeof data === 'string' ? JSON.parse(data) : data
@@ -73,4 +75,12 @@ export function createMainPluginDataStoreAdapter(): PluginDataStore {
       }
     },
   }
+}
+
+export function replaceMainPluginDataStore(data: Record<string, Record<string, any>>) {
+  pluginDataStore.set('pluginData', data)
+}
+
+export function clearMainPluginDataStore() {
+  pluginDataStore.clear()
 }

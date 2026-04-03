@@ -15,9 +15,13 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm run build:plugins && vue-tsc && vite build && electron-builder",
-    "build:win": "pnpm run build:plugins && vue-tsc && vite build && electron-builder --win",
-    "build:mac": "pnpm run build:plugins && vue-tsc && vite build && electron-builder --mac",
+    "build": "pnpm run build:desktop",
+    "build:app": "pnpm run build:plugins && pnpm run typecheck:app && vite build",
+    "build:desktop": "pnpm run build:app && electron-builder",
+    "build:desktop:win": "pnpm run build:app && electron-builder --win",
+    "build:desktop:mac": "pnpm run build:app && electron-builder --mac",
+    "build:win": "pnpm run build:desktop:win",
+    "build:mac": "pnpm run build:desktop:mac",
     "build:plugins": "pnpm --filter @giopic/* run build",
     "changeset": "changeset",
     "changeset:add": "changeset add",
@@ -44,14 +48,24 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest --config vitest.config.ts",
-    "test:run": "vitest run --config vitest.config.ts",
-    "test:ui": "vitest --ui --config vitest.config.ts",
-    "test:coverage": "vitest run --coverage --config vitest.config.ts",
+    "typecheck": "pnpm run typecheck:app",
+    "typecheck:app": "vue-tsc --noEmit",
+    "typecheck:packages": "pnpm --filter @giopic/core --filter @giopic/lsky-plugin --filter @giopic/lskypro-plugin --filter @giopic/s3-plugin run typecheck",
+    "test": "pnpm run test:unit",
+    "test:run": "pnpm run test:unit:run",
+    "test:ui": "pnpm run test:unit:ui",
+    "test:coverage": "pnpm run test:unit:coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "vitest --config vitest.config.ts",
+    "test:unit:run": "vitest run --config vitest.config.ts",
+    "test:unit:ui": "vitest --ui --config vitest.config.ts",
+    "test:unit:coverage": "vitest run --coverage --config vitest.config.ts",
     "test:integration": "pnpm --filter @giopic/integration-tests test",
     "test:integration:run": "pnpm --filter @giopic/integration-tests test:run",
     "test:integration:ui": "pnpm --filter @giopic/integration-tests test:ui",
-    "test:integration:coverage": "pnpm --filter @giopic/integration-tests test:coverage"
+    "test:integration:coverage": "pnpm --filter @giopic/integration-tests test:coverage",
+    "verify": "pnpm lint && pnpm run typecheck:app && pnpm run test:unit:run && pnpm run test:integration:run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",
@@ -81,6 +95,7 @@
     "@antfu/eslint-config": "^4.13.1",
     "@iconify/json": "^2.2.458",
     "@iconify/vue": "^5.0.0",
+    "@playwright/test": "^1.54.2",
     "@types/node": "^24.12.0",
     "@unocss/eslint-config": "^66.6.7",
     "@unocss/eslint-plugin": "^66.6.7",
@@ -96,6 +111,7 @@
     "eslint-plugin-format": "^1.0.1",
     "happy-dom": "^20.8.9",
     "naive-ui": "^2.44.1",
+    "playwright": "^1.54.2",
     "tsdown": "^0.12.0",
     "typescript": "^5.8.3",
     "unocss": "^66.6.7",
@@ -109,5 +125,14 @@
     "vite-plugin-vue-devtools": "^7.7.6",
     "vitest": "^4.1.2",
     "vue-tsc": "^2.2.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "electron-winstaller",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

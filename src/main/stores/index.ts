@@ -1,7 +1,9 @@
 import { ipcMain } from 'electron'
 import Store from 'electron-store'
+import { getStorePath } from '../utils/runtime-paths'
 
 const store = new Store({
+  cwd: getStorePath(),
   serialize: (data) => {
     const parsed = typeof data === 'string' ? JSON.parse(data) : data
     return JSON.stringify(parsed, null, 2)
@@ -54,4 +56,12 @@ export function setStore(key: string, value: any, storeKey: string = defaultStor
 
 export function clearStore() {
   store.clear()
+}
+
+export function setPersistedStore(key: string, value: any) {
+  store.set(key, value)
+}
+
+export function deletePersistedStore(key: string) {
+  store.delete(key)
 }

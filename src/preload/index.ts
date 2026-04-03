@@ -19,3 +19,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     return ipcRenderer.invoke(channel, data)
   },
 })
+
+contextBridge.exposeInMainWorld('giopicRuntime', {
+  e2e: process.env.GIOPIC_E2E === '1',
+})

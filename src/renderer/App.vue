@@ -19,7 +19,7 @@ onMounted(async () => {
 
 <template>
   <provider>
-    <n-layout has-sider class="wh-full">
+    <n-layout has-sider class="wh-full" data-testid="desktop-app">
       <n-layout-sider
         bordered
         collapse-mode="width"

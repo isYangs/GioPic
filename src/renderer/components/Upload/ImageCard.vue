@@ -102,6 +102,7 @@ function getStatusText(status: string) {
 
 <template>
   <n-card
+    :data-testid="`upload-card-${index}`"
     class="upload-card mb-2 rounded-2"
     content-class="!p-3 flex items-center gap-3"
   >
@@ -177,6 +178,7 @@ function getStatusText(status: string) {
 
       <template v-else-if="status === 'error'">
         <n-button
+          :data-testid="`upload-retry-${index}`"
           size="small"
           type="warning"
           quaternary
@@ -190,6 +192,7 @@ function getStatusText(status: string) {
 
       <template v-else-if="status === 'pending'">
         <n-button
+          :data-testid="`upload-single-${index}`"
           size="small"
           type="primary"
           quaternary
@@ -203,6 +206,7 @@ function getStatusText(status: string) {
       </template>
 
       <n-button
+        :data-testid="`remove-image-${index}`"
         size="small"
         type="error"
         quaternary

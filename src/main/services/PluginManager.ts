@@ -5,9 +5,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
-import { app } from 'electron'
 import { getStore } from '../stores'
 import logger from '../utils/logger'
+import { getPluginsPath } from '../utils/runtime-paths'
 
 const pluginLogger = logger.scope('PluginManager')
 
@@ -88,7 +88,7 @@ export class PluginManager {
   ]
 
   constructor() {
-    this.pluginsDir = path.join(app.getPath('userData'), 'plugins')
+    this.pluginsDir = getPluginsPath()
 
     if (!fs.existsSync(this.pluginsDir)) {
       fs.mkdirSync(this.pluginsDir, { recursive: true })

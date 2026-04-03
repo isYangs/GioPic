@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { app } from 'electron'
 import logger from '../utils/logger'
+import { getPluginTemplatesPath } from '../utils/runtime-paths'
 
 const devToolsLogger = logger.scope('PluginDevTools')
 
@@ -10,7 +10,7 @@ export class PluginDevTools {
   private templatesDir: string
 
   constructor() {
-    this.templatesDir = path.join(app.getPath('userData'), 'plugin-templates')
+    this.templatesDir = getPluginTemplatesPath()
     if (!fs.existsSync(this.templatesDir)) {
       fs.mkdirSync(this.templatesDir, { recursive: true })
     }

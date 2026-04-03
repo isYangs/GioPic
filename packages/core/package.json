@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {

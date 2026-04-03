@@ -1,8 +1,8 @@
 import type { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
-import { app } from 'electron'
 import logger from '../../utils/logger'
+import { getBackupsPath } from '../../utils/runtime-paths'
 
 export interface Migration {
   version: string
@@ -130,7 +130,7 @@ export function runMigrations(db: DatabaseSync, _appVersion: string): void {
  */
 export function backupDatabase(dbPath: string, maxBackups: number = 5): string | null {
   try {
-    const backupDir = path.join(app.getPath('userData'), 'backups')
+    const backupDir = getBackupsPath()
 
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true })

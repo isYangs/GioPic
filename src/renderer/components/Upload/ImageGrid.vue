@@ -8,7 +8,7 @@ const { data } = storeToRefs(uploadDataStore)
 </script>
 
 <template>
-  <div class="flex-1 overflow-y-auto">
+  <div class="flex-1 overflow-y-auto" data-testid="upload-grid">
     <n-image-group>
       <image-card
         v-for="(file, index) in data"
@@ -21,6 +21,7 @@ const { data } = storeToRefs(uploadDataStore)
 
     <div
       v-if="data.length === 0"
+      data-testid="upload-grid-empty"
       class="h-full min-h-120px flex flex-col items-center justify-center text-[var(--n-text-color-disabled)]"
     >
       <div class="mb-1.5 h-6 w-6 opacity-50" i-ph-files />

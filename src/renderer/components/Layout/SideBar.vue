@@ -72,19 +72,20 @@ const storageList = ref({
     }, [
       h('span', ['存储配置']),
       h(NButton, {
-        class: 'w9 h5',
-        size: 'small',
-        type: 'tertiary',
-        round: true,
-        secondary: true,
-        focusable: false,
-        ariaLabel: '添加存储配置',
-        renderIcon: renderIcon('i-ic-sharp-add !w16px !h16px'),
-        onClick: (e) => {
+        'class': 'w9 h5',
+        'data-testid': 'create-program-button',
+        'ariaLabel': '添加存储配置',
+        'focusable': false,
+        'onClick': (e) => {
           if (expandedKeys.value.includes('user-storage'))
             e.stopPropagation()
           openCreateProgram()
         },
+        'renderIcon': renderIcon('i-ic-sharp-add !w16px !h16px'),
+        'round': true,
+        'secondary': true,
+        'size': 'small',
+        'type': 'tertiary',
       }),
     ]),
   key: 'user-storage',
@@ -114,17 +115,17 @@ const menuOptions = computed(() => [
     show: !isMenuCollapsed.value,
   },
   {
-    label: '上传图片',
+    label: () => h('span', { 'data-testid': 'nav-home' }, '上传图片'),
     key: '/',
     icon: renderIcon('i-ph-upload-simple-bold w20px h20px'),
   },
   {
-    label: '图片列表',
+    label: () => h('span', { 'data-testid': 'nav-images' }, '图片列表'),
     key: '/Images',
     icon: renderIcon('i-ph-list-bullets-bold w20px h20px'),
   },
   {
-    label: '插件管理',
+    label: () => h('span', { 'data-testid': 'nav-plugins' }, '插件管理'),
     key: '/Setting/Plugins',
     icon: renderIcon('i-ph-puzzle-piece-bold w20px h20px'),
   },
@@ -167,7 +168,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full flex flex-col" data-testid="sidebar">
     <div class="min-h-0 flex-1">
       <n-scrollbar class="h-full">
         <n-menu

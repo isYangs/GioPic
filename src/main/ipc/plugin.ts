@@ -4,6 +4,7 @@ import { pluginDevTools } from '../services/PluginDevTools'
 import { pluginManager } from '../services/PluginManager'
 import { setStore } from '../stores'
 import logger from '../utils/logger'
+import { runE2EUploadMock } from './e2e'
 
 const pluginLogger = logger.scope('PluginIPC')
 
@@ -141,6 +142,10 @@ export function registerPluginIpc() {
   ipcMain.handle('upload-with-plugin', async (_event, params: UploadWithPluginParams) => {
     try {
       const { pluginId, params: uploadParams } = params
+      const mockResult = await runE2EUploadMock(pluginId, uploadParams)
+      if (mockResult) {
+        return mockResult
+      }
       const result = await pluginManager.uploadWithPlugin(pluginId, uploadParams)
       return result
     }

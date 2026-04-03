@@ -223,9 +223,10 @@ async function handleSingleImageUpload(index: number) {
 </script>
 
 <template>
-  <div ref="dropZoneRef" class="h-full flex flex-col overflow-hidden">
+  <div ref="dropZoneRef" class="h-full flex flex-col overflow-hidden" data-testid="home-page">
     <div class="flex-shrink-0">
       <upload-area
+        data-testid="upload-area"
         :is-processing="isProcessing"
         :is-over-drop-zone="isOverDropZone"
         :has-files="data.length > 0"
@@ -235,6 +236,7 @@ async function handleSingleImageUpload(index: number) {
 
     <template v-if="data.length">
       <upload-controls
+        data-testid="upload-controls"
         :has-uploadable-images="hasUploadableImages"
         :is-upload="isUpload"
         :has-urls="hasUrls"
@@ -250,6 +252,7 @@ async function handleSingleImageUpload(index: number) {
       />
 
       <image-grid
+        data-testid="upload-grid"
         @remove-image="removeImage"
         @upload-single="handleSingleImageUpload"
       />

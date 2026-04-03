@@ -351,7 +351,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full" data-testid="plugins-page">
     <div class="mb-4 flex items-center justify-between gap-4">
       <h2 class="flex-shrink-0 text-base font-medium">
         存储插件

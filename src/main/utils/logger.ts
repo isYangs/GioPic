@@ -6,8 +6,9 @@
  * @see https://www.npmjs.com/package/electron-log
  */
 import path from 'node:path'
-import { app, ipcMain } from 'electron'
+import { ipcMain } from 'electron'
 import logger from 'electron-log'
+import { getUserDataPath } from './runtime-paths'
 
 // 获取当前日期的字符串
 function getCurrentDateString() {
@@ -24,7 +25,7 @@ logger.transports.file.maxSize = 10 * 1024 * 1024
 logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}'
 logger.transports.file.resolvePathFn = () => {
   const dateStr = getCurrentDateString()
-  return path.join(app.getPath('userData'), `logs/${dateStr}.log`)
+  return path.join(getUserDataPath(), `logs/${dateStr}.log`)
 }
 
 logger.info(`[logger] log module initialized; path: ${logger.transports.file.getFile().path}`)
