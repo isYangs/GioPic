@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SelectOption } from 'naive-ui'
+import type { InputInst, SelectOption } from 'naive-ui'
 import type { VNodeChild } from 'vue'
 import type { SettingEntry } from '@/types'
 import { useOsTheme } from 'naive-ui'
@@ -75,6 +75,115 @@ const primaryColorOptions = [
   { label: '红色', value: 'red' },
   { label: '自定义', value: 'custom' },
 ]
+
+type DynamicSelectKey = 'updateSource' | 'npmRegistry'
+type DynamicSelectPlacement = 'top-start' | 'bottom-start'
+
+const floatingSelectProps = {
+  consistentMenuWidth: false,
+  to: 'body',
+} as const
+
+const updateSourceTriggerRef = ref<HTMLElement | null>(null)
+const npmRegistryTriggerRef = ref<HTMLElement | null>(null)
+
+const dynamicSelectPlacements = reactive<Record<DynamicSelectKey, DynamicSelectPlacement>>({
+  updateSource: 'bottom-start',
+  npmRegistry: 'bottom-start',
+})
+
+const dynamicSelectShows = reactive<Record<DynamicSelectKey, boolean>>({
+  updateSource: false,
+  npmRegistry: false,
+})
+
+const dynamicSelectMenuHeights = reactive<Record<DynamicSelectKey, number>>({
+  updateSource: 0,
+  npmRegistry: 0,
+})
+
+const customRegistryFieldRef = ref<HTMLElement | null>(null)
+const customRegistryInputRef = ref<InputInst | null>(null)
+
+function estimateMenuHeight(optionCount: number) {
+  const optionHeight = 34
+  const menuVerticalPadding = 18
+  return optionCount * optionHeight + menuVerticalPadding
+}
+
+function resolvePlacementBoundary(triggerEl: HTMLElement) {
+  const settingPanel = triggerEl.closest('.setting-panel')
+  const scrollViewport = settingPanel?.querySelector('.setting-content .n-scrollbar-container')
+  const scrollArea = settingPanel?.querySelector('.setting-content')
+
+  if (scrollViewport instanceof HTMLElement)
+    return scrollViewport.getBoundingClientRect()
+
+  if (scrollArea instanceof HTMLElement)
+    return scrollArea.getBoundingClientRect()
+
+  if (settingPanel instanceof HTMLElement)
+    return settingPanel.getBoundingClientRect()
+
+  return new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+}
+
+function updateDynamicSelectPlacement(key: DynamicSelectKey, triggerEl: HTMLElement, optionCount: number) {
+  const boundaryRect = resolvePlacementBoundary(triggerEl)
+  const triggerRect = triggerEl.getBoundingClientRect()
+  const estimatedHeight = estimateMenuHeight(optionCount)
+  const safeGap = 12
+  const availableBelow = Math.max(boundaryRect.bottom - triggerRect.bottom - safeGap, 0)
+  const availableAbove = Math.max(triggerRect.top - boundaryRect.top - safeGap, 0)
+  const shouldOpenBelow = availableBelow >= estimatedHeight || availableBelow >= availableAbove
+  const availableSpace = shouldOpenBelow ? availableBelow : availableAbove
+
+  dynamicSelectPlacements[key] = shouldOpenBelow ? 'bottom-start' : 'top-start'
+  dynamicSelectMenuHeights[key] = Math.min(Math.floor(availableSpace), estimatedHeight)
+}
+
+function getDynamicSelectTrigger(key: DynamicSelectKey) {
+  const triggerRef = key === 'updateSource'
+    ? updateSourceTriggerRef.value
+    : npmRegistryTriggerRef.value
+
+  if (!triggerRef)
+    return
+
+  const selectionTrigger = triggerRef.querySelector('.n-base-selection')
+
+  if (selectionTrigger instanceof HTMLElement)
+    return selectionTrigger
+
+  return triggerRef
+}
+
+function updateDynamicSelectLayout(key: DynamicSelectKey, optionCount: number) {
+  const triggerEl = getDynamicSelectTrigger(key)
+
+  if (!triggerEl)
+    return
+
+  updateDynamicSelectPlacement(key, triggerEl, optionCount)
+}
+
+function getDynamicSelectMenuProps(key: DynamicSelectKey) {
+  return {
+    style: {
+      '--n-height': `${dynamicSelectMenuHeights[key]}px`,
+    },
+  }
+}
+
+function onDynamicSelectShowChange(key: DynamicSelectKey, show: boolean, optionCount: number) {
+  if (!show) {
+    dynamicSelectShows[key] = false
+    return
+  }
+
+  updateDynamicSelectLayout(key, optionCount)
+  dynamicSelectShows[key] = true
+}
 
 function renderThemeLabel(option: SelectOption): VNodeChild {
   return [
@@ -174,6 +283,19 @@ watch(updateSource, (newValue) => {
 watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
   window.ipcRenderer.send('change-npm-registry', { registry, custom })
 })
+
+watch(npmRegistry, async (value) => {
+  if (value !== 'custom')
+    return
+
+  await nextTick()
+
+  customRegistryFieldRef.value?.scrollIntoView({
+    behavior: enableAnimations.value ? 'smooth' : 'auto',
+    block: 'nearest',
+  })
+  customRegistryInputRef.value?.focus()
+})
 </script>
 
 <template>
@@ -271,34 +393,54 @@ watch([npmRegistry, customNpmRegistry], ([registry, custom]) => {
         </setting-item>
 
         <setting-item title="更新源" desc="当无法访问GitHub时可切换为国内源">
-          <n-select
-            v-model:value="updateSource"
-            :options="updateOptions"
-            :consistent-menu-width="false"
-            size="medium"
-          />
+          <div
+            ref="updateSourceTriggerRef"
+            class="w50"
+          >
+            <n-select
+              v-model:value="updateSource"
+              v-bind="floatingSelectProps"
+              :menu-props="getDynamicSelectMenuProps('updateSource')"
+              :options="updateOptions"
+              :placement="dynamicSelectPlacements.updateSource"
+              :show="dynamicSelectShows.updateSource"
+              size="medium"
+              @update:show="onDynamicSelectShowChange('updateSource', $event, updateOptions.length)"
+            />
+          </div>
         </setting-item>
 
         <setting-item title="插件源" desc="用于搜索和安装插件的包管理源">
-          <n-select
-            v-model:value="npmRegistry"
-            :options="npmRegistryOptions"
-            :consistent-menu-width="false"
-            size="medium"
-          />
+          <div
+            ref="npmRegistryTriggerRef"
+            class="w50"
+          >
+            <n-select
+              v-model:value="npmRegistry"
+              v-bind="floatingSelectProps"
+              :menu-props="getDynamicSelectMenuProps('npmRegistry')"
+              :options="npmRegistryOptions"
+              :placement="dynamicSelectPlacements.npmRegistry"
+              :show="dynamicSelectShows.npmRegistry"
+              size="medium"
+              @update:show="onDynamicSelectShowChange('npmRegistry', $event, npmRegistryOptions.length)"
+            />
+          </div>
         </setting-item>
 
-        <setting-item
-          v-if="npmRegistry === 'custom'"
-          title="自定义插件源"
-          desc="输入自定义插件源地址"
-        >
-          <n-input
-            v-model:value="customNpmRegistry"
-            placeholder="https://registry.npmjs.org"
-            :style="{ width: '300px' }"
-          />
-        </setting-item>
+        <div v-if="npmRegistry === 'custom'" ref="customRegistryFieldRef">
+          <setting-item
+            title="自定义插件源"
+            desc="输入自定义插件源地址"
+          >
+            <n-input
+              ref="customRegistryInputRef"
+              v-model:value="customNpmRegistry"
+              placeholder="https://registry.npmjs.org"
+              :style="{ width: '300px' }"
+            />
+          </setting-item>
+        </div>
 
         <setting-item title="显示任务栏图标" desc="是否显示 系统Dock栏/任务栏 应用图标">
           <n-switch
