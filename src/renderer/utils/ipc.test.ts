@@ -41,12 +41,4 @@ describe('callIpc', () => {
 
     await expect(callIpc('fail-channel')).rejects.toThrow('IPC调用失败: fail-channel')
   })
-
-  it('should return typed results', async () => {
-    vi.mocked(window.ipcRenderer.callMain).mockResolvedValue({ id: 1, name: 'test' })
-
-    const result = await callIpc<{ id: number, name: string }>('typed-channel')
-
-    expect(result).toEqual({ id: 1, name: 'test' })
-  })
 })

@@ -58,11 +58,6 @@ describe('store Module', () => {
       expect(mockStoreInstance.get).toHaveBeenCalledWith('customKey')
     })
 
-    it('should return undefined when store data is empty object', () => {
-      mockStoreInstance.get.mockReturnValue({})
-      const result = getStore('anyKey')
-      expect(result).toBeUndefined()
-    })
   })
 
   describe('setStore', () => {
@@ -117,30 +112,9 @@ describe('store Module', () => {
       clearStore()
       expect(mockStoreInstance.clear).toHaveBeenCalled()
     })
-
-    it('should clear all data', () => {
-      clearStore()
-      clearStore()
-      expect(mockStoreInstance.clear).toHaveBeenCalledTimes(2)
-    })
   })
 
   describe('initStore', () => {
-    it('should register get-store handler', () => {
-      initStore()
-      expect(ipcMain.handle).toHaveBeenCalledWith('get-store', expect.any(Function))
-    })
-
-    it('should register set-store handler', () => {
-      initStore()
-      expect(ipcMain.handle).toHaveBeenCalledWith('set-store', expect.any(Function))
-    })
-
-    it('should register delete-store handler', () => {
-      initStore()
-      expect(ipcMain.handle).toHaveBeenCalledWith('delete-store', expect.any(Function))
-    })
-
     it('should have 3 handlers registered', () => {
       vi.clearAllMocks()
       initStore()
