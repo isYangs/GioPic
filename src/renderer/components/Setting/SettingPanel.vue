@@ -246,10 +246,13 @@ const activeIndex = ref(tabIndex === -1 ? 0 : tabIndex)
 
 // 设置标签页
 const settingTabs = computed(() =>
-  settings.map(({ title, icon }, index) => ({
+  settings.map(({ title, icon, key }, index) => ({
     icon,
     key: index,
-    label: () => h('a', { onClick: () => activeIndex.value = index }, title),
+    label: () => h('a', {
+      'onClick': () => activeIndex.value = index,
+      'data-testid': `settings-tab-${key}`,
+    }, title),
   })),
 )
 
@@ -299,7 +302,7 @@ watch(npmRegistry, async (value) => {
 </script>
 
 <template>
-  <div class="h-full flex">
+  <div class="h-full flex" data-testid="settings-panel">
     <n-menu
       :options="settingTabs"
       :value="activeIndex"
@@ -396,6 +399,7 @@ watch(npmRegistry, async (value) => {
           <div
             ref="updateSourceTriggerRef"
             class="w50"
+            data-testid="settings-update-source-select"
           >
             <n-select
               v-model:value="updateSource"
@@ -414,6 +418,7 @@ watch(npmRegistry, async (value) => {
           <div
             ref="npmRegistryTriggerRef"
             class="w50"
+            data-testid="settings-npm-registry-select"
           >
             <n-select
               v-model:value="npmRegistry"
@@ -436,6 +441,7 @@ watch(npmRegistry, async (value) => {
             <n-input
               ref="customRegistryInputRef"
               v-model:value="customNpmRegistry"
+              data-testid="settings-custom-npm-registry-input"
               placeholder="https://registry.npmjs.org"
               :style="{ width: '300px' }"
             />

@@ -35,3 +35,21 @@ test('supports title bar window actions', async ({ electronApp, page }) => {
   await restoreMainWindow(electronApp)
   await expect.poll(async () => (await getMainWindowState(electronApp))?.isVisible).toBe(true)
 })
+
+test('opens settings and focuses the custom npm registry input', async ({ page }) => {
+  await page.getByTestId('titlebar-settings').click()
+  await page.getByText('程序设置', { exact: true }).click()
+
+  await expect(page.getByTestId('settings-panel')).toBeVisible()
+
+  await page.getByTestId('settings-tab-system').click()
+
+  const registrySelect = page.getByTestId('settings-npm-registry-select').locator('.n-base-selection')
+  await registrySelect.click()
+
+  await page.locator('.n-base-select-option').filter({ hasText: '自定义' }).click()
+
+  const customRegistryInput = page.getByTestId('settings-custom-npm-registry-input').locator('input')
+  await expect(customRegistryInput).toBeVisible()
+  await expect(customRegistryInput).toBeFocused()
+})
