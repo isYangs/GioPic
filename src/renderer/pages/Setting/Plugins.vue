@@ -104,6 +104,10 @@ function openNpmInstallModal() {
   modalSearchResults.value = []
 }
 
+function isPluginInstalled(packageName: string) {
+  return plugins.value.some(plugin => plugin.npmPackage === packageName || plugin.id === packageName)
+}
+
 async function installFromModalResult(packageName: string, pluginName: string) {
   try {
     pluginOperations.value.installing = true
@@ -424,14 +428,14 @@ onMounted(async () => {
             <n-button
               type="primary"
               size="small"
-              :disabled="pluginOperations.installing || plugins.some(p => p.id === pkg.name)"
+              :disabled="pluginOperations.installing || isPluginInstalled(pkg.name)"
               :loading="pluginOperations.installing && pluginOperations.currentPluginId === pkg.name"
               @click="installFromModalResult(pkg.name, pkg.name)"
             >
               <template #icon>
                 <div i-ph-download-simple />
               </template>
-              {{ plugins.some(p => p.id === pkg.name) ? '已安装' : '安装' }}
+              {{ isPluginInstalled(pkg.name) ? '已安装' : '安装' }}
             </n-button>
           </div>
         </div>
@@ -617,14 +621,14 @@ onMounted(async () => {
             <n-button
               type="primary"
               size="small"
-              :disabled="pluginOperations.installing || plugins.some(p => p.npmPackage === pkg.name)"
+              :disabled="pluginOperations.installing || isPluginInstalled(pkg.name)"
               :loading="pluginOperations.installing && pluginOperations.currentPluginId === pkg.name"
               @click="installFromModalResult(pkg.name, pkg.name)"
             >
               <template #icon>
                 <div i-ph-download-simple />
               </template>
-              {{ plugins.some(p => p.npmPackage === pkg.name) ? '已安装' : '安装' }}
+              {{ isPluginInstalled(pkg.name) ? '已安装' : '安装' }}
             </n-button>
           </div>
         </div>

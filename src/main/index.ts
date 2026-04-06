@@ -10,7 +10,6 @@ import { registerE2EIpc } from './ipc/e2e'
 import { registerIpc } from './ipc/index'
 import createAppUpdater from './services/AppUpdater'
 import { pluginManager } from './services/PluginManager'
-import { setupBuiltinPlugins } from './services/PluginSetup'
 import createShortcutService from './services/ShortcutService'
 import createTrayService from './services/TrayService'
 import createWindowService from './services/WindowService'
@@ -128,7 +127,6 @@ async function createMainWindow() {
   const mainPluginDataStoreAdapter = createMainPluginDataStoreAdapter()
   setPluginDataStore(mainPluginDataStoreAdapter)
 
-  await setupBuiltinPlugins()
   await pluginManager.init()
   createAppUpdater(mainWindow)
 }

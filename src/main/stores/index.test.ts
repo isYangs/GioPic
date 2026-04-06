@@ -57,7 +57,6 @@ describe('store Module', () => {
       expect(result).toBe('dark')
       expect(mockStoreInstance.get).toHaveBeenCalledWith('customKey')
     })
-
   })
 
   describe('setStore', () => {

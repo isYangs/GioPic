@@ -549,6 +549,37 @@ export class PluginManager {
     fs.copyFileSync(sourcePath, targetPath)
   }
 
+  private persistPluginEnabledState(plugin: StoragePlugin) {
+    if (plugin.isBuiltin || !plugin.path) {
+      return
+    }
+
+    const packageJsonPath = path.join(plugin.path, 'package.json')
+    if (!fs.existsSync(packageJsonPath)) {
+      throw new Error(`插件 package.json 不存在: ${packageJsonPath}`)
+    }
+
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+    packageJson.plugin = {
+      ...packageJson.plugin,
+      enabled: plugin.enabled !== false,
+    }
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  }
+
+  private restorePluginFromBackup(plugin: StoragePlugin, backupDir: string) {
+    if (!plugin.path || !fs.existsSync(backupDir)) {
+      return
+    }
+
+    if (fs.existsSync(plugin.path)) {
+      fs.rmSync(plugin.path, { recursive: true, force: true })
+    }
+
+    this.copyDir(backupDir, plugin.path)
+    this.plugins.set(plugin.id, plugin)
+  }
+
   /**
    * 安装插件
    * @param pluginPath 插件包路径（支持.tgz、.tar.gz、.zip 或目录）
@@ -728,6 +759,10 @@ export class PluginManager {
       const plugin = this.getPlugin(pluginId)
       if (!plugin) {
         throw new Error(`插件不存在: ${pluginId}`)
+      }
+
+      if (plugin.enabled === false) {
+        throw new Error(`插件 ${plugin.name} 已禁用，请先启用后再上传`)
       }
 
       const pluginModule = await this.loadPluginModule(pluginId)
@@ -1095,13 +1130,16 @@ export class PluginManager {
    * @param pluginId 插件ID
    */
   async enablePlugin(pluginId: string) {
+    let previousEnabledState: boolean | undefined
     try {
       const plugin = this.plugins.get(pluginId)
       if (!plugin) {
         throw new Error(`插件不存在: ${pluginId}`)
       }
 
+      previousEnabledState = plugin.enabled
       plugin.enabled = true
+      this.persistPluginEnabledState(plugin)
       this.plugins.set(pluginId, plugin)
 
       if (!this.builtinPluginIds.has(pluginId)) {
@@ -1111,6 +1149,10 @@ export class PluginManager {
       return true
     }
     catch (e) {
+      const plugin = this.plugins.get(pluginId)
+      if (plugin) {
+        plugin.enabled = previousEnabledState
+      }
       pluginLogger.error(`插件启用失败: ${pluginId}`, e)
       return false
     }
@@ -1121,13 +1163,16 @@ export class PluginManager {
    * @param pluginId 插件ID
    */
   async disablePlugin(pluginId: string) {
+    let previousEnabledState: boolean | undefined
     try {
       const plugin = this.plugins.get(pluginId)
       if (!plugin) {
         throw new Error(`插件不存在: ${pluginId}`)
       }
 
+      previousEnabledState = plugin.enabled
       plugin.enabled = false
+      this.persistPluginEnabledState(plugin)
       this.plugins.set(pluginId, plugin)
 
       if (!this.builtinPluginIds.has(pluginId)) {
@@ -1137,6 +1182,10 @@ export class PluginManager {
       return true
     }
     catch (e) {
+      const plugin = this.plugins.get(pluginId)
+      if (plugin) {
+        plugin.enabled = previousEnabledState
+      }
       pluginLogger.error(`插件禁用失败: ${pluginId}`, e)
       return false
     }
@@ -1317,25 +1366,52 @@ export class PluginManager {
 
       pluginLogger.info(`开始更新插件: ${pluginId}`)
 
-      // 先卸载旧版本
-      await this.uninstallPlugin(pluginId)
+      const pluginBackup = { ...plugin }
+      const backupDir = path.join(this.pluginsDir, '.temp', `update_backup_${pluginId}_${Date.now()}`)
 
-      // 根据安装来源选择更新方式
-      if (plugin.installSource === 'github' && plugin.githubRepo) {
-        const updatedPlugin = await this.installFromGitHub(plugin.githubRepo)
-        pluginLogger.info(`插件从 GitHub 更新成功: ${pluginId}`)
+      if (plugin.path && fs.existsSync(plugin.path)) {
+        this.copyDir(plugin.path, backupDir)
+      }
+
+      try {
+        // 先卸载旧版本，再安装新版本；失败时回滚备份
+        const uninstalled = await this.uninstallPlugin(pluginId)
+        if (!uninstalled) {
+          throw new Error('旧插件卸载失败，已取消更新')
+        }
+
+        let updatedPlugin: StoragePlugin | null
+
+        if (plugin.installSource === 'github' && plugin.githubRepo) {
+          updatedPlugin = await this.installFromGitHub(plugin.githubRepo)
+          pluginLogger.info(`插件从 GitHub 更新成功: ${pluginId}`)
+        }
+        else {
+          const packageName = plugin.npmPackage || this.getPluginPackageName(plugin)
+          if (!packageName) {
+            throw new Error('插件缺少包名，无法更新')
+          }
+
+          updatedPlugin = await this.installNpmPlugin(packageName)
+          pluginLogger.info(`插件更新成功: ${pluginId}`)
+        }
+
+        if (updatedPlugin && plugin.enabled === false) {
+          await this.disablePlugin(updatedPlugin.id)
+          updatedPlugin.enabled = false
+        }
+
         return updatedPlugin
       }
-
-      // npm 安装的插件
-      const packageName = plugin.npmPackage || this.getPluginPackageName(plugin)
-      if (!packageName) {
-        throw new Error('插件缺少包名，无法更新')
+      catch (e) {
+        this.restorePluginFromBackup(pluginBackup, backupDir)
+        throw e
       }
-
-      const updatedPlugin = await this.installNpmPlugin(packageName)
-      pluginLogger.info(`插件更新成功: ${pluginId}`)
-      return updatedPlugin
+      finally {
+        if (fs.existsSync(backupDir)) {
+          fs.rmSync(backupDir, { recursive: true, force: true })
+        }
+      }
     }
     catch (e) {
       pluginLogger.error(`插件更新失败: ${pluginId}`, e)
@@ -1828,101 +1904,6 @@ export class PluginManager {
       pluginLogger.error('导入插件备份失败', e)
       throw new Error(`导入插件备份失败: ${e instanceof Error ? e.message : '未知错误'}`)
     }
-  }
-
-  async getPluginDependencies(pluginId: string): Promise<{ dependencies: Record<string, string>, devDependencies: Record<string, string> }> {
-    try {
-      const plugin = this.getPlugin(pluginId)
-      if (!plugin) {
-        throw new Error(`插件不存在: ${pluginId}`)
-      }
-
-      if (plugin.isBuiltin) {
-        return { dependencies: {}, devDependencies: {} }
-      }
-
-      const packageJsonPath = path.join(plugin.path!, 'package.json')
-      if (!fs.existsSync(packageJsonPath)) {
-        return { dependencies: {}, devDependencies: {} }
-      }
-
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
-
-      return {
-        dependencies: packageJson.dependencies || {},
-        devDependencies: packageJson.devDependencies || {},
-      }
-    }
-    catch (e) {
-      pluginLogger.error(`获取插件依赖失败: ${pluginId}`, e)
-      throw e
-    }
-  }
-
-  async checkPluginCompatibility(pluginId: string): Promise<{ compatible: boolean, issues: string[] }> {
-    try {
-      const plugin = this.getPlugin(pluginId)
-      if (!plugin) {
-        throw new Error(`插件不存在: ${pluginId}`)
-      }
-
-      const issues: string[] = []
-
-      if (plugin.isBuiltin) {
-        return { compatible: true, issues: [] }
-      }
-
-      const packageJsonPath = path.join(plugin.path!, 'package.json')
-      if (!fs.existsSync(packageJsonPath)) {
-        issues.push('缺少 package.json 文件')
-        return { compatible: false, issues }
-      }
-
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
-
-      if (packageJson.engines?.giopic) {
-        const requiredVersion = packageJson.engines.giopic
-        issues.push(`需要 GioPic 版本: ${requiredVersion}`)
-      }
-
-      const distPath = path.join(plugin.path!, 'dist', 'index.js')
-      if (!fs.existsSync(distPath)) {
-        issues.push('缺少编译后的文件 (dist/index.js)')
-      }
-
-      return {
-        compatible: issues.length === 0,
-        issues,
-      }
-    }
-    catch (e) {
-      pluginLogger.error(`检查插件兼容性失败: ${pluginId}`, e)
-      throw e
-    }
-  }
-
-  async installNpmPluginWithRetry(packageName: string, maxRetries: number = 3): Promise<StoragePlugin | null> {
-    let lastError: Error | null = null
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        pluginLogger.info(`尝试安装插件 (${attempt}/${maxRetries}): ${packageName}`)
-        const plugin = await this.installNpmPlugin(packageName)
-        return plugin
-      }
-      catch (e) {
-        lastError = e instanceof Error ? e : new Error(String(e))
-        pluginLogger.warn(`安装失败 (${attempt}/${maxRetries}): ${lastError.message}`)
-
-        if (attempt < maxRetries) {
-          const delay = attempt * 1000
-          pluginLogger.info(`等待 ${delay}ms 后重试...`)
-          await new Promise(resolve => setTimeout(resolve, delay))
-        }
-      }
-    }
-
-    throw lastError || new Error('安装失败')
   }
 }
 

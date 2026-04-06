@@ -1,6 +1,5 @@
 import { getPluginDataStore } from '@giopic/core'
 import { dialog, ipcMain } from 'electron'
-import { pluginDevTools } from '../services/PluginDevTools'
 import { pluginManager } from '../services/PluginManager'
 import { setStore } from '../stores'
 import logger from '../utils/logger'
@@ -152,7 +151,7 @@ export function registerPluginIpc() {
     catch (e) {
       const pluginId = params?.pluginId || 'unknown'
       pluginLogger.error(`[plugin] upload with plugin error: ${pluginId}`, e)
-      throw new Error('上传失败')
+      throw new Error(e instanceof Error ? e.message : '上传失败')
     }
   })
 
@@ -347,64 +346,6 @@ export function registerPluginIpc() {
     }
   })
 
-  ipcMain.handle('generate-plugin-template', async (_event, options: any) => {
-    try {
-      const { canceled, filePaths } = await dialog.showOpenDialog({
-        title: '选择插件生成目录',
-        properties: ['openDirectory', 'createDirectory'],
-      })
-
-      if (canceled || filePaths.length === 0) {
-        return null
-      }
-
-      const outputDir = filePaths[0]
-      const pluginDir = await pluginDevTools.generatePluginTemplate({
-        ...options,
-        outputDir,
-      })
-
-      return pluginDir
-    }
-    catch (e) {
-      pluginLogger.error('[plugin] generate plugin template error', e)
-      throw new Error('生成插件模板失败')
-    }
-  })
-
-  ipcMain.handle('build-plugin', async (_event, pluginDir: string) => {
-    try {
-      await pluginDevTools.buildPlugin(pluginDir)
-      return true
-    }
-    catch (e) {
-      pluginLogger.error(`[plugin] build plugin error: ${pluginDir}`, e)
-      throw new Error('构建插件失败')
-    }
-  })
-
-  ipcMain.handle('pack-plugin', async (_event, pluginDir: string) => {
-    try {
-      const tgzPath = await pluginDevTools.packPlugin(pluginDir)
-      return tgzPath
-    }
-    catch (e) {
-      pluginLogger.error(`[plugin] pack plugin error: ${pluginDir}`, e)
-      throw new Error('打包插件失败')
-    }
-  })
-
-  ipcMain.handle('validate-plugin', async (_event, pluginDir: string) => {
-    try {
-      const result = await pluginDevTools.validatePlugin(pluginDir)
-      return result
-    }
-    catch (e) {
-      pluginLogger.error(`[plugin] validate plugin error: ${pluginDir}`, e)
-      throw new Error('验证插件失败')
-    }
-  })
-
   ipcMain.handle('export-plugins-backup', async () => {
     try {
       const backupJson = await pluginManager.exportPluginsBackup()
@@ -454,28 +395,6 @@ export function registerPluginIpc() {
     catch (e) {
       pluginLogger.error('[plugin] import plugins backup error', e)
       throw new Error('导入插件备份失败')
-    }
-  })
-
-  ipcMain.handle('get-plugin-dependencies', async (_event, pluginId: string) => {
-    try {
-      const result = await pluginManager.getPluginDependencies(pluginId)
-      return result
-    }
-    catch (e) {
-      pluginLogger.error(`[plugin] get plugin dependencies error: ${pluginId}`, e)
-      throw new Error('获取插件依赖失败')
-    }
-  })
-
-  ipcMain.handle('check-plugin-compatibility', async (_event, pluginId: string) => {
-    try {
-      const result = await pluginManager.checkPluginCompatibility(pluginId)
-      return result
-    }
-    catch (e) {
-      pluginLogger.error(`[plugin] check plugin compatibility error: ${pluginId}`, e)
-      throw new Error('检查插件兼容性失败')
     }
   })
 }

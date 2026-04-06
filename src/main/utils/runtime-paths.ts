@@ -57,10 +57,6 @@ export function getPluginsPath() {
   return path.join(getUserDataPath(), 'plugins')
 }
 
-export function getPluginTemplatesPath() {
-  return path.join(getUserDataPath(), 'plugin-templates')
-}
-
 export function getBackupsPath() {
   return path.join(getUserDataPath(), 'backups')
 }

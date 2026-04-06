@@ -97,35 +97,11 @@ export const pluginApi = {
     return callIpc('get-recommended-plugins')
   },
 
-  async generatePluginTemplate(options: any) {
-    return callIpc('generate-plugin-template', options)
-  },
-
-  async buildPlugin(pluginDir: string) {
-    return callIpc('build-plugin', pluginDir)
-  },
-
-  async packPlugin(pluginDir: string) {
-    return callIpc('pack-plugin', pluginDir)
-  },
-
-  async validatePlugin(pluginDir: string) {
-    return callIpc('validate-plugin', pluginDir)
-  },
-
   async exportPluginsBackup() {
     return callIpc('export-plugins-backup')
   },
 
   async importPluginsBackup() {
     return callIpc('import-plugins-backup')
-  },
-
-  async getPluginDependencies(pluginId: string) {
-    return callIpc('get-plugin-dependencies', pluginId)
-  },
-
-  async checkPluginCompatibility(pluginId: string) {
-    return callIpc('check-plugin-compatibility', pluginId)
   },
 }
