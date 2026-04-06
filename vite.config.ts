@@ -14,6 +14,7 @@ import electron from 'vite-plugin-electron/simple'
 import pkg from './package.json'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const appVersion = pkg.version
 
 export default defineConfig(async ({ command }) => {
   fs.rmSync('dist-electron', { recursive: true, force: true })
@@ -135,5 +136,8 @@ export default defineConfig(async ({ command }) => {
         })()
       : undefined,
     clearScreen: false,
+    define: {
+      __APP_VERSION__: JSON.stringify(appVersion),
+    },
   }
 })

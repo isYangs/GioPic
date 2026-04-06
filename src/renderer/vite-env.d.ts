@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 /// <reference types="unplugin-vue-router/client" />
 
+declare const __APP_VERSION__: string
+
 interface Window {
   giopicRuntime: {
     e2e: boolean
