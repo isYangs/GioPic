@@ -65,7 +65,6 @@ async function uploadToSingleStrategy(options: LskyUploadParams, strategyId?: st
       Authorization: `Bearer ${token}`,
     },
     data: formData,
-    verbose: true,
     logOptions: { name: 'lskypro-upload' },
   })
 

@@ -1,6 +1,6 @@
 import { mockMethods } from 'electron-store'
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMainPluginDataStoreAdapter } from '@/main/stores/plugin-data'
 
 vi.mock('electron-store', () => {
@@ -24,7 +24,12 @@ describe('plugin Data Store Adapter', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     adapter = createMainPluginDataStoreAdapter()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   describe('setData', () => {

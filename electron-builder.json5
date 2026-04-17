@@ -14,9 +14,19 @@
     "web"
   ],
   "mac": {
-    "target": ["dmg", "zip"],
+    // Use ad-hoc signing so macOS builds do not require Apple Developer certificates.
+    "identity": "-",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "zip",
+        "arch": ["x64", "arm64"]
+      }
+    ],
     "artifactName": "${productName}-${version}-${arch}.${ext}",
-    "arch": ["x64", "arm64"],
     "icon": "public/icon-mac.png"
   },
   "dmg": {

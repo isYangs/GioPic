@@ -3,6 +3,7 @@
   "productName": "GioPic",
   "type": "module",
   "version": "0.0.1",
+  "description": "Desktop image uploader with plugin-based storage providers.",
   "author": "isYangs",
   "github": "https://github.com/isYangs/GioPic",
   "license": "AGPL-3.0",
@@ -57,9 +58,9 @@
     "postinstall": "pnpm run build:plugins",
     "devtools": "pnpm vue-devtools",
     "preview": "vite preview",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "typecheck": "pnpm run typecheck:app",
+    "lint": "node scripts/run-eslint.mjs .",
+    "lint:fix": "node scripts/run-eslint.mjs . --fix",
+    "typecheck": "pnpm run typecheck:app && pnpm run typecheck:packages",
     "typecheck:app": "vue-tsc --noEmit",
     "typecheck:packages": "pnpm --filter @giopic/core --filter @giopic/lsky-plugin --filter @giopic/lskypro-plugin --filter @giopic/s3-plugin run typecheck",
     "test": "pnpm run test:unit",
@@ -76,7 +77,7 @@
     "test:integration:run": "pnpm --filter @giopic/integration-tests test:run",
     "test:integration:ui": "pnpm --filter @giopic/integration-tests test:ui",
     "test:integration:coverage": "pnpm --filter @giopic/integration-tests test:coverage",
-    "verify": "pnpm lint && pnpm run typecheck:app && pnpm run test:unit:run && pnpm run test:integration:run"
+    "verify": "pnpm lint && pnpm run typecheck && pnpm run test:unit:run && pnpm run test:integration:run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",

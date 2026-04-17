@@ -90,17 +90,13 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Build Mac
+      - name: Build Mac (ad-hoc)
         if: matrix.os == 'macos-latest'
         run: pnpm run build:mac
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
-      - name: Build Windows
+      - name: Build Windows (unsigned)
         if: matrix.os == 'windows-latest'
         run: pnpm run build:win
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Cleanup Mac artifacts
         if: matrix.os == 'macos-latest'

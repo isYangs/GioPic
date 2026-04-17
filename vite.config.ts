@@ -16,6 +16,38 @@ import pkg from './package.json'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const appVersion = pkg.version
 
+function ensureLocalStorageShim() {
+  const storage = globalThis.localStorage
+  if (
+    storage
+    && typeof storage.getItem === 'function'
+    && typeof storage.setItem === 'function'
+    && typeof storage.removeItem === 'function'
+    && typeof storage.clear === 'function'
+  ) {
+    return
+  }
+
+  const state = new Map<string, string>()
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem(key: string) {
+        return state.get(key) ?? null
+      },
+      setItem(key: string, value: string) {
+        state.set(String(key), String(value))
+      },
+      removeItem(key: string) {
+        state.delete(String(key))
+      },
+      clear() {
+        state.clear()
+      },
+    },
+  })
+}
+
 export default defineConfig(async ({ command }) => {
   fs.rmSync('dist-electron', { recursive: true, force: true })
 
@@ -113,8 +145,15 @@ export default defineConfig(async ({ command }) => {
   ]
 
   if (isServe) {
-    const { default: VueDevTools } = await import('vite-plugin-vue-devtools')
-    plugins.splice(3, 0, VueDevTools())
+    ensureLocalStorageShim()
+
+    try {
+      const { default: VueDevTools } = await import('vite-plugin-vue-devtools')
+      plugins.splice(3, 0, VueDevTools())
+    }
+    catch (error) {
+      console.warn('[vite] Failed to load Vue DevTools plugin:', error)
+    }
   }
 
   return {

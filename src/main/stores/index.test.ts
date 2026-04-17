@@ -41,8 +41,11 @@ describe('store Module', () => {
       mockStoreInstance.get.mockImplementation(() => {
         throw new Error('Store error')
       })
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const result = getStore('someKey')
+      expect(consoleSpy).toHaveBeenCalled()
       expect(result).toBe('someKey')
+      consoleSpy.mockRestore()
     })
 
     it('should return undefined for non-existent key', () => {

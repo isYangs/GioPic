@@ -147,14 +147,10 @@ function getStatusText(status: string) {
           :bordered="false"
         >
           <template #icon>
-            <div
-              :class="{
-                'i-ph-clock': status === 'pending',
-                'i-ph-circle-notch animate-spin': status === 'uploading',
-                'i-ph-check': status === 'success',
-                'i-ph-x': status === 'error',
-              }"
-            />
+            <div v-if="status === 'pending'" i-ph-clock />
+            <div v-else-if="status === 'uploading'" i-ph-circle-notch class="animate-spin" />
+            <div v-else-if="status === 'success'" i-ph-check />
+            <div v-else i-ph-x />
           </template>
           {{ getStatusText(status) }}
         </n-tag>

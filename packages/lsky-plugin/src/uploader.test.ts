@@ -1,6 +1,6 @@
 import { request } from '@giopic/core'
 import { createUploader } from '@pkg-lsky/uploader'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@giopic/core', async () => {
   const actual = await vi.importActual('@giopic/core')
@@ -29,6 +29,13 @@ describe('lsky-plugin uploader', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   describe('createUploader', () => {
@@ -78,6 +85,7 @@ describe('lsky-plugin uploader', () => {
         expect(result.url).toBe('https://example.com/test.jpg')
         expect(result.name).toBe('test.jpg')
       }
+      expect(vi.mocked(request).mock.calls[0]?.[0]).not.toHaveProperty('verbose')
     })
 
     it('should upload file to multiple strategies', async () => {

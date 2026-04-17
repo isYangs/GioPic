@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NpmSearchResult } from '@/types'
+import { useThemeVars } from 'naive-ui'
 import StorageIcon from '~/components/Common/StorageIcon.vue'
 
 defineOptions({
@@ -31,6 +32,13 @@ const sortBy = ref<'name' | 'date' | 'type'>('name')
 const filterType = ref<'all' | 'enabled' | 'disabled'>('all')
 
 const programStore = useProgramStore()
+const themeVars = useThemeVars()
+
+const pluginTypeTagStyle = computed(() => ({
+  color: themeVars.value.primaryColor,
+  backgroundColor: `color-mix(in srgb, ${themeVars.value.primaryColor} 16%, transparent)`,
+  borderColor: `color-mix(in srgb, ${themeVars.value.primaryColor} 30%, transparent)`,
+}))
 
 const filteredAndSortedPlugins = computed(() => {
   let result = [...plugins.value]
@@ -54,6 +62,24 @@ const filteredAndSortedPlugins = computed(() => {
 
   return result
 })
+
+const isFilteredEmptyState = computed(() => {
+  return plugins.value.length > 0
+    && filterType.value !== 'all'
+    && filteredAndSortedPlugins.value.length === 0
+})
+
+const installedEmptyDescription = computed(() => {
+  return isFilteredEmptyState.value ? '没有符合当前筛选条件的插件' : '暂无存储插件'
+})
+
+const installedEmptyActionText = computed(() => {
+  return isFilteredEmptyState.value ? '查看全部' : '导入插件'
+})
+
+function resetPluginFilters() {
+  filterType.value = 'all'
+}
 
 async function reloadPlugins() {
   pluginOperations.value.loading = true
@@ -355,12 +381,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full" data-testid="plugins-page">
-    <div class="mb-4 flex items-center justify-between gap-4">
+  <div class="h-full w-full flex flex-col" data-testid="plugins-page">
+    <div class="mb-4 flex flex-shrink-0 items-center justify-between gap-4">
       <h2 class="flex-shrink-0 text-base font-medium">
         存储插件
       </h2>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
         <n-dropdown
           :options="[
             { label: '从插件源安装', key: 'npm' },
@@ -384,12 +410,9 @@ onMounted(async () => {
         >
           <n-button
             type="primary"
-            size="small"
+            size="medium"
             :disabled="pluginOperations.installing"
           >
-            <template #icon>
-              <div i-ph-plus />
-            </template>
             安装插件
           </n-button>
         </n-dropdown>
@@ -397,7 +420,7 @@ onMounted(async () => {
     </div>
 
     <!-- 推荐插件 -->
-    <div v-if="recommendedPlugins.length > 0" class="mb-5">
+    <div v-if="recommendedPlugins.length > 0" class="mb-5 flex-shrink-0">
       <h3 class="mb-2 text-sm font-medium op-70">
         推荐插件
       </h3>
@@ -443,16 +466,16 @@ onMounted(async () => {
     </div>
 
     <!-- 已安装插件 -->
-    <div>
-      <div class="mb-2 flex items-center justify-between">
+    <div class="min-h-0 flex flex-1 flex-col">
+      <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
         <h3 class="text-sm font-medium op-70">
           已安装
         </h3>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-3">
           <n-select
             v-model:value="filterType"
-            size="small"
-            style="width: 100px"
+            size="medium"
+            class="w-32"
             :options="[
               { label: '全部', value: 'all' },
               { label: '已启用', value: 'enabled' },
@@ -461,8 +484,8 @@ onMounted(async () => {
           />
           <n-select
             v-model:value="sortBy"
-            size="small"
-            style="width: 100px"
+            size="medium"
+            class="w-32"
             :options="[
               { label: '按名称', value: 'name' },
               { label: '按类型', value: 'type' },
@@ -470,26 +493,24 @@ onMounted(async () => {
           />
         </div>
       </div>
-      <div class="min-h-[200px]">
-        <n-spin :show="pluginOperations.loading" description="加载插件中...">
-          <n-empty
-            v-if="filteredAndSortedPlugins.length === 0"
-            description="暂无存储插件"
-            class="py-12"
-          >
-            <template #icon>
-              <div i-carbon-cube class="text-5xl opacity-50" />
-            </template>
-            <template #extra>
-              <n-button
-                type="primary"
-                class="mt-4"
-                @click="installPlugin"
-              >
-                导入插件
-              </n-button>
-            </template>
-          </n-empty>
+      <div class="min-h-0 flex-1">
+        <n-spin :show="pluginOperations.loading" description="加载插件中..." class="h-full">
+          <div v-if="filteredAndSortedPlugins.length === 0" class="plugin-empty-state">
+            <n-empty :description="installedEmptyDescription">
+              <template #icon>
+                <div i-carbon-cube class="text-5xl opacity-50" />
+              </template>
+              <template #extra>
+                <n-button
+                  type="primary"
+                  class="mt-4"
+                  @click="isFilteredEmptyState ? resetPluginFilters() : installPlugin()"
+                >
+                  {{ installedEmptyActionText }}
+                </n-button>
+              </template>
+            </n-empty>
+          </div>
 
           <transition-group
             v-else
@@ -516,9 +537,13 @@ onMounted(async () => {
                   <n-tag v-if="plugin.isBuiltin" size="tiny" :bordered="false">
                     内置
                   </n-tag>
-                  <n-tag v-if="plugin.type" size="tiny" :bordered="false" type="info">
+                  <span
+                    v-if="plugin.type"
+                    class="plugin-type-tag"
+                    :style="pluginTypeTagStyle"
+                  >
                     {{ plugin.type }}
-                  </n-tag>
+                  </span>
                 </div>
                 <div class="mt-0.5 truncate text-xs op-50">
                   {{ plugin.description || '暂无描述' }}
@@ -689,6 +714,26 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.plugin-empty-state {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plugin-type-tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 8px;
+  min-height: 20px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .plugin-list-enter-active,
 .plugin-list-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

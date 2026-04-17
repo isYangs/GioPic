@@ -1,16 +1,20 @@
 import { request } from '@pkg-core/http'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { mockAxiosInstance, mockAxiosCreate } = vi.hoisted(() => {
+const { mockAxiosInstance, mockAxiosCreate, mockRequestInterceptorUse, mockResponseInterceptorUse } = vi.hoisted(() => {
   const instance = vi.fn()
+  const mockRequestInterceptorUse = vi.fn()
+  const mockResponseInterceptorUse = vi.fn()
   instance.interceptors = {
-    request: { use: vi.fn() },
-    response: { use: vi.fn() },
+    request: { use: mockRequestInterceptorUse },
+    response: { use: mockResponseInterceptorUse },
   }
 
   return {
     mockAxiosInstance: instance,
     mockAxiosCreate: vi.fn(() => instance),
+    mockRequestInterceptorUse,
+    mockResponseInterceptorUse,
   }
 })
 
@@ -26,6 +30,52 @@ describe('http', () => {
   beforeEach(() => {
     mockAxiosCreate.mockClear()
     mockAxiosInstance.mockReset()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('axios interceptors', () => {
+    it('should register request error handler in rejected slot', async () => {
+      expect(mockRequestInterceptorUse).toHaveBeenCalledWith(undefined, expect.any(Function))
+
+      const onRejected = mockRequestInterceptorUse.mock.calls[0]?.[1]
+      const error = {
+        config: {
+          method: 'post',
+          url: 'https://api.example.com/request-error',
+        },
+        message: 'Request interceptor failed',
+      }
+
+      await expect(onRejected?.(error)).rejects.toBe(error)
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('[request] Failed - Method: post, URL: https://api.example.com/request-error, Error: Request interceptor failed'),
+      )
+    })
+
+    it('should register response error handler in rejected slot', async () => {
+      expect(mockResponseInterceptorUse).toHaveBeenCalledWith(undefined, expect.any(Function))
+
+      const onRejected = mockResponseInterceptorUse.mock.calls[0]?.[1]
+      const error = {
+        config: {
+          method: 'get',
+          url: 'https://api.example.com/response-error',
+        },
+        response: {
+          status: 500,
+        },
+        message: 'Response interceptor failed',
+      }
+
+      await expect(onRejected?.(error)).rejects.toBe(error)
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('[response] Failed - Method: get, URL: https://api.example.com/response-error, Status: 500, Error: Response interceptor failed'),
+      )
+    })
   })
 
   describe('request', () => {

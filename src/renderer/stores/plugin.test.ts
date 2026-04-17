@@ -38,7 +38,12 @@ describe('usePluginStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('loadPlugins fetches and sets plugins', async () => {
@@ -58,6 +63,7 @@ describe('usePluginStore', () => {
 
     await store.loadPlugins()
 
+    expect(console.error).toHaveBeenCalledWith('插件列表不是数组类型')
     expect(store.plugins).toEqual([])
     expect(store.loaded).toBe(false)
   })
@@ -68,6 +74,7 @@ describe('usePluginStore', () => {
 
     await store.loadPlugins()
 
+    expect(console.error).toHaveBeenCalledWith('加载插件失败:', expect.any(Error))
     expect(store.plugins).toEqual([])
     expect(store.loaded).toBe(false)
   })

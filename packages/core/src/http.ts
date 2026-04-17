@@ -1,4 +1,4 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import type { LoggerOptions } from './logger'
 import axios from 'axios'
 import FormData from 'form-data'
@@ -43,18 +43,18 @@ const axiosInstance: AxiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use(
-  (error) => {
-    const { config, message } = error
-    logger.error(`[request] Failed - Method: ${config?.method}, URL: ${config?.url}, Error: ${message}`)
+  undefined,
+  (error: AxiosError) => {
+    logger.error(`[request] Failed - Method: ${error.config?.method}, URL: ${error.config?.url}, Error: ${error.message}`)
     return Promise.reject(error)
   },
 )
 
 axiosInstance.interceptors.response.use(
-  (error) => {
+  undefined,
+  (error: AxiosError) => {
     if (error.response) {
-      const { config, response, message } = error
-      logger.error(`[response] Failed - Method: ${config?.method}, URL: ${config?.url}, Status: ${response?.status}, Error: ${message}`)
+      logger.error(`[response] Failed - Method: ${error.config?.method}, URL: ${error.config?.url}, Status: ${error.response.status}, Error: ${error.message}`)
     }
     else {
       logger.error(`[response] Failed - Error: ${error instanceof Error ? error.message : String(error)}`)

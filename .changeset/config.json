@@ -4,7 +4,7 @@
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   },
   "access": "public",
-  "baseBranch": "plugin",
+  "baseBranch": "main",
   "changelog": ["@changesets/changelog-github", { "repo": "isYangs/GioPic" }],
   "commit": false,
   "fixed": [],

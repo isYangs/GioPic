@@ -3,10 +3,16 @@ import { vi } from 'vitest'
 
 import { createPluginDataStoreAdapter, syncPluginDataFromMain, usePluginDataStore } from '~/stores/plugin-data'
 
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 describe('usePluginDataStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(undefined)
   })
 
@@ -158,11 +164,12 @@ describe('usePluginDataStore', () => {
     )
   })
 
-  it('syncToMain handles errors gracefully', () => {
+  it('syncToMain handles errors gracefully', async () => {
     vi.mocked(window.ipcRenderer.invoke).mockRejectedValueOnce(new Error('Sync failed'))
     const store = usePluginDataStore()
 
     store.syncToMain('plugin-1', 'setting-1', { value: 'test' })
+    await Promise.resolve()
 
     expect(window.ipcRenderer.invoke).toHaveBeenCalledWith(
       'set-plugin-data',
@@ -172,6 +179,7 @@ describe('usePluginDataStore', () => {
         data: { value: 'test' },
       },
     )
+    expect(console.error).toHaveBeenCalledWith('同步数据到主进程失败: plugin-1.setting-1', expect.any(Error))
   })
 })
 
@@ -179,6 +187,8 @@ describe('createPluginDataStoreAdapter', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(undefined)
   })
 

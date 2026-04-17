@@ -3,7 +3,7 @@ name: Release Packages
 on:
   push:
     branches:
-      - plugin
+      - main
     paths:
       - '.changeset/**'
       - 'packages/core/**'
@@ -22,7 +22,7 @@ permissions:
 jobs:
   release:
     name: Release Packages
-    if: github.repository == 'isYangs/GioPic' && github.ref == 'refs/heads/plugin'
+    if: github.repository == 'isYangs/GioPic' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
