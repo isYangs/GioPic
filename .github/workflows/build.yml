@@ -155,11 +155,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     if: |
-      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
-      secrets.CN_SERVER_HOST != '' &&
-      secrets.CN_SERVER_USERNAME != '' &&
-      secrets.CN_SERVER_PASSWORD != '' &&
-      secrets.CN_SERVER_PORT != ''
+      startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -172,7 +168,24 @@ jobs:
           find ./release-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "latest*.yml" \) -exec cp {} ./update-files/ \; 2>/dev/null || true
           ls -la ./update-files/
 
+      - name: Check CN server secrets
+        id: check-cn-secrets
+        shell: bash
+        env:
+          CN_SERVER_HOST: ${{ secrets.CN_SERVER_HOST }}
+          CN_SERVER_USERNAME: ${{ secrets.CN_SERVER_USERNAME }}
+          CN_SERVER_PASSWORD: ${{ secrets.CN_SERVER_PASSWORD }}
+          CN_SERVER_PORT: ${{ secrets.CN_SERVER_PORT }}
+        run: |
+          if [ -n "$CN_SERVER_HOST" ] && [ -n "$CN_SERVER_USERNAME" ] && [ -n "$CN_SERVER_PASSWORD" ] && [ -n "$CN_SERVER_PORT" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "CN server secrets are not fully configured; skipping sync."
+          fi
+
       - name: Deploy to CN server
+        if: steps.check-cn-secrets.outputs.should_deploy == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.CN_SERVER_HOST }}
