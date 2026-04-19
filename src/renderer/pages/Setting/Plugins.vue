@@ -604,7 +604,7 @@ onMounted(async () => {
         <div class="flex gap-2">
           <n-input
             v-model:value="modalSearchKeyword"
-            placeholder="搜索插件，如 giopic-plugin-xxx"
+            placeholder="搜索插件，如 @giopic/lsky-plugin"
             clearable
             @keyup.enter="modalSearchNpmPlugins"
           >

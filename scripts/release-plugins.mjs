@@ -54,23 +54,6 @@ function ensureNpmAuth() {
   }
 }
 
-function snapshotFiles() {
-  return pluginPackagePaths.map((file) => {
-    const absolutePath = path.join(rootDir, file)
-    return {
-      file,
-      absolutePath,
-      content: fs.readFileSync(absolutePath, 'utf-8'),
-    }
-  })
-}
-
-function restoreFiles(snapshot) {
-  for (const item of snapshot) {
-    fs.writeFileSync(item.absolutePath, item.content, 'utf-8')
-  }
-}
-
 function getCurrentPluginVersion() {
   const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, pluginPackagePaths[0]), 'utf-8'))
   return pkg.version
@@ -89,23 +72,21 @@ async function main() {
   ensureCleanWorktree()
   ensureNpmAuth()
 
-  const snapshot = snapshotFiles()
   const bumpArgs = [release]
   if (preid)
     bumpArgs.push(`--preid=${preid}`)
 
   try {
     run(`node scripts/bump-plugins.mjs ${bumpArgs.join(' ')}`)
-    run(`node scripts/publish-plugins.mjs --tag=${npmTag}`)
-
     const newVersion = getCurrentPluginVersion()
     run(`git add ${pluginPackagePaths.join(' ')}`)
     run(`git commit -m "release(plugins): v${newVersion}"`)
     run(`git tag plugins-v${newVersion}`)
+    run(`node scripts/publish-plugins.mjs --tag=${npmTag}`)
   }
   catch (error) {
-    restoreFiles(snapshot)
-    console.error('\n插件发布未完成，已还原本地 package.json 版本变更。')
+    console.error('\n插件发布未完成，但当前版本变更和 release tag 已保留。')
+    console.error('修复问题后，请直接重新执行 publish 命令，避免继续 bump 到下一个版本。')
     console.error('如果报错包含 E404 / 403，请重点检查 npm 账号对当前 scope 的发布权限。')
     throw error
   }

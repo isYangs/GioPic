@@ -148,15 +148,20 @@ export class PluginManager {
     // 智能处理搜索关键词
     let searchQuery: string
     if (!query) {
-      searchQuery = 'giopic-plugin'
+      searchQuery = '@giopic'
     }
-    else if (query.startsWith('giopic-plugin') || query.startsWith('@giopic/')) {
+    else if (query.startsWith('@giopic/')) {
       // 用户输入了完整包名，直接使用
       searchQuery = query
     }
+    else if (query === 'giopic-plugin' || query.startsWith('giopic-plugin-')) {
+      searchQuery = query
+        .replace(/^giopic-plugin-/, '@giopic/')
+        .replace(/^giopic-plugin$/, '@giopic')
+    }
     else {
-      // 用户输入关键词，添加前缀
-      searchQuery = `giopic-plugin-${query}`
+      // 用户输入关键词，优先在官方 scope 内搜索
+      searchQuery = `@giopic ${query}`
     }
     pluginLogger.info(`搜索插件源插件: ${searchQuery}`)
 
@@ -200,7 +205,7 @@ export class PluginManager {
           }))
 
           const filteredResults = results.filter((pkg) => {
-            return pkg.name.includes('giopic-plugin')
+            return pkg.name.startsWith('@giopic/')
               && (pkg.keywords?.includes('giopic')
                 || pkg.keywords?.includes('image')
                 || pkg.description.toLowerCase().includes('giopic'))
@@ -1740,7 +1745,7 @@ export class PluginManager {
 
       for (const registry of this.npmRegistries) {
         try {
-          const searchUrl = `${registry.searchUrl}?text=giopic-plugin&size=20`
+          const searchUrl = `${registry.searchUrl}?text=${encodeURIComponent('@giopic')}&size=20`
           const controller = new AbortController()
           const timeoutId = setTimeout(() => controller.abort(), 10000)
 
@@ -1764,7 +1769,7 @@ export class PluginManager {
           const results: NpmSearchResult[] = data.objects
             .filter((item: any) => {
               const pkg = item.package
-              return pkg.name.includes('giopic-plugin')
+              return pkg.name.startsWith('@giopic/')
                 && (pkg.keywords?.includes('giopic')
                   || pkg.keywords?.includes('image')
                   || pkg.description?.toLowerCase().includes('giopic'))
