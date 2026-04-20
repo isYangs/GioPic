@@ -15,6 +15,7 @@ module.exports = {
         'build', // 构建相关
         'ci', // CI 配置
         'chore', // 其他变更
+        'release', // 发布版本
         'revert', // 回退
       ],
     ],
