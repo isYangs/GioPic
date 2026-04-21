@@ -1,0 +1,13 @@
+# Default ownership
+* @isYangs
+
+# CI / release workflows
+/.github/ @isYangs
+
+# Package ecosystem
+/packages/ @isYangs
+
+# Desktop app runtime
+/src/main/ @isYangs
+/src/preload/ @isYangs
+/src/renderer/ @isYangs
