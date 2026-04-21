@@ -1,7 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { app, globalShortcut, Menu, MenuItem } from 'electron'
+import { getStore } from '../stores'
 import logger from '../utils/logger'
-import { getStore } from '../utils/store'
 
 interface ShortcutConfig {
   key: string
@@ -126,8 +126,8 @@ export class ShortcutService implements IShortcutService {
         this.registeredShortcuts.push(key)
       }
     }
-    catch (error) {
-      logger.error(`[shortcut] Error registering global shortcut ${key}:`, error)
+    catch (e) {
+      logger.error(`[shortcut] Error registering global shortcut ${key}:`, e)
     }
   }
 
@@ -171,8 +171,8 @@ export class ShortcutService implements IShortcutService {
           this.registeredShortcuts.splice(index, 1)
         }
       }
-      catch (error) {
-        logger.error(`[shortcut] Error unregistering DevTools shortcut: ${error}`)
+      catch (e) {
+        logger.error('[shortcut] Error unregistering DevTools shortcut:', e)
       }
     }
   }

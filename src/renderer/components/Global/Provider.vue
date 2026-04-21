@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { GlobalThemeOverrides } from 'naive-ui'
-import { darkTheme, dateZhCN, useOsTheme, zhCN } from 'naive-ui'
+import {
+  darkTheme,
+  dateZhCN as dateLocale,
+  zhCN as locale,
+  useOsTheme,
+} from 'naive-ui'
 import { createTextVNode } from 'vue'
-import { useAppStore } from '~/stores'
-import { openSettingPanel, openUpdateAvailable, openUpdateRestart } from '~/utils/modal'
 
 const appStore = useAppStore()
 const {
@@ -11,16 +14,30 @@ const {
   updateAtNext,
   themeType,
   themeAuto,
+  sidebarWidth,
+  borderRadius,
+  enableAnimations,
+  primaryColor,
+  customPrimaryColor,
+  showDockIcon,
 } = storeToRefs(appStore)
 
 const osThemeRef = useOsTheme()
 const theme = ref(themeType.value === 'dark' ? darkTheme : null)
 
-const themeOverrides: GlobalThemeOverrides = {
+const themeOverrides = computed((): GlobalThemeOverrides => ({
+  common: {
+    ...generateCustomColors(primaryColor.value === 'custom'
+      ? customPrimaryColor.value
+      : getPrimaryColor(themeType.value, primaryColor.value),
+    ),
+    borderRadius: `${borderRadius.value}px`,
+    borderRadiusSmall: `${Math.max(2, borderRadius.value - 2)}px`,
+  },
   Typography: {
     // headerBarColor: 'currentColor',
   },
-}
+}))
 
 function setupNaiveTools() {
   // 对话框
@@ -56,6 +73,38 @@ watch(osThemeRef, (val) => {
     themeType.value = val
 })
 
+watch(themeType, (val) => {
+  if (val === 'dark') {
+    theme.value = darkTheme
+    document.documentElement.classList.add('dark')
+  }
+  else {
+    theme.value = null
+    document.documentElement.classList.remove('dark')
+  }
+}, { immediate: true })
+
+watch(enableAnimations, (val) => {
+  if (val) {
+    document.documentElement.classList.remove('no-animations')
+  }
+  else {
+    document.documentElement.classList.add('no-animations')
+  }
+}, { immediate: true })
+
+watch(sidebarWidth, (val) => {
+  document.documentElement.style.setProperty('--sidebar-width', `${val}px`)
+}, { immediate: true })
+
+watch(borderRadius, (val) => {
+  document.documentElement.style.setProperty('--giopic-border-radius', `${val}px`)
+}, { immediate: true })
+
+watch(showDockIcon, (val) => {
+  callIpc('dock-icon-show', val)
+}, { immediate: true })
+
 // 监听更新提示信息
 window.ipcRenderer.on('update-show-toast', (_e, message) => {
   window.ipcRenderer.invoke('window-show')
@@ -80,8 +129,8 @@ window.ipcRenderer.on('open-setting', (_e, tab?: string) => openSettingPanel(tab
 
 <template>
   <n-config-provider
-    :locale="zhCN"
-    :date-locale="dateZhCN"
+    :locale
+    :date-locale
     :theme
     :theme-overrides
     abstract

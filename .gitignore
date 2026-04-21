@@ -24,3 +24,15 @@ release
 *.njsproj
 *.sln
 *.sw?
+
+# Test artifacts
+coverage/
+.vitest/
+test-results/
+playwright-report/
+
+# Package manager artifacts
+.pnpm-store/
+
+# AI generated files
+.claude

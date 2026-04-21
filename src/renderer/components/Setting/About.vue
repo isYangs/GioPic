@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const appVersion = ref('0.0.0')
+const appVersion = ref(__APP_VERSION__)
 
 const infoItems = ref([
   {
@@ -25,8 +25,13 @@ const infoItems = ref([
 ])
 
 async function getAppVersion() {
-  const version = await window.ipcRenderer.invoke('app-version')
-  return version
+  try {
+    const version = await window.ipcRenderer.invoke('app-version')
+    return typeof version === 'string' && version ? version : __APP_VERSION__
+  }
+  catch {
+    return __APP_VERSION__
+  }
 }
 
 onMounted(async () => {

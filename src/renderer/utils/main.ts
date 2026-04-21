@@ -22,7 +22,6 @@ const linkTypeMap: LinkTypeMap = {
   bbcode: 'BBcode',
   markdown: 'Markdown',
   markdown_with_link: 'Markdown With Link',
-  thumbnail_url: 'Thumbnail URL',
 }
 
 // 获取格式化后的链接类型，用于显示

@@ -1,113 +1,201 @@
-name: Build
+name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. v0.0.1)
+        required: true
+        default: v0.0.1
+      platform:
+        description: Build platform
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - windows
+          - mac
   push:
     tags:
-      - '*'
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: build and release electron app
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
-    env:
-      GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        os: ${{ fromJSON(github.event_name == 'push' && '["macos-latest", "windows-latest"]' || github.event.inputs.platform == 'all' && '["macos-latest", "windows-latest"]' || github.event.inputs.platform == 'windows' && '["windows-latest"]' || github.event.inputs.platform == 'mac' && '["macos-latest"]' || '["macos-latest", "windows-latest"]') }}
 
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get release tag
+        id: get-tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set package.json version
+        shell: bash
+        run: |
+          TAG="${{ steps.get-tag.outputs.tag }}"
+          VERSION="${TAG#v}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
+      - name: Install pnpm
+        run: npm i -g pnpm
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Install Dependencies
-        run: |
-          npm i -g pnpm
-          pnpm install
+        run: pnpm install
 
-      - name: Build Electron App for Windows
-        if: matrix.os == 'windows-latest'
-        run: pnpm run build:win
-
-      - name: Build Electron App for MacOS
+      - name: Build Mac (ad-hoc)
         if: matrix.os == 'macos-latest'
         run: pnpm run build:mac
 
-      - name: Cleanup Artifacts for Windows
+      - name: Build Windows (unsigned)
         if: matrix.os == 'windows-latest'
-        run: |
-          npx rimraf "release/*/!(*.exe|*.zip|*.yml)"
+        run: pnpm run build:win
 
-      - name: Cleanup Artifacts for MacOS
+      - name: Cleanup Mac artifacts
         if: matrix.os == 'macos-latest'
         run: |
-          npx rimraf "release/*/!(*.dmg|*.zip|latest*.yml)"
+          npx rimraf release/*/!(*.dmg|*.zip|latest*.yml)
+
+      - name: Cleanup Windows artifacts
+        if: matrix.os == 'windows-latest'
+        run: |
+          npx rimraf release/*/!(*.exe|*.zip|latest*.yml)
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
-          name: ${{ matrix.os }}
+          name: ${{ matrix.os }}-artifacts
           path: release
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+  create-release:
+    needs: release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v5
         with:
-          files: 'release/**'
+          fetch-depth: 0
+
+      - name: Get release tag
+        id: get-tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: release-artifacts
+
+      - name: Merge artifacts
+        run: |
+          mkdir -p release
+          cp -r release-artifacts/*/* release/ || true
+
+      - name: Generate release body with download table
+        id: generate-body
+        run: |
+          TAG="${{ steps.get-tag.outputs.tag }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          BODY=$(cat .github/release-template.md)
+          BODY="${BODY//\{\{tag\}\}/$TAG}"
+          BODY="${BODY//\{\{prevTag\}\}/$PREV_TAG}"
+
+          {
+            echo "body<<EOF"
+            echo "$BODY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          makeLatest: false
+          tag_name: ${{ steps.get-tag.outputs.tag }}
+          body: ${{ steps.generate-body.outputs.body }}
+          files: release/**
 
   sync-to-cn-server:
     name: Sync update files to CN server
     needs: release
     runs-on: ubuntu-latest
+    if: |
+      startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
         with:
-          name: windows-latest
-          path: ./release-artifacts/windows
-
-      - name: Download MacOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-latest
-          path: ./release-artifacts/macos
+          path: ./release-artifacts
 
       - name: Prepare update files
         run: |
           mkdir -p ./update-files
-          echo "Finding all update files..."
-          find ./release-artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "latest*.yml" | sort
-          echo "Copying Windows files..."
-          cp -v ./release-artifacts/windows/**/latest*.yml ./update-files/ 2>/dev/null || echo "No Windows yml files found"
-          cp -v ./release-artifacts/windows/**/*.exe ./update-files/ 2>/dev/null || echo "No Windows exe files found"
-          echo "Copying macOS files..."
-          cp -v ./release-artifacts/macos/**/latest*.yml ./update-files/ 2>/dev/null || echo "No macOS yml files found"
-          cp -v ./release-artifacts/macos/**/*.dmg ./update-files/ 2>/dev/null || echo "No macOS dmg files found"
-          echo "Files ready for upload:"
+          find ./release-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "latest*.yml" \) -exec cp {} ./update-files/ \; 2>/dev/null || true
           ls -la ./update-files/
-          if [ -z "$(ls -A ./update-files/)" ]; then
-            echo "ERROR: No files found to upload!"
-            exit 1
+
+      - name: Check CN server secrets
+        id: check-cn-secrets
+        shell: bash
+        env:
+          CN_SERVER_HOST: ${{ secrets.CN_SERVER_HOST }}
+          CN_SERVER_USERNAME: ${{ secrets.CN_SERVER_USERNAME }}
+          CN_SERVER_PASSWORD: ${{ secrets.CN_SERVER_PASSWORD }}
+          CN_SERVER_PORT: ${{ secrets.CN_SERVER_PORT }}
+        run: |
+          if [ -n "$CN_SERVER_HOST" ] && [ -n "$CN_SERVER_USERNAME" ] && [ -n "$CN_SERVER_PASSWORD" ] && [ -n "$CN_SERVER_PORT" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "CN server secrets are not fully configured; skipping sync."
           fi
 
-      - name: Clean target directory
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.CN_SERVER_HOST }}
-          username: ${{ secrets.CN_SERVER_USERNAME }}
-          password: ${{ secrets.CN_SERVER_PASSWORD }}
-          port: ${{ secrets.CN_SERVER_PORT }}
-          script: |
-            mkdir -p /wwwroot/update.isyangs.cn
-            rm -rf /wwwroot/update.isyangs.cn/*
-            echo "Update directory cleaned!"
-
       - name: Deploy to CN server
+        if: steps.check-cn-secrets.outputs.should_deploy == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.CN_SERVER_HOST }}
@@ -117,15 +205,3 @@ jobs:
           source: './update-files/*'
           target: /wwwroot/update.isyangs.cn
           strip_components: 1
-
-      - name: Verify deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.CN_SERVER_HOST }}
-          username: ${{ secrets.CN_SERVER_USERNAME }}
-          password: ${{ secrets.CN_SERVER_PASSWORD }}
-          port: ${{ secrets.CN_SERVER_PORT }}
-          script: |
-            cd /wwwroot/update.isyangs.cn
-            ls -la
-            echo "Update files sync completed!"

@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "name": "GioPic",
+      "path": "."
+    },
+    {
+      "name": "core",
+      "path": "packages/core"
+    },
+    {
+      "name": "LskyPlugin",
+      "path": "packages/lsky-plugin"
+    },
+    {
+      "name": "LskyProPlugin",
+      "path": "packages/lskypro-plugin"
+    },
+    {
+      "name": "S3Plugin",
+      "path": "packages/s3-plugin"
+    },
+
+  ],
+  "settings": {}
+}

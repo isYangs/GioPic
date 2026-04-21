@@ -1,0 +1,45 @@
+{
+  "name": "@giopic/lskypro-plugin",
+  "type": "module",
+  "version": "0.0.2-beta.1",
+  "description": "兰空插件，仅支持企业版v2",
+  "author": "isYangs",
+  "license": "AGPL-3.0",
+  "keywords": [
+    "giopic",
+    "lskypro",
+    "plugin",
+    "upload"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@giopic/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@giopic/core": "workspace:*",
+    "@types/node": "^24.12.0",
+    "source-map-support": "^0.5.21",
+    "tsdown": "^0.12.0",
+    "typescript": "^5.3.3"
+  },
+  "plugin": {
+    "id": "giopic-lskypro",
+    "name": "兰空企业版",
+    "version": "0.0.2-beta.1",
+    "author": "isYangs",
+    "description": "兰空插件，仅支持企业版v2",
+    "type": "lskypro"
+  }
+}

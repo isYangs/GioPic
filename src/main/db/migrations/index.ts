@@ -1,13 +1,13 @@
-import type { Database } from 'better-sqlite3'
+import type { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
-import { app } from 'electron'
 import logger from '../../utils/logger'
+import { getBackupsPath } from '../../utils/runtime-paths'
 
 export interface Migration {
   version: string
   name: string
-  up: string | ((db: Database) => void)
+  up: string | ((db: DatabaseSync) => void)
 }
 
 // 版本比较函数
@@ -29,7 +29,7 @@ function compareVersions(v1: string, v2: string): number {
 }
 
 // 确保版本表存在
-function ensureVersionTable(db: Database): void {
+function ensureVersionTable(db: DatabaseSync): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS "db_version" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +41,7 @@ function ensureVersionTable(db: Database): void {
 }
 
 // 获取当前版本信息
-function getCurrentVersion(db: Database): { version: string, name: string } | null {
+function getCurrentVersion(db: DatabaseSync): { version: string, name: string } | null {
   ensureVersionTable(db)
 
   const row = db.prepare('SELECT version, name FROM db_version ORDER BY id DESC LIMIT 1').get() as { version: string, name: string } | undefined
@@ -68,7 +68,7 @@ function getAllMigrations(): Migration[] {
 }
 
 // 记录应用的迁移
-function recordMigration(db: Database, migration: Migration): void {
+function recordMigration(db: DatabaseSync, migration: Migration): void {
   db.prepare(
     'INSERT INTO db_version (version, name, applied_at) VALUES (?, ?, ?)',
   ).run(migration.version, migration.name, new Date().toISOString())
@@ -77,7 +77,7 @@ function recordMigration(db: Database, migration: Migration): void {
 /**
  * 应用单个迁移
  */
-function applyMigration(db: Database, migration: Migration): void {
+function applyMigration(db: DatabaseSync, migration: Migration): void {
   db.exec('BEGIN TRANSACTION;')
 
   try {
@@ -91,17 +91,17 @@ function applyMigration(db: Database, migration: Migration): void {
     recordMigration(db, migration)
     db.exec('COMMIT;')
   }
-  catch (error) {
+  catch (e) {
     db.exec('ROLLBACK;')
-    logger.error(`[db] Migration failed: ${migration.version} - ${migration.name}`, error)
-    throw error
+    logger.error(`[db] Migration failed: ${migration.version} - ${migration.name}`, e)
+    throw e
   }
 }
 
 /**
  * 执行所有待处理的数据库迁移
  */
-export function runMigrations(db: Database, _appVersion: string): void {
+export function runMigrations(db: DatabaseSync, _appVersion: string): void {
   const currentDbInfo = getCurrentVersion(db)
   const currentVersion = currentDbInfo?.version || '0.0.0'
   const migrations = getAllMigrations()
@@ -130,7 +130,7 @@ export function runMigrations(db: Database, _appVersion: string): void {
  */
 export function backupDatabase(dbPath: string, maxBackups: number = 5): string | null {
   try {
-    const backupDir = path.join(app.getPath('userData'), 'backups')
+    const backupDir = getBackupsPath()
 
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true })
@@ -159,8 +159,8 @@ export function backupDatabase(dbPath: string, maxBackups: number = 5): string |
           }
         }
       }
-      catch (cleanupError) {
-        logger.error('[db] Failed to cleanup old backups:', cleanupError)
+      catch (e) {
+        logger.error('[db] Failed to cleanup old backups:', e)
       }
     }
 
@@ -169,8 +169,8 @@ export function backupDatabase(dbPath: string, maxBackups: number = 5): string |
     logger.info(`[db] Database backup created: ${backupPath}`)
     return backupPath
   }
-  catch (error) {
-    logger.error('[db] Database backup failed:', error)
+  catch (e) {
+    logger.error('[db] Database backup failed:', e)
     return null
   }
 }

@@ -1,52 +1,13 @@
-import type { ProgramType } from '@/types'
-import type { SelectOption } from 'naive-ui'
+import { usePluginStore } from './plugin'
+import { usePluginDataStore } from './plugin-data'
 
 export interface Program {
-  type: ProgramType
-  name: string
   id: number | null
-  detail: typeof programDetailTemplate[ProgramType]
-}
-
-export const programTypeName: Record<ProgramType, string> = {
-  lsky: '兰空图床社区版',
-  lskyPro: '兰空图床企业版V1',
-  s3: 'S3(AWS/腾讯云/阿里云)',
-}
-
-export const programDetailTemplate = {
-  lsky: {
-    api: '',
-    token: '',
-    strategies: [] as ([] | SelectOption[]),
-    activeStrategy: null as (number | null),
-  },
-  lskyPro: {
-    api: '',
-    token: '',
-    strategies: [] as [],
-    activeStrategy: null as (number | null),
-  },
-  s3: {
-    /** accessKeyId */
-    accessKeyId: '',
-    /** secretAccessKey */
-    secretAccessKey: '',
-    /** 存储桶名称 */
-    bucketName: '',
-    /** 上传路径 */
-    pathPrefix: '',
-    /** 区域 */
-    region: '',
-    /** 自定义终端节点 */
-    endpoint: '',
-    /** 自定义域名 */
-    customDomain: '',
-    /** 是否启用S3 Path Style */
-    forcePathStyle: false,
-    /** 权限 */
-    acl: '',
-  },
+  type: string
+  name: string
+  detail: Record<string, any>
+  pluginId: string
+  icon?: string
 }
 
 export const useProgramStore = defineStore(
@@ -54,55 +15,94 @@ export const useProgramStore = defineStore(
   () => {
     const programs = ref<Program[]>([])
 
-    function createProgram(type: ProgramType = 'lsky') {
+    function createProgram(type: string) {
       const id = Date.now()
       programs.value.push({
         type,
         name: '',
         id,
-        detail: { ...programDetailTemplate[type] },
+        detail: {},
+        pluginId: '',
+        icon: '',
       })
       return id
     }
 
-    function setProgramDetail(id: number, detail: Partial<typeof programDetailTemplate[ProgramType]>) {
-      Object.assign(getProgram(id).detail, detail)
+    function setProgramDetail(id: number, detail: Record<string, any>) {
+      const program = getProgram(id)
+      program.detail = { ...program.detail, ...detail }
     }
 
     function setProgramName(id: number, name: string) {
       getProgram(id).name = name
     }
 
-    function getProgramTypeName(type: ProgramType) {
-      return programTypeName[type]
+    function setProgramIcon(id: number, icon: string) {
+      getProgram(id).icon = icon
     }
 
     function getProgram(id: number | null): Program {
-      // 考虑 defaultProgram 的id可能为 null 的情况
       const program = programs.value.find(item => item.id === id)
-      // 防止开发过程中异常路由导致程序崩溃
       if (!program) {
-        return { type: 'lsky', name: '', id: null, detail: programDetailTemplate.lsky }
+        return { type: 'unknown', name: '', id: null, detail: {}, pluginId: '', icon: '' }
       }
       return program
     }
 
     function getProgramList() {
+      const pluginStore = usePluginStore()
       return programs.value.map(item => ({
-        /** 程序名称 */
-        label: item.name || getProgramTypeName(item.type),
-        /** 程序ID */
-        value: item.id as number,
-        /** 程序类型 */
+        label: item.name || pluginStore.getPluginNameByType(item.type),
+        value: item.id,
         type: item.type,
       }))
     }
 
     function removeProgram(id: number) {
       const index = programs.value.findIndex(item => item.id === id)
-      if (index !== -1)
+      if (index !== -1) {
+        const pluginDataStore = usePluginDataStore()
+        pluginDataStore.removeProgramData(id)
+
         programs.value.splice(index, 1)
+      }
       return Math.max(index - 1, 0)
+    }
+
+    function removeProgramsByPluginId(pluginId: string) {
+      const removedPrograms = programs.value.filter(program => program.pluginId === pluginId)
+      const pluginDataStore = usePluginDataStore()
+
+      removedPrograms.forEach((program) => {
+        if (program.id !== null) {
+          pluginDataStore.removeProgramData(program.id)
+        }
+      })
+
+      programs.value = programs.value.filter(program => program.pluginId !== pluginId)
+      return removedPrograms
+    }
+
+    function getPluginSetting(programId: number, pluginId: string): Record<string, any> {
+      const program = getProgram(programId)
+      if (!program.detail[pluginId]) {
+        program.detail[pluginId] = {}
+      }
+      return program.detail[pluginId]
+    }
+
+    function exportProgram(id: number) {
+      const program = getProgram(id)
+      if (!program || !program.id)
+        return null
+      return {
+        version: 1,
+        type: program.type,
+        name: program.name,
+        pluginId: program.pluginId,
+        detail: { ...program.detail },
+        icon: program.icon || '',
+      }
     }
 
     return {
@@ -110,16 +110,18 @@ export const useProgramStore = defineStore(
       createProgram,
       setProgramDetail,
       setProgramName,
-      getProgramTypeName,
+      setProgramIcon,
       getProgramList,
       getProgram,
       removeProgram,
+      removeProgramsByPluginId,
+      getPluginSetting,
+      exportProgram,
     }
   },
   {
     persistedState: {
       key: '__giopic_program_store__',
-      includePaths: ['programs'],
     },
   },
 )

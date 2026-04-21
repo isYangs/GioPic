@@ -16,7 +16,7 @@ export function openSettingPanel(tab?: string) {
 
 // 打开创建存储类型面板
 export function openCreateProgram() {
-  useUniqueModal('创建存储', CreateProgram)
+  useUniqueModal('创建存储', CreateProgram, { style: 'width: 460px' })
 }
 
 // 打开新版本更新提示

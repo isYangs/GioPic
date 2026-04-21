@@ -1,0 +1,46 @@
+name: Commit Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-lint:
+    name: Commit Message Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install Commitlint
+        run: npm install -g @commitlint/cli @commitlint/config-conventional
+
+      - name: Lint commits
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "Checking commits since last tag..."
+            RANGE=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null)..HEAD
+            if [ -z "$RANGE" ]; then
+              echo "No previous tags found, checking all commits"
+              RANGE=HEAD~10..HEAD
+            fi
+            echo "Commit range: $RANGE"
+            npx commitlint --from=$RANGE --to=HEAD --verbose
+          else
+            echo "Checking PR commits..."
+            npx commitlint --from=origin/${{ github.base_ref }} --to=HEAD --verbose
+          fi

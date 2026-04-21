@@ -10,7 +10,9 @@ tables.set('upload_data', `
     "mimetype" TEXT NOT NULL,
     "size" REAL NOT NULL,
     "url" TEXT NOT NULL,
-    "origin_name" TEXT NOT NULL
+    "origin_name" TEXT NOT NULL,
+    "program_id" INTEGER,
+    "program_type" TEXT
   );
 `)
 

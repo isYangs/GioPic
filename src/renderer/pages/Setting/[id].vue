@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
-import { useProgramStore } from '~/stores'
-
 const route = useRoute('/Setting/[id]')
-const router = useRouter()
 const id = computed(() => Number.parseInt(route.params.id))
-
 const programStore = useProgramStore()
+const pluginStore = usePluginStore()
 const {
   getProgram,
-  getProgramTypeName,
   setProgramName,
-  removeProgram,
+  setProgramIcon,
 } = programStore
 
 const programType = computed(() => getProgram(id.value)?.type)
@@ -19,55 +14,74 @@ const programName = computed({
   get: () => getProgram(id.value)?.name,
   set: newName => setProgramName(id.value, newName),
 })
+const programIcon = computed({
+  get: () => getProgram(id.value)?.icon || '',
+  set: newIcon => setProgramIcon(id.value, newIcon),
+})
+const program = computed(() => getProgram(id.value))
+const pluginId = computed(() => program.value?.pluginId)
+const plugin = computed(() => {
+  if (!pluginId.value)
+    return null
+  return pluginStore.getPlugin(pluginId.value)
+})
 
-// 根据类型动态加载组件
-const compName = computed(() => {
-  if (!programType.value)
-    return 'Lsky'
-  if (programType.value === 'lskyPro') {
-    return 'Lsky'
+async function exportConfig() {
+  const data = programStore.exportProgram(id.value)
+  if (!data)
+    return
+
+  try {
+    const filePath = await window.ipcRenderer.invoke('export-program-config', {
+      name: data.name || data.type,
+      data,
+    })
+    if (filePath) {
+      window.$message.success('配置已导出')
+    }
   }
-  return programType.value[0].toUpperCase() + programType.value.slice(1)
-})
-
-const comp = shallowRef<Component>()
-
-watchImmediate([() => route.params.id, programType], () => {
-  comp.value = defineAsyncComponent(() => import(`~/components/Setting/Config${compName.value}.vue`))
-})
-
-function openRemoveDialog() {
-  window.$dialog.warning({
-    title: '提示',
-    content: '删除存储会导致配置丢失，是否继续？',
-    positiveText: '确定',
-    negativeText: '取消',
-    autoFocus: false,
-    onPositiveClick: () => {
-      const prevIndex = removeProgram(id.value)
-      window.$message.success('删除成功')
-      const nextId = programStore.programs[prevIndex]?.id
-      router.push(`/Setting/${nextId ?? ''}`)
-    },
-  })
+  catch (e: any) {
+    window.$message.error(e?.message || '导出失败')
+  }
 }
+
+onMounted(async () => {
+  if (!pluginStore.loaded) {
+    await pluginStore.loadPlugins()
+  }
+})
 </script>
 
 <template>
-  <n-form>
-    <setting-item title="存储备注" :desc="`存储类型：${getProgramTypeName(programType)}`">
+  <n-form data-testid="program-settings-page">
+    <setting-item
+      title="存储备注"
+      :desc="plugin ? `存储类型：${plugin.name}` : `存储类型：${programType || '未知类型'}`"
+    >
       <code-input
         v-model:value="programName"
         type="text"
-        :placeholder="getProgramTypeName(programType)"
+        :placeholder="plugin?.name || programType || '未知类型'"
       />
     </setting-item>
 
-    <component :is="comp" />
+    <setting-item title="存储图标" desc="可设置当前存储配置的 Iconify 图标">
+      <storage-icon-selector v-model="programIcon" :plugin-icon="plugin?.icon || ''" />
+    </setting-item>
 
-    <setting-item title="删除存储" desc="删除存储会导致配置丢失，请谨慎操作">
-      <n-button type="error" :secondary="true" @click="openRemoveDialog">
-        删除存储
+    <program-setting
+      v-if="pluginId"
+      :key="pluginId"
+      :program-id="id"
+      :plugin-id="pluginId"
+    />
+
+    <setting-item title="导出配置" desc="将当前存储配置导出为文件，可用于备份或迁移">
+      <n-button size="small" @click="exportConfig">
+        <template #icon>
+          <div i-ph-export />
+        </template>
+        导出
       </n-button>
     </setting-item>
   </n-form>

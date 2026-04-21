@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { ipcMain } from 'electron'
 import pkg from 'electron-updater'
+import { getStore, setStore } from '../stores'
 import logger from '../utils/logger'
-import { getStore, setStore } from '../utils/store'
 
 const { autoUpdater } = pkg
 
@@ -26,7 +26,7 @@ export class AppUpdater {
 
     // 设置更新服务器
     this.setupUpdateServer().catch((e) => {
-      logger.error(`[update] Error setting up update server: ${e}`)
+      logger.error('[update] Error setting up update server:', e)
     })
 
     // 关闭自动下载
@@ -77,8 +77,8 @@ export class AppUpdater {
           resolve(response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode < 500)
         })
 
-        request.on('error', (error) => {
-          logger.error(`[update] GitHub accessibility check error: ${error}`)
+        request.on('error', (e) => {
+          logger.error(`[update] GitHub accessibility check error: ${e}`)
           resolve(false)
         })
 
@@ -91,8 +91,8 @@ export class AppUpdater {
         request.end()
       })
     }
-    catch (error) {
-      logger.error(`[update] Error checking GitHub accessibility: ${error}`)
+    catch (e) {
+      logger.error('[update] Error checking GitHub accessibility:', e)
       return false
     }
   }
@@ -105,7 +105,7 @@ export class AppUpdater {
       await autoUpdater.checkForUpdates()
     }
     catch (e) {
-      logger.error(`[update] Error checking for updates: ${e}`)
+      logger.error('[update] Error checking for updates:', e)
     }
   }
 
@@ -116,7 +116,7 @@ export class AppUpdater {
     ipcMain.on('change-update-source', (_e, source) => {
       setStore('updateSource', source)
       this.setupUpdateServer().catch((e) => {
-        logger.error(`[update] Error setting up update server after source change: ${e}`)
+        logger.error('[update] Error setting up update server after source change:', e)
       })
     })
 
@@ -133,7 +133,7 @@ export class AppUpdater {
     })
 
     autoUpdater.on('error', (e) => {
-      logger.error(`[update] AutoUpdater error: ${e}`)
+      logger.error('[update] AutoUpdater error:', e)
     })
 
     // 检测是否需要更新
@@ -187,7 +187,8 @@ export class AppUpdater {
 
     // 更新下载进度
     autoUpdater.on('download-progress', (progress) => {
-      const _percent = Math.trunc(progress.percent)
+      Math.trunc(progress.percent)
+      // const percent = Math.trunc(progress.percent)
       // this.win.webContents.send('update-update-progress', _percent)
     })
 

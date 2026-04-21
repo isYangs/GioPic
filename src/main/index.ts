@@ -3,19 +3,26 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { platform } from '@electron-toolkit/utils'
+import { setPluginDataStore } from '@giopic/core'
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { init as initDB } from './db'
-import { registerIpc } from './ipc'
+import { registerE2EIpc } from './ipc/e2e'
+import { registerIpc } from './ipc/index'
 import createAppUpdater from './services/AppUpdater'
+import { pluginManager } from './services/PluginManager'
 import createShortcutService from './services/ShortcutService'
 import createTrayService from './services/TrayService'
 import createWindowService from './services/WindowService'
-import { initStore } from './utils/store'
+import { initStore } from './stores'
+import { createMainPluginDataStoreAdapter } from './stores/plugin-data'
+import { configureRuntimePaths } from './utils/runtime-paths'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '../..')
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+
+configureRuntimePaths()
 
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
@@ -93,13 +100,6 @@ async function createMainWindow() {
     icon,
   })
 
-  if (VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(VITE_DEV_SERVER_URL)
-  }
-  else {
-    mainWindow.loadFile(indexHtml)
-  }
-
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:'))
       shell.openExternal(url)
@@ -108,12 +108,26 @@ async function createMainWindow() {
 
   app.dock?.setIcon(icon)
 
+  // 先注册 IPC 处理程序，再加载页面，避免渲染进程调用时 handler 未注册
   registerIpc(mainWindow, loadingWindow)
+  initStore()
+  initDB()
+  registerE2EIpc()
+
+  if (VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(VITE_DEV_SERVER_URL)
+  }
+  else {
+    mainWindow.loadFile(indexHtml)
+  }
   createTrayService(mainWindow)
   createShortcutService(mainWindow)
   createWindowService(mainWindow)
-  initStore()
-  initDB()
+
+  const mainPluginDataStoreAdapter = createMainPluginDataStoreAdapter()
+  setPluginDataStore(mainPluginDataStoreAdapter)
+
+  await pluginManager.init()
   createAppUpdater(mainWindow)
 }
 

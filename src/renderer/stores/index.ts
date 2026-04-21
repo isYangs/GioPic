@@ -1,22 +1,23 @@
 import { createPersistedStatePlugin } from 'pinia-plugin-persistedstate-2'
 
 export * from './app'
+export * from './plugin'
 export * from './program'
 export * from './record'
 
 const store = createPinia()
 
 async function setStore(key: string, value: string) {
-  await window.ipcRenderer.invoke('set-store', key, value)
+  await callIpc('set-store', { key, value })
 }
 
 async function getStore(key: string): Promise<string> {
-  const value = await window.ipcRenderer.invoke('get-store', key)
+  const value = await callIpc('get-store', key)
   return JSON.stringify(value)
 }
 
 async function deleteStore(key: string): Promise<void> {
-  await window.ipcRenderer.invoke('delete-store', key)
+  await callIpc('delete-store', key)
 }
 
 store.use(

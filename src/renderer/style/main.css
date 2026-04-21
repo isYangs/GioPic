@@ -1,5 +1,9 @@
 :root {
   --font-mono: SFMono-Regular, Fira Code, JetBrains Mono, Menlo, Monaco, Consolas, 'monospace', system-ui, monospace;
+  --sidebar-width: 180px;
+  --sidebar-collapsed-width: 64px;
+  --animation-duration: 0.3s;
+  --giopic-border-radius: 8px;
 }
 
 html,
@@ -46,7 +50,7 @@ img {
 */
 .n-layout-toggle-bar {
   height: 44px !important;
-  top: calc(40% - 22px) !important;
+  top: calc(45% - 22px) !important;
 }
 
 .n-layout-toggle-bar__top,
@@ -71,15 +75,15 @@ img {
   --n-arrow-color-child-active: ;
 }
 
-.n-menu-item-content--selected::before {
-  /* border-left: 4px solid var(--n-item-text-color-active); */
-}
-
 .n-modal {
   width: 50vw;
   max-width: 700px;
   min-width: min(24rem, 100vw);
-  border-radius: 8px;
+  border-radius: var(--giopic-border-radius);
+}
+
+.n-card {
+  border-radius: var(--giopic-border-radius);
 }
 
 .n-modal-mask {
@@ -87,7 +91,7 @@ img {
 }
 
 .n-image-preview-toolbar {
-  border-radius: 6px;
+  border-radius: calc(var(--giopic-border-radius) - 2px);
   background: rgba(0, 0, 0, 0.75);
   bottom: 50px;
 }
@@ -105,7 +109,7 @@ img {
 }
 
 .n-message-container .n-message-wrapper .n-message {
-  border-radius: 12px;
+  border-radius: calc(var(--giopic-border-radius) + 4px);
 }
 
 .n-scrollbar > .n-scrollbar-rail {
@@ -120,11 +124,26 @@ img {
 */
 .router-enter-active,
 .router-leave-active {
-  transition: all 0.2s ease;
+  transition: all var(--animation-duration) ease;
 }
 
 .router-enter-from,
 .router-leave-to {
   opacity: 0;
   transform: translateX(10px);
+}
+
+/*
+-------------------------
+    动画效果控制
+-------------------------
+*/
+.no-animations * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.no-animations .router-enter-active,
+.no-animations .router-leave-active {
+  transition: none !important;
 }

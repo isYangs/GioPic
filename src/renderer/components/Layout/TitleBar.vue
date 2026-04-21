@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { useAppStore } from '~/stores'
-import { renderIcon } from '~/utils/main'
-import { openSettingPanel } from '~/utils/modal'
-
 const appStore = useAppStore()
 const { themeAuto, themeType, appCloseTip, appCloseType } = storeToRefs(appStore)
 const route = useRoute()
@@ -57,7 +53,6 @@ const windowActions = {
     showCloseTipModal.value = false
   },
   hide: async () => {
-    // FIXME 先关闭弹窗，再隐藏窗口
     await window.ipcRenderer.invoke('window-hide')
     showCloseTipModal.value = false
   },
@@ -72,7 +67,6 @@ function onCloseClick() {
   rememberChoice.value = false
 }
 
-/** 执行关闭主窗口操作 */
 const closeTipModalActions = {
   close: () => {
     if (rememberChoice.value) {
@@ -113,20 +107,20 @@ const closeTipModalActions = {
 
       <div class="no-draggable flex-center">
         <n-dropdown :options="themeOptions" trigger="click" @select="onDropdownClick">
-          <n-button :focusable="false" quaternary size="small" class="h6 w6">
+          <n-button :focusable="false" quaternary size="small" class="h6 w6" data-testid="titlebar-settings">
             <template #icon>
               <div i-ph-gear-six-bold />
             </template>
           </n-button>
         </n-dropdown>
         <div class="window-title-bar ml2 h9 flex">
-          <div @click="windowActions.minimize">
+          <div data-testid="window-minimize" @click="windowActions.minimize">
             <div i-ic-round-minus />
           </div>
-          <div @click="windowActions.toggleMaximize">
+          <div data-testid="window-maximize" @click="windowActions.toggleMaximize">
             <div :class="isMaximized ? 'i-material-symbols-chrome-restore-outline' : 'i-material-symbols-chrome-maximize-outline'" />
           </div>
-          <div class="!hover:bg-red-5 !hover:text-light" @click="onCloseClick">
+          <div class="!hover:bg-red-5 !hover:text-light" data-testid="window-close" @click="onCloseClick">
             <div i-ic-round-close />
           </div>
         </div>

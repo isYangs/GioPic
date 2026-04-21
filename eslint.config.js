@@ -5,7 +5,7 @@ export default antfu(
     vue: true,
     typescript: true,
     unocss: true,
-    formatters: true,
+    formatters: false,
 
     rules: {
       'unused-imports/no-unused-imports': 'error',
@@ -25,12 +25,17 @@ export default antfu(
         registeredComponentsOnly: false,
       }],
     },
-
     ignores: [
       '.vscode/*',
       'dist/*',
       'rebuild.js',
       'vite.config.ts',
     ],
+  },
+  {
+    files: ['packages/**/*.ts', 'packages/**/*.js'],
+    rules: {
+      'no-console': 'off',
+    },
   },
 )

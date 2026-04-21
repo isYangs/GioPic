@@ -1,0 +1,247 @@
+import type { StoragePlugin } from '@giopic/core'
+import type { PluginManager as PluginManagerType } from '@/main/services/PluginManager'
+import fs from 'node:fs'
+import { app } from 'electron'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { getStore } from '@/main/stores'
+
+vi.mock('@/main/utils/logger', () => ({
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    scope: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    })),
+  },
+}))
+
+vi.mock('node:fs', () => ({
+  default: {
+    existsSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    readdirSync: vi.fn(),
+    statSync: vi.fn(),
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    rmSync: vi.fn(),
+    copyFileSync: vi.fn(),
+    readlinkSync: vi.fn(),
+  },
+}))
+
+vi.mock('node:child_process', () => ({
+  default: {
+    execSync: vi.fn(),
+  },
+  execSync: vi.fn(),
+}))
+
+vi.mock('@/main/stores', () => ({
+  getStore: vi.fn(),
+  setStore: vi.fn(),
+}))
+
+describe('pluginManager', () => {
+  let PluginManager: typeof PluginManagerType
+  let pluginManager: PluginManagerType
+
+  function createExternalPlugin(overrides: Partial<StoragePlugin> = {}): StoragePlugin {
+    return {
+      id: 'test-plugin',
+      name: 'Test Plugin',
+      version: '1.0.0',
+      author: 'Tester',
+      description: 'Test plugin',
+      type: 'image-uploader',
+      path: '/mock/user/data/plugins/test-plugin',
+      isBuiltin: false,
+      enabled: true,
+      installSource: 'npm',
+      npmPackage: 'giopic-plugin-test-plugin',
+      ...overrides,
+    }
+  }
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.resetModules()
+
+    vi.mocked(app.getPath).mockReturnValue('/mock/user/data')
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.readdirSync).mockReturnValue([])
+    vi.mocked(fs.statSync).mockReturnValue({ isDirectory: () => true } as any)
+    vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({}))
+    vi.mocked(getStore).mockImplementation((key: string) => {
+      if (key === 'npmRegistry')
+        return 'auto'
+      if (key === 'customNpmRegistry')
+        return ''
+      return undefined
+    })
+
+    const module = await import('@/main/services/PluginManager')
+    PluginManager = module.PluginManager
+    pluginManager = new PluginManager()
+  })
+
+  it('should initialize plugins directory when missing', async () => {
+    vi.mocked(fs.existsSync).mockReturnValueOnce(false)
+    const manager = new PluginManager()
+
+    expect(fs.mkdirSync).toHaveBeenCalledWith(expect.stringMatching(/\/plugins$/), { recursive: true })
+    expect(manager.getAllPlugins().some(p => p.id === 'giopic-lsky')).toBe(true)
+    expect(manager.getAllPlugins().some(p => p.id === 'giopic-s3')).toBe(true)
+  })
+
+  it('should return built-in plugins', () => {
+    const plugins = pluginManager.getAllPlugins()
+    expect(plugins.length).toBeGreaterThanOrEqual(2)
+    expect(plugins.find(p => p.id === 'giopic-lsky')).toBeDefined()
+    expect(plugins.find(p => p.id === 'giopic-s3')).toBeDefined()
+  })
+
+  it('should return plugin by id', () => {
+    expect(pluginManager.getPlugin('giopic-lsky')?.name).toBe('兰空图床')
+    expect(pluginManager.getPlugin('not-exist')).toBeUndefined()
+  })
+
+  it('should update npm registry config from store', () => {
+    vi.mocked(getStore).mockImplementation((key: string) => {
+      if (key === 'npmRegistry')
+        return 'custom'
+      if (key === 'customNpmRegistry')
+        return 'https://custom.registry'
+      return undefined
+    })
+
+    pluginManager.updateNpmRegistryConfig()
+
+    expect((pluginManager as any).npmRegistries).toEqual([
+      {
+        name: '自定义源',
+        searchUrl: 'https://custom.registry/-/v1/search',
+        packageUrl: 'https://custom.registry',
+      },
+    ])
+  })
+
+  it('should compare versions correctly', () => {
+    const compareVersions = (pluginManager as any).compareVersions.bind(pluginManager)
+
+    expect(compareVersions('1.0.0', '1.0.0')).toBe(0)
+    expect(compareVersions('1.1.0', '1.0.0')).toBe(1)
+    expect(compareVersions('1.0.0', '1.1.0')).toBe(-1)
+  })
+
+  it('should persist plugin enabled state to package.json', async () => {
+    const plugin = createExternalPlugin({ enabled: false })
+    ;(pluginManager as any).plugins.set(plugin.id, plugin)
+
+    vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+      plugin: {
+        id: plugin.id,
+        enabled: false,
+      },
+    }))
+
+    await pluginManager.enablePlugin(plugin.id)
+
+    expect(plugin.enabled).toBe(true)
+    expect(fs.writeFileSync).toHaveBeenLastCalledWith(
+      `${plugin.path}/package.json`,
+      expect.any(String),
+    )
+    expect(JSON.parse(vi.mocked(fs.writeFileSync).mock.lastCall?.[1] as string).plugin.enabled).toBe(true)
+
+    vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+      plugin: {
+        id: plugin.id,
+        enabled: true,
+      },
+    }))
+
+    await pluginManager.disablePlugin(plugin.id)
+
+    expect(plugin.enabled).toBe(false)
+    expect(JSON.parse(vi.mocked(fs.writeFileSync).mock.lastCall?.[1] as string).plugin.enabled).toBe(false)
+  })
+
+  it('should reject upload when plugin is disabled', async () => {
+    const plugin = createExternalPlugin({ enabled: false })
+    const loadPluginModuleSpy = vi.spyOn(pluginManager as any, 'loadPluginModule')
+    ;(pluginManager as any).plugins.set(plugin.id, plugin)
+
+    await expect(pluginManager.uploadWithPlugin(plugin.id, { fileName: 'demo.png' })).rejects.toThrow(
+      '插件 Test Plugin 已禁用，请先启用后再上传',
+    )
+    expect(loadPluginModuleSpy).not.toHaveBeenCalled()
+  })
+
+  it('should preserve disabled state after plugin update', async () => {
+    const plugin = createExternalPlugin({ enabled: false })
+    const updatedPlugin = createExternalPlugin({ version: '1.1.0', enabled: true })
+
+    ;(pluginManager as any).plugins.set(plugin.id, plugin)
+    vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+      plugin: {
+        id: plugin.id,
+        enabled: true,
+      },
+    }))
+
+    vi.spyOn(pluginManager, 'uninstallPlugin').mockImplementation(async (pluginId: string) => {
+      ;(pluginManager as any).plugins.delete(pluginId)
+      return true
+    })
+    vi.spyOn(pluginManager, 'installNpmPlugin').mockImplementation(async () => {
+      ;(pluginManager as any).plugins.set(updatedPlugin.id, updatedPlugin)
+      return updatedPlugin
+    })
+
+    const result = await pluginManager.updatePlugin(plugin.id)
+
+    expect(result?.enabled).toBe(false)
+    expect((pluginManager as any).plugins.get(plugin.id)?.enabled).toBe(false)
+    expect(fs.writeFileSync).toHaveBeenCalled()
+  })
+
+  it('should restore plugin from backup when update fails', async () => {
+    const plugin = createExternalPlugin()
+    ;(pluginManager as any).plugins.set(plugin.id, plugin)
+
+    const copyDirSpy = vi.spyOn(pluginManager as any, 'copyDir').mockImplementation(() => {})
+
+    vi.spyOn(pluginManager, 'uninstallPlugin').mockImplementation(async (pluginId: string) => {
+      ;(pluginManager as any).plugins.delete(pluginId)
+      return true
+    })
+    vi.spyOn(pluginManager, 'installNpmPlugin').mockRejectedValue(new Error('registry unavailable'))
+
+    await expect(pluginManager.updatePlugin(plugin.id)).rejects.toThrow('registry unavailable')
+
+    expect(copyDirSpy).toHaveBeenNthCalledWith(
+      1,
+      plugin.path,
+      expect.stringMatching(/update_backup_test-plugin_/),
+    )
+    expect(copyDirSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/update_backup_test-plugin_/),
+      plugin.path,
+    )
+    expect((pluginManager as any).plugins.get(plugin.id)).toMatchObject({
+      id: plugin.id,
+      path: plugin.path,
+      version: plugin.version,
+    })
+    expect(fs.rmSync).toHaveBeenCalledWith(
+      expect.stringMatching(/update_backup_test-plugin_/),
+      { recursive: true, force: true },
+    )
+  })
+})

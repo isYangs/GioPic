@@ -1,18 +1,5 @@
-import type { SupportedUploader } from '@/main/services/beds'
-import type { LskyStrategiesResponse, LskyUploadParams, ProgramDetail, ProgramType } from '@/types'
 import type { Program } from '~/stores'
-import { useAppStore, useProgramStore } from '~/stores'
-
-async function callApi<T>(
-  bed: SupportedUploader,
-  method: string,
-  args: any[] = [],
-): Promise<T> {
-  const res = await window.ipcRenderer.invoke('api-call', { bed, method, args })
-  if (res.success)
-    return res.data
-  throw new Error(res.message)
-}
+import { pluginApi } from './plugin'
 
 function getCurrentProgram() {
   const appStore = useAppStore()
@@ -31,30 +18,81 @@ function getProgramAuthParams(program: Program): Record<string, any> {
     throw new Error('请先选择存储程序')
   }
 
-  if (program.type === 'lsky' || program.type === 'lskyPro') {
-    const detail = program.detail as ProgramDetail['lsky']
-    if (!detail.api || !detail.token) {
-      throw new Error('API 地址或 Token 不能为空')
-    }
-    return {
-      api: detail.api,
-      token: detail.token,
-    }
-  }
-  else if (program.type === 's3') {
-    const detail = program.detail as ProgramDetail['s3']
-    if (!detail.accessKeyId || !detail.secretAccessKey || !detail.bucketName) {
-      throw new Error('AccessKey、SecretKey 或存储桶名称不能为空')
-    }
-
-    return { ...detail }
+  if (!program.pluginId) {
+    throw new Error('当前程序不支持，请使用插件')
   }
 
-  throw new Error('不支持的程序类型')
+  return {
+    ...program.detail,
+    pluginId: program.pluginId,
+  }
+}
+
+export const ipcApi = {
+  async insertUploadData(dataString: string) {
+    await callIpc('insert-upload-data', dataString)
+    return true
+  },
+
+  async fetchUploadDataPaginated(page = 1, pageSize = 20) {
+    return callIpc('fetch-upload-data-paginated', { page, pageSize })
+  },
+
+  async fetchAllUploadData() {
+    return callIpc('fetch-all-upload-data')
+  },
+
+  async getUploadDataCount() {
+    return callIpc('get-upload-data-count')
+  },
+
+  async getUploadTotalSize() {
+    return callIpc('get-upload-total-size')
+  },
+
+  async deleteUploadData(key: string) {
+    await callIpc('delete-upload-data', key)
+    return true
+  },
+
+  async deleteUploadDataBatch(keys: string[]) {
+    await callIpc('delete-upload-data-batch', keys)
+    return true
+  },
+
+  // 图片处理
+  async generateImageThumbnail(fileBuffer: ArrayBuffer, maxSize = 200) {
+    return callIpc('generate-image-thumbnail', { fileBuffer, maxSize })
+  },
+
+  async getImageMetadata(fileBuffer: ArrayBuffer) {
+    return callIpc('get-image-metadata', fileBuffer)
+  },
+
+  // 系统设置
+  async setAutoStart(enabled: boolean) {
+    await callIpc('auto-start', enabled)
+    return true
+  },
+
+  async setDevTools(enabled: boolean) {
+    await callIpc('reg-dev-tools', enabled)
+    return true
+  },
+
+  async setDockIconVisible(visible: boolean) {
+    await callIpc('dock-icon-show', visible)
+    return true
+  },
+
+  async resetSettings() {
+    await callIpc('reset-settings')
+    return true
+  },
 }
 
 export const apiClient = {
-  upload: async (type: ProgramType, params: Partial<LskyUploadParams>) => {
+  upload: async (params: Record<string, any>) => {
     const program = getCurrentProgram()
     const authParams = getProgramAuthParams(program)
 
@@ -63,17 +101,11 @@ export const apiClient = {
       ...JSON.parse(JSON.stringify(authParams)),
     }
 
-    return await window.ipcRenderer.invoke('upload', { type, params: completeParams })
-  },
+    completeParams.pluginId = program.pluginId
 
-  getStrategies: async (program?: Program) => {
-    const targetProgram = program || getCurrentProgram()
-
-    if (targetProgram.type !== 'lsky' && targetProgram.type !== 'lskyPro') {
-      throw new Error('当前存储程序不支持获取存储策略')
-    }
-
-    const authParams = getProgramAuthParams(targetProgram)
-    return await callApi<LskyStrategiesResponse>('lsky', 'getStrategies', [authParams])
+    const result = await pluginApi.uploadWithPlugin(program.pluginId, completeParams)
+    return result
   },
 }
+
+export { pluginApi }

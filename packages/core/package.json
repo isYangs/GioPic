@@ -1,0 +1,35 @@
+{
+  "name": "@giopic/core",
+  "type": "module",
+  "version": "0.0.2-beta.1",
+  "description": "GioPic 核心工具包，提供插件所需的通用功能",
+  "author": "isYangs",
+  "license": "AGPL-3.0",
+  "keywords": [
+    "giopic",
+    "core",
+    "plugin",
+    "upload"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "form-data": "^4.0.5"
+  },
+  "devDependencies": {
+    "tsdown": "^0.12.0",
+    "typescript": "^5.3.3"
+  }
+}

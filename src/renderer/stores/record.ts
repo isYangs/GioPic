@@ -1,28 +1,39 @@
-import type { UploadFileInfo } from 'naive-ui'
-
 interface State {
   data: UploadData[]
 }
 
-// 接口返回的文件数据
 interface BaseData {
-  name?: string
   key?: string
-  size?: number
-  mimetype?: string
-  url?: string
+  name?: string
   origin_name?: string
+  mimetype?: string
+  size?: number
+  time?: string
+  program_id?: number
+  program_type?: string
+  url?: string
 }
 
 export interface UploadData extends BaseData {
-  fileUrl?: string // 文件的blob地址，用于预览
-  fileInfo?: UploadFileInfo // 文件信息
-  isLoading?: boolean // 是否正在上传
-  uploadFailed?: boolean // 是否上传失败
-  uploaded?: boolean // 是否上传成功
-  time?: string // 上传时间
-  isPublic?: number // 是否公开
-  strategies?: number // 上传策略
+  file?: File
+  name?: string
+  id?: string
+  thumbnail?: string
+  buffer?: ArrayBuffer
+  fileUrl?: string
+  metadata?: {
+    width?: number
+    height?: number
+    format?: string
+    size?: number
+    hasAlpha?: boolean
+    orientation?: number
+  }
+  isLoading?: boolean
+  uploadFailed?: boolean
+  uploaded?: boolean
+  time?: string
+  isPublic?: number
 }
 
 export const useUploadDataStore = defineStore('uploadDataStore', () => {
@@ -63,25 +74,24 @@ export const useUploadDataStore = defineStore('uploadDataStore', () => {
   /**
    * 获取记录并发送到主进程以创建上传记录文件。
    */
-  function getUploadData() {
-    state.data
+  async function getUploadData() {
+    const promises = state.data
       .filter(item => item.url && item.key)
-      .forEach(({ key, name, time, size, mimetype, url, origin_name }: UploadData) => {
-        try {
-          window.ipcRenderer.invoke('insert-upload-data', JSON.stringify({
-            key,
-            name,
-            time,
-            size,
-            mimetype,
-            url,
-            origin_name,
-          }))
-        }
-        catch (e) {
-          console.error('Error inserting upload data:', e)
-        }
+      .map(async ({ key, name, time, size, mimetype, url, origin_name, program_id, program_type }: UploadData) => {
+        await window.ipcRenderer.invoke('insert-upload-data', JSON.stringify({
+          key,
+          name,
+          time,
+          size,
+          mimetype,
+          url,
+          origin_name,
+          program_id,
+          program_type,
+        }))
       })
+
+    await Promise.all(promises)
   }
 
   return {
