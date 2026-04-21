@@ -33,10 +33,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
             echo "Checking commits since last tag..."
-            RANGE=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null)..HEAD
-            if [ -z "$RANGE" ]; then
+            LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+            if [ -z "$LAST_TAG" ]; then
               echo "No previous tags found, checking all commits"
               RANGE=HEAD~10..HEAD
+            else
+              RANGE=$LAST_TAG..HEAD
             fi
             echo "Commit range: $RANGE"
             npx commitlint --from=$RANGE --to=HEAD --verbose
