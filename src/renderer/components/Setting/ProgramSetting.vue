@@ -8,8 +8,7 @@ const props = defineProps<{
 }>()
 
 const programStore = useProgramStore()
-const route = useRoute('/Setting/[id]')
-const id = ref(Number.parseInt(route.params.id))
+const id = computed(() => props.programId)
 
 const settings = ref<SettingItem[]>([])
 const isLoading = ref(true)

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-const route = useRoute('/Setting/[id]')
-const id = computed(() => Number.parseInt(route.params.id))
+const route = useRoute()
+const id = computed(() => {
+  const routeId = route.params.id
+  const value = Array.isArray(routeId) ? routeId[0] : routeId
+
+  return Number.parseInt(value ?? '')
+})
 const programStore = useProgramStore()
 const pluginStore = usePluginStore()
 const {
