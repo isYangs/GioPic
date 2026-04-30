@@ -83,11 +83,11 @@ jobs:
 
       - name: Build Mac (ad-hoc)
         if: matrix.os == 'macos-latest'
-        run: pnpm run build:mac
+        run: pnpm run build:app && pnpm exec electron-builder --mac --publish=never
 
       - name: Build Windows (unsigned)
         if: matrix.os == 'windows-latest'
-        run: pnpm run build:win
+        run: pnpm run build:app && pnpm exec electron-builder --win --publish=never
 
       - name: Cleanup Mac artifacts
         if: matrix.os == 'macos-latest'
