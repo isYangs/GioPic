@@ -18,6 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const appVersion = pkg.version
 const external = [
   'electron',
+  'sqlite',
+  'node:sqlite',
   ...builtinModules,
   ...builtinModules.map(moduleName => `node:${moduleName}`),
   ...Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
