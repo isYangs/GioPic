@@ -22,27 +22,33 @@ for package_dir in packages/*/; do
   is_private=$(jq -r '.private // false' "$package_dir/package.json" 2>/dev/null || echo "false")
 
   # 跳过空值和 private 包
-  if [ -z "$package_name" ] || [ "$is_private" = "true" ]; then
+  if [ -z "$package_name" ] || [ "$package_name" = "null" ] || [ -z "$version" ] || [ "$version" = "null" ] || [ "$is_private" = "true" ]; then
     continue
   fi
 
   # 检查是否为预发行版本并设置正确的标签
-  if [[ $version =~ -alpha\. ]] || [[ $version =~ -beta\. ]] || [[ $version =~ -rc\. ]] || [[ $version =~ -next\. ]]; then
+  if [[ "$version" =~ -alpha\. ]] || [[ "$version" =~ -beta\. ]] || [[ "$version" =~ -rc\. ]] || [[ "$version" =~ -next\. ]]; then
     tag="next"
   else
     tag="latest"
   fi
 
+  if npm view "$package_name@$version" version > /dev/null 2>&1; then
+    echo "⏭️  $package_name@$version 已存在于 npm，跳过发布"
+    continue
+  fi
+
   echo "📦 发布 $package_name@$version (tag: $tag)..."
 
-  cd "$package_dir"
-  npm publish --tag "$tag" --access public
-  if [ $? -eq 0 ]; then
+  if (
+    cd "$package_dir"
+    npm publish --tag "$tag" --access public
+  ); then
     echo "✅ $package_name@$version 发布成功"
   else
     echo "⚠️  $package_name@$version 发布失败"
+    exit 1
   fi
-  cd - > /dev/null
 done
 
 echo "✅ 发布流程完成！"
