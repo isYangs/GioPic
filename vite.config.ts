@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -15,6 +16,12 @@ import pkg from './package.json'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const appVersion = pkg.version
+const external = [
+  'electron',
+  ...builtinModules,
+  ...builtinModules.map(moduleName => `node:${moduleName}`),
+  ...Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+]
 
 function ensureLocalStorageShim() {
   const storage = globalThis.localStorage
@@ -110,7 +117,7 @@ export default defineConfig(async ({ command }) => {
             minify: isBuild,
             outDir: 'dist-electron/main',
             rollupOptions: {
-              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              external,
             },
           },
           resolve: {
@@ -131,7 +138,7 @@ export default defineConfig(async ({ command }) => {
               ignoreDynamicRequires: true,
             },
             rollupOptions: {
-              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+              external,
             },
           },
           resolve: {
