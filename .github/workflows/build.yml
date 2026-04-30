@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -58,7 +58,7 @@ jobs:
           npm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
 
@@ -100,7 +100,7 @@ jobs:
           npx rimraf release/*/!(*.exe|*.zip|latest*.yml)
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }}-artifacts
           path: release
@@ -111,7 +111,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -126,7 +126,7 @@ jobs:
           fi
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: release-artifacts
 
@@ -152,7 +152,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           makeLatest: false
@@ -168,7 +168,7 @@ jobs:
       startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: ./release-artifacts
 
@@ -196,7 +196,7 @@ jobs:
 
       - name: Deploy to CN server
         if: steps.check-cn-secrets.outputs.should_deploy == 'true'
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.CN_SERVER_HOST }}
           username: ${{ secrets.CN_SERVER_USERNAME }}
