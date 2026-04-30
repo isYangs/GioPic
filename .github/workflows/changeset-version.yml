@@ -6,10 +6,12 @@ on:
       - main
     paths:
       - '.changeset/**'
+      - '.github/workflows/changeset-version.yml'
       - 'packages/core/**'
       - 'packages/lsky-plugin/**'
       - 'packages/lskypro-plugin/**'
       - 'packages/s3-plugin/**'
+      - 'scripts/publish-packages.sh'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
