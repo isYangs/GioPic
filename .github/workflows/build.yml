@@ -101,8 +101,7 @@ jobs:
         run: |
           Get-ChildItem -Path release -Recurse -File |
             Where-Object {
-              $_.Name -notlike '*.exe' -and
-              $_.Name -notlike '*.zip' -and
+              $_.Name -notlike 'GioPic-*-setup.exe' -and
               $_.Name -notlike 'latest*.yml'
             } |
             Remove-Item -Force
@@ -137,6 +136,16 @@ jobs:
             echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Ensure release tag exists
+        shell: bash
+        run: |
+          TAG="${{ steps.get-tag.outputs.tag }}"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null 2>&1; then
+            exit 0
+          fi
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
@@ -151,11 +160,20 @@ jobs:
         id: generate-body
         run: |
           TAG="${{ steps.get-tag.outputs.tag }}"
+          VERSION="${TAG#v}"
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            COMPARE_URL="https://github.com/isYangs/GioPic/compare/$PREV_TAG...$TAG"
+          else
+            COMPARE_URL="https://github.com/isYangs/GioPic/commits/$TAG"
+          fi
 
           BODY=$(cat .github/release-template.md)
           BODY="${BODY//\{\{tag\}\}/$TAG}"
+          BODY="${BODY//\{\{version\}\}/$VERSION}"
           BODY="${BODY//\{\{prevTag\}\}/$PREV_TAG}"
+          BODY="${BODY//\{\{compareUrl\}\}/$COMPARE_URL}"
 
           {
             echo "body<<EOF"
