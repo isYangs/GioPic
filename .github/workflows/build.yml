@@ -101,7 +101,8 @@ jobs:
         run: |
           Get-ChildItem -Path release -Recurse -File |
             Where-Object {
-              $_.Name -notlike 'GioPic-*-setup.exe' -and
+              $_.Name -notlike 'GioPic-*-x64-setup.exe' -and
+              $_.Name -notlike 'GioPic-*-arm64-setup.exe' -and
               $_.Name -notlike 'latest*.yml'
             } |
             Remove-Item -Force
@@ -165,8 +166,15 @@ jobs:
 
           if [ -n "$PREV_TAG" ]; then
             COMPARE_URL="https://github.com/isYangs/GioPic/compare/$PREV_TAG...$TAG"
+            CHANGELOG_RANGE="$PREV_TAG..HEAD"
           else
             COMPARE_URL="https://github.com/isYangs/GioPic/commits/$TAG"
+            CHANGELOG_RANGE="HEAD"
+          fi
+
+          CHANGELOG=$(git log --max-count=50 --no-merges --pretty=format:'- %s (%h)' "$CHANGELOG_RANGE")
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Initial desktop release."
           fi
 
           BODY=$(cat .github/release-template.md)
@@ -174,6 +182,7 @@ jobs:
           BODY="${BODY//\{\{version\}\}/$VERSION}"
           BODY="${BODY//\{\{prevTag\}\}/$PREV_TAG}"
           BODY="${BODY//\{\{compareUrl\}\}/$COMPARE_URL}"
+          BODY="${BODY//\{\{changelog\}\}/$CHANGELOG}"
 
           {
             echo "body<<EOF"
@@ -184,9 +193,10 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
-          draft: true
-          makeLatest: false
+          draft: false
+          make_latest: false
           tag_name: ${{ steps.get-tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           body: ${{ steps.generate-body.outputs.body }}
           files: release/**
 
