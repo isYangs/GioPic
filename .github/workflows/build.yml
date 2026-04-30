@@ -92,12 +92,24 @@ jobs:
       - name: Cleanup Mac artifacts
         if: matrix.os == 'macos-latest'
         run: |
-          npx rimraf release/*/!(*.dmg|*.zip|latest*.yml)
+          find release -type f ! \( -name '*.dmg' -o -name '*.zip' -o -name 'latest*.yml' \) -delete
+          find release -type d -empty -delete
 
       - name: Cleanup Windows artifacts
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          npx rimraf release/*/!(*.exe|*.zip|latest*.yml)
+          Get-ChildItem -Path release -Recurse -File |
+            Where-Object {
+              $_.Name -notlike '*.exe' -and
+              $_.Name -notlike '*.zip' -and
+              $_.Name -notlike 'latest*.yml'
+            } |
+            Remove-Item -Force
+          Get-ChildItem -Path release -Recurse -Directory |
+            Sort-Object FullName -Descending |
+            Where-Object { -not (Get-ChildItem -Path $_.FullName -Force) } |
+            Remove-Item -Force
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
