@@ -28,7 +28,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",
     "@aws-sdk/lib-storage": "^3.1021.0",
-    "mime": "^3.0.0"
+    "mime": "^4.1.0"
   },
   "devDependencies": {
     "@giopic/core": "workspace:^",
