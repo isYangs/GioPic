@@ -196,7 +196,7 @@ jobs:
 
       - name: Deploy to CN server
         if: steps.check-cn-secrets.outputs.should_deploy == 'true'
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.CN_SERVER_HOST }}
           username: ${{ secrets.CN_SERVER_USERNAME }}
