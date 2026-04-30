@@ -61,7 +61,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm exec node scripts/publish-packages.sh
+          publish: bash scripts/publish-packages.sh
           version: pnpm changeset:version
           commit: 'chore: version packages'
           title: 'chore: version packages'
