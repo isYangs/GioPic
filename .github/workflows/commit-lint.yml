@@ -36,12 +36,12 @@ jobs:
             LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
             if [ -z "$LAST_TAG" ]; then
               echo "No previous tags found, checking all commits"
-              RANGE=HEAD~10..HEAD
+              FROM=HEAD~10
             else
-              RANGE=$LAST_TAG..HEAD
+              FROM=$LAST_TAG
             fi
-            echo "Commit range: $RANGE"
-            npx commitlint --from=$RANGE --to=HEAD --verbose
+            echo "Commit range: $FROM..HEAD"
+            npx commitlint --from=$FROM --to=HEAD --verbose
           else
             echo "Checking PR commits..."
             npx commitlint --from=origin/${{ github.base_ref }} --to=HEAD --verbose
