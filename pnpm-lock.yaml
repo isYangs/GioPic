@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1039.0
-        version: 3.1039.0
+        specifier: ^3.1040.0
+        version: 3.1040.0
       '@aws-sdk/lib-storage':
-        specifier: ^3.1039.0
-        version: 3.1039.0(@aws-sdk/client-s3@3.1039.0)
+        specifier: ^3.1040.0
+        version: 3.1040.0(@aws-sdk/client-s3@3.1040.0)
       '@electron-toolkit/utils':
         specifier: ^4.0.0
         version: 4.0.0(electron@36.2.1)
@@ -27,8 +27,8 @@ importers:
         specifier: workspace:^
         version: link:packages/s3-plugin
       '@vueuse/core':
-        specifier: ^14.2.1
-        version: 14.2.1(vue@3.5.33(typescript@5.9.3))
+        specifier: ^14.3.0
+        version: 14.3.0(vue@3.5.33(typescript@5.9.3))
       animate.css:
         specifier: ^4.1.1
         version: 4.1.1
@@ -155,7 +155,7 @@ importers:
         version: 66.6.7(@emnapi/core@1.4.3)(@emnapi/runtime@1.9.1)(vite@6.3.5(@types/node@24.12.0)(jiti@2.6.1)(yaml@2.8.3))
       unplugin-auto-import:
         specifier: ^19.2.0
-        version: 19.2.0(@vueuse/core@14.2.1(vue@3.5.33(typescript@5.9.3)))
+        version: 19.2.0(@vueuse/core@14.3.0(vue@3.5.33(typescript@5.9.3)))
       unplugin-vue-components:
         specifier: ^28.5.0
         version: 28.5.0(@babel/parser@7.29.2)(vue@3.5.33(typescript@5.9.3))
@@ -241,11 +241,11 @@ importers:
   packages/s3-plugin:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1039.0
-        version: 3.1039.0
+        specifier: ^3.1040.0
+        version: 3.1040.0
       '@aws-sdk/lib-storage':
-        specifier: ^3.1039.0
-        version: 3.1039.0(@aws-sdk/client-s3@3.1039.0)
+        specifier: ^3.1040.0
+        version: 3.1040.0(@aws-sdk/client-s3@3.1040.0)
       mime:
         specifier: ^4.1.0
         version: 4.1.0
@@ -353,8 +353,8 @@ packages:
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
 
-  '@aws-sdk/client-s3@3.1039.0':
-    resolution: {integrity: sha512-PVH9v0pHYBQnBADSR/m88NgcuJcYqPXfpmkcME66vRF75Y4swwbEVVFbTBFuvxu0YcZiLFXu3lw0FDK00vEa3A==}
+  '@aws-sdk/client-s3@3.1040.0':
+    resolution: {integrity: sha512-Ldfby1xDrlZwNY2NxP9pwdVrf8sqHbGBKP1UkoG/oWcePGlGhjY8iVwy8hRy9f1EQfHVFWIFunwHaPQxhYTnWQ==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.974.7':
@@ -397,11 +397,11 @@ packages:
     resolution: {integrity: sha512-aryawqyebf+3WhAFNHfF62rekFpYtVcVN7dQ89qnAWsa4n5hJst8qBG6gXC24WHtW7Nnhkf9ScYnjwo0Brn3bw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/lib-storage@3.1039.0':
-    resolution: {integrity: sha512-1GZwZUTWCx21IjI8wbsH61uQ0Fcj9v5oodZ6qaQAZ+fd0Rfloq+PstSJXkmRBY9IGDPNQ0+Jqnd4aCzv1d12SQ==}
+  '@aws-sdk/lib-storage@3.1040.0':
+    resolution: {integrity: sha512-4cPpxs/2Gnzm7dKn2EBTPf0/rPNM5BoOleWSNn03QPGkELPDg9VmVwUhXZsDcb8k8F9wm5ft9n7BSNXKAjoIWw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@aws-sdk/client-s3': ^3.1039.0
+      '@aws-sdk/client-s3': ^3.1040.0
 
   '@aws-sdk/middleware-bucket-endpoint@3.972.10':
     resolution: {integrity: sha512-Vbc2frZH7wXlMNd+ZZSXUEs/l1Sv8Jj4zUnIfwrYF5lwaLdXHZ9xx4U3rjUcaye3HRhFVc+E5DbBxpRAbB16BA==}
@@ -2399,16 +2399,16 @@ packages:
   '@vue/test-utils@2.4.6':
     resolution: {integrity: sha512-FMxEjOpYNYiFe0GkaHsnJPXFHxQ6m4t8vI/ElPGpMWxZKpmRvQ33OIrvRXemy6yha03RxhOlQuy+gZMC3CQSow==}
 
-  '@vueuse/core@14.2.1':
-    resolution: {integrity: sha512-3vwDzV+GDUNpdegRY6kzpLm4Igptq+GA0QkJ3W61Iv27YWwW/ufSlOfgQIpN6FZRMG0mkaz4gglJRtq5SeJyIQ==}
+  '@vueuse/core@14.3.0':
+    resolution: {integrity: sha512-aHfz47g0ZhMtTVHmIzMVpJy8ePhhOy68GY5bv110+5DVtZ+W7BsOx+m61UNQqfrWyPztIHIanWa3E2tib3NFIw==}
     peerDependencies:
       vue: ^3.5.0
 
-  '@vueuse/metadata@14.2.1':
-    resolution: {integrity: sha512-1ButlVtj5Sb/HDtIy1HFr1VqCP4G6Ypqt5MAo0lCgjokrk2mvQKsK2uuy0vqu/Ks+sHfuHo0B9Y9jn9xKdjZsw==}
+  '@vueuse/metadata@14.3.0':
+    resolution: {integrity: sha512-BwxmbAzwAVF50+MW57GXOUEV61nFBGnlBvrTqj49PqWJu3uw7hdu72ztXeZ33RdZtDY6kO+bfCAE1PCn88Tktw==}
 
-  '@vueuse/shared@14.2.1':
-    resolution: {integrity: sha512-shTJncjV9JTI4oVNyF1FQonetYAiTBd+Qj7cY89SWbXSkx7gyhrgtEdF2ZAVWS1S3SHlaROO6F2IesJxQEkZBw==}
+  '@vueuse/shared@14.3.0':
+    resolution: {integrity: sha512-bZpge9eSXwa4ToSiqJ7j6KRwhAsneMFoSz3LMWKQDkqimm3D/tbFlrklrs/IOqC8tEcYmXQZJ6N0UrjhBirVCg==}
     peerDependencies:
       vue: ^3.5.0
 
@@ -6055,7 +6055,7 @@ snapshots:
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
 
-  '@aws-sdk/client-s3@3.1039.0':
+  '@aws-sdk/client-s3@3.1040.0':
     dependencies:
       '@aws-crypto/sha1-browser': 5.2.0
       '@aws-crypto/sha256-browser': 5.2.0
@@ -6241,9 +6241,9 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/lib-storage@3.1039.0(@aws-sdk/client-s3@3.1039.0)':
+  '@aws-sdk/lib-storage@3.1040.0(@aws-sdk/client-s3@3.1040.0)':
     dependencies:
-      '@aws-sdk/client-s3': 3.1039.0
+      '@aws-sdk/client-s3': 3.1040.0
       '@smithy/middleware-endpoint': 4.4.32
       '@smithy/protocol-http': 5.3.14
       '@smithy/smithy-client': 4.12.13
@@ -8740,16 +8740,16 @@ snapshots:
       js-beautify: 1.15.4
       vue-component-type-helpers: 2.2.12
 
-  '@vueuse/core@14.2.1(vue@3.5.33(typescript@5.9.3))':
+  '@vueuse/core@14.3.0(vue@3.5.33(typescript@5.9.3))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
-      '@vueuse/metadata': 14.2.1
-      '@vueuse/shared': 14.2.1(vue@3.5.33(typescript@5.9.3))
+      '@vueuse/metadata': 14.3.0
+      '@vueuse/shared': 14.3.0(vue@3.5.33(typescript@5.9.3))
       vue: 3.5.33(typescript@5.9.3)
 
-  '@vueuse/metadata@14.2.1': {}
+  '@vueuse/metadata@14.3.0': {}
 
-  '@vueuse/shared@14.2.1(vue@3.5.33(typescript@5.9.3))':
+  '@vueuse/shared@14.3.0(vue@3.5.33(typescript@5.9.3))':
     dependencies:
       vue: 3.5.33(typescript@5.9.3)
 
@@ -12428,7 +12428,7 @@ snapshots:
       - '@emnapi/runtime'
       - vite
 
-  unplugin-auto-import@19.2.0(@vueuse/core@14.2.1(vue@3.5.33(typescript@5.9.3))):
+  unplugin-auto-import@19.2.0(@vueuse/core@14.3.0(vue@3.5.33(typescript@5.9.3))):
     dependencies:
       local-pkg: 1.1.1
       magic-string: 0.30.17
@@ -12437,7 +12437,7 @@ snapshots:
       unplugin: 2.3.4
       unplugin-utils: 0.2.4
     optionalDependencies:
-      '@vueuse/core': 14.2.1(vue@3.5.33(typescript@5.9.3))
+      '@vueuse/core': 14.3.0(vue@3.5.33(typescript@5.9.3))
 
   unplugin-utils@0.2.4:
     dependencies:

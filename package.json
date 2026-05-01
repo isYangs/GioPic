@@ -80,13 +80,13 @@
     "verify": "pnpm lint && pnpm run typecheck && pnpm run test:unit:run && pnpm run test:integration:run"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1039.0",
-    "@aws-sdk/lib-storage": "^3.1039.0",
+    "@aws-sdk/client-s3": "^3.1040.0",
+    "@aws-sdk/lib-storage": "^3.1040.0",
     "@electron-toolkit/utils": "^4.0.0",
     "@giopic/core": "workspace:^",
     "@giopic/lsky-plugin": "workspace:^",
     "@giopic/s3-plugin": "workspace:^",
-    "@vueuse/core": "^14.2.1",
+    "@vueuse/core": "^14.3.0",
     "animate.css": "^4.1.1",
     "axios": "^1.15.2",
     "dayjs": "^1.11.20",
