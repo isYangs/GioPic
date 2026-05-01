@@ -126,8 +126,7 @@ export class AppUpdater {
     const updateOnThisStart = getStore('updateAtNext')
     this.win.once('ready-to-show', async () => {
       if (getStore('autoUpdate') || updateOnThisStart) {
-        await autoUpdater.checkForUpdates()
-
+        await this.checkForUpdates()
         this.silentUpdateCheck = false
       }
     })

@@ -102,6 +102,33 @@ describe('appUpdater', () => {
     expect(pkg.default.autoUpdater.checkForUpdates).toHaveBeenCalled()
   })
 
+  it('should catch startup update check errors', async () => {
+    const pkg = await import('electron-updater')
+    const { getStore } = await import('@/main/stores')
+    const logger = await import('@/main/utils/logger')
+
+    let readyToShow: (() => Promise<void>) | undefined
+    mockWindow.once = vi.fn((_event, callback) => {
+      readyToShow = callback as () => Promise<void>
+    }) as any
+
+    vi.mocked(getStore).mockImplementation((key: string) => {
+      if (key === 'updateSource')
+        return 'github'
+      if (key === 'autoUpdate')
+        return true
+      return false
+    })
+    vi.mocked(pkg.default.autoUpdater.checkForUpdates).mockRejectedValue(new Error('missing update config'))
+
+    const { AppUpdater } = await import('@/main/services/AppUpdater')
+
+    const _updater = new AppUpdater(mockWindow)
+    await expect(readyToShow?.()).resolves.toBeUndefined()
+
+    expect(logger.default.error).toHaveBeenCalledWith('[update] Error checking for updates:', expect.any(Error))
+  })
+
   it('should setup update server with cn source', async () => {
     const pkg = await import('electron-updater')
     const { getStore } = await import('@/main/stores')
