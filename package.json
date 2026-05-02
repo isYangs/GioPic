@@ -130,6 +130,7 @@
     "@antfu/eslint-config": "^4.13.1",
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.30.0",
+    "@electron/asar": "^3.4.1",
     "@iconify/json": "^2.2.458",
     "@iconify/vue": "^5.0.0",
     "@playwright/test": "^1.54.2",
