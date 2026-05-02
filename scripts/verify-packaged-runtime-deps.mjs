@@ -1,8 +1,8 @@
-import { spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { extractAll } from '@electron/asar'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const releaseDir = path.join(rootDir, 'release')
@@ -61,14 +61,11 @@ function packageJsonPath(extractedDir, packageName) {
 }
 
 function extractAsar(asarPath, destination) {
-  const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
-  const result = spawnSync(pnpm, ['exec', 'asar', 'extract', asarPath, destination], {
-    cwd: rootDir,
-    stdio: 'inherit',
-  })
-
-  if (result.status !== 0) {
-    throw new Error(`Failed to extract ${path.relative(rootDir, asarPath)}`)
+  try {
+    extractAll(asarPath, destination)
+  }
+  catch (error) {
+    throw new Error(`Failed to extract ${path.relative(rootDir, asarPath)}`, { cause: error })
   }
 }
 
