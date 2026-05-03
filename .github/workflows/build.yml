@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag (e.g. v0.0.1)
+        description: Release tag (e.g. v0.0.1-beta.0)
         required: true
-        default: v0.0.1
+        default: v0.0.1-beta.0
       platform:
         description: Build platform
         required: true
@@ -200,6 +200,7 @@ jobs:
           make_latest: false
           tag_name: ${{ steps.get-tag.outputs.tag }}
           target_commitish: ${{ github.sha }}
+          prerelease: ${{ contains(steps.get-tag.outputs.tag, '-') }}
           body: ${{ steps.generate-body.outputs.body }}
           files: release/**
 
@@ -208,7 +209,8 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+      (startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-')) ||
+      (github.event_name == 'workflow_dispatch' && !contains(github.event.inputs.tag, '-'))
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
