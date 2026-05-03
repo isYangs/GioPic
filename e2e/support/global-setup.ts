@@ -3,7 +3,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../..',
+)
 const mainEntry = path.join(repoRoot, 'dist-electron/main/index.js')
 const rendererEntry = path.join(repoRoot, 'dist/index.html')
 
