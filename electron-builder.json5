@@ -35,20 +35,20 @@
     "background": "public/dmg-background.png",
     "contents": [
       {
-        "x": 380,
-        "y": 280,
+        "x": 615,
+        "y": 379,
         "type": "link",
         "path": "/Applications"
       },
       {
-        "x": 110,
-        "y": 280,
+        "x": 165,
+        "y": 375,
         "type": "file"
       }
     ],
     "window": {
-      "width": 540,
-      "height": 400
+      "width": 810,
+      "height": 600
     }
   },
   "win": {
